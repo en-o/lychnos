@@ -129,7 +129,18 @@ const HomePage: React.FC = () => {
                   onClick={() => setShowUserMenu(!showUserMenu)}
                   className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-gray-100 transition"
                 >
-                 ·
+                  <div className="w-7 h-7 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-white text-sm font-medium">
+                    {(() => {
+                      const str = (userInfo.nickname || userInfo.username || 'tan').toString();
+                      const firstChar = str.charAt(0);
+                      // 判断首字符是否为中文（包括常用汉字）
+                      const isChinese = /[\u4e00-\u9fff]/.test(firstChar);
+                      const displayText = isChinese ?
+                          str.substring(0, 1).toUpperCase() :
+                          str.substring(0, 3).toUpperCase();
+                      return displayText;
+                    })()}
+                  </div>
                   <ChevronDown className="w-4 h-4 text-gray-600" />
                 </button>
 
@@ -382,6 +393,18 @@ const HomePage: React.FC = () => {
           animation: fadeIn 0.3s ease-out;
         }
       `}</style>
+
+      {/* 登录确认对话框 */}
+      {showLoginConfirm && (
+        <ConfirmDialog
+          message="需要登录才能使用分析功能，是否前往登录？"
+          onConfirm={() => {
+            setShowLoginConfirm(false);
+            navigate('/login?redirect=/');
+          }}
+          onCancel={() => setShowLoginConfirm(false)}
+        />
+      )}
     </div>
   );
 };

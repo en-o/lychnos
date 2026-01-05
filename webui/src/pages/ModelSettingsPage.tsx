@@ -4,6 +4,7 @@ import { ArrowLeft, Plus, Trash2, Check, Brain, Image as ImageIcon } from 'lucid
 import type { AIAnalysisModel, AIImageModel } from '../types/settings';
 import Logo from '../components/Logo';
 import { toast } from '../components/ToastContainer';
+import ConfirmDialog from '../components/ConfirmDialog';
 
 type TabType = 'analysis' | 'image';
 
@@ -16,6 +17,7 @@ const ModelSettingsPage: React.FC = () => {
   const [imageModels, setImageModels] = useState<AIImageModel[]>([]);
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingModel, setEditingModel] = useState<AIAnalysisModel | AIImageModel | null>(null);
+  const [deleteConfirm, setDeleteConfirm] = useState<{show: boolean; id: string; type: TabType} | null>(null);
 
   const [analysisFormData, setAnalysisFormData] = useState({
     name: '',
@@ -105,9 +107,7 @@ const ModelSettingsPage: React.FC = () => {
   };
 
   const handleDeleteAnalysisModel = (id: string) => {
-    if (window.confirm('确定要删除这个模型配置吗？')) {
-      saveAnalysisModels(analysisModels.filter((m) => m.id !== id));
-    }
+    setDeleteConfirm({ show: true, id, type: 'analysis' });
   };
 
   const handleSetAnalysisActive = (id: string) => {
@@ -156,9 +156,7 @@ const ModelSettingsPage: React.FC = () => {
   };
 
   const handleDeleteImageModel = (id: string) => {
-    if (window.confirm('确定要删除这个模型配置吗？')) {
-      saveImageModels(imageModels.filter((m) => m.id !== id));
-    }
+    setDeleteConfirm({ show: true, id, type: 'image' });
   };
 
   const handleSetImageActive = (id: string) => {
@@ -547,6 +545,22 @@ const ModelSettingsPage: React.FC = () => {
             </div>
           </div>
         </div>
+      )}
+
+      {/* 删除确认对话框 */}
+      {deleteConfirm?.show && (
+        <ConfirmDialog
+          message="确定要删除这个模型配置吗？"
+          onConfirm={() => {
+            if (deleteConfirm.type === 'analysis') {
+              saveAnalysisModels(analysisModels.filter((m) => m.id !== deleteConfirm.id));
+            } else {
+              saveImageModels(imageModels.filter((m) => m.id !== deleteConfirm.id));
+            }
+            setDeleteConfirm(null);
+          }}
+          onCancel={() => setDeleteConfirm(null)}
+        />
       )}
     </div>
   );
