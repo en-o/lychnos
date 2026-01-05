@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { BookOpen } from 'lucide-react';
 import { mockAuthApi } from '../api/auth';
 
@@ -110,6 +110,16 @@ const LoginPage: React.FC = () => {
         <div className="mt-6 p-3 bg-gray-50 rounded-lg border border-gray-200">
           <p className="text-xs text-gray-600 mb-1">演示账号:</p>
           <p className="text-xs text-gray-700">用户名: admin / 密码: admin</p>
+        </div>
+
+        {/* 注册链接 */}
+        <div className="mt-4 text-center">
+          <p className="text-sm text-gray-600">
+            还没有账号?{' '}
+            <Link to="/register" className="text-blue-600 hover:text-blue-700 font-medium">
+              立即注册
+            </Link>
+          </p>
         </div>
       </div>
     </div>

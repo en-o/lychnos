@@ -1,9 +1,9 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import LoginPage from './pages/LoginPage';
+import RegisterPage from './pages/RegisterPage';
 import HomePage from './pages/HomePage';
 import ProfilePage from './pages/ProfilePage';
-import AIAnalysisSettingsPage from './pages/AIAnalysisSettingsPage';
-import AIImageSettingsPage from './pages/AIImageSettingsPage';
+import ModelSettingsPage from './pages/ModelSettingsPage';
 import ChangePasswordPage from './pages/ChangePasswordPage';
 import PrivateRoute from './components/PrivateRoute';
 
@@ -13,6 +13,7 @@ function App() {
       <Routes>
         {/* 公开页面 */}
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
         <Route path="/" element={<HomePage />} />
 
         {/* 需要登录的页面 */}
@@ -25,18 +26,10 @@ function App() {
           }
         />
         <Route
-          path="/settings/ai-analysis"
+          path="/settings/models"
           element={
             <PrivateRoute>
-              <AIAnalysisSettingsPage />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/settings/ai-image"
-          element={
-            <PrivateRoute>
-              <AIImageSettingsPage />
+              <ModelSettingsPage />
             </PrivateRoute>
           }
         />

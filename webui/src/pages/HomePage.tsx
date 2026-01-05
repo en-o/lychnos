@@ -7,7 +7,6 @@ import {
   UserCircle,
   Key,
   Brain,
-  Image as ImageIcon,
   ChevronDown
 } from 'lucide-react';
 import { mockBookApi, type BookAnalysis, type FeedbackHistory } from '../api/book';
@@ -153,19 +152,11 @@ const HomePage: React.FC = () => {
                     </button>
 
                     <button
-                      onClick={() => handleMenuClick('/settings/ai-analysis')}
+                      onClick={() => handleMenuClick('/settings/models')}
                       className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3"
                     >
                       <Brain className="w-4 h-4" />
-                      AI分析模型
-                    </button>
-
-                    <button
-                      onClick={() => handleMenuClick('/settings/ai-image')}
-                      className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3"
-                    >
-                      <ImageIcon className="w-4 h-4" />
-                      AI生图模型
+                      AI模型设置
                     </button>
 
                     <button

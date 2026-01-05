@@ -1,0 +1,244 @@
+import React, { useState } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
+import { BookOpen, Eye, EyeOff } from 'lucide-react';
+
+const RegisterPage: React.FC = () => {
+  const navigate = useNavigate();
+  const [formData, setFormData] = useState({
+    username: '',
+    password: '',
+    confirmPassword: '',
+    email: '',
+    nickname: '',
+  });
+  const [showPasswords, setShowPasswords] = useState({
+    password: false,
+    confirm: false,
+  });
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [loading, setLoading] = useState(false);
+
+  const validateForm = () => {
+    const newErrors: Record<string, string> = {};
+
+    if (!formData.username) {
+      newErrors.username = '请输入用户名';
+    } else if (formData.username.length < 3) {
+      newErrors.username = '用户名至少3个字符';
+    }
+
+    if (!formData.password) {
+      newErrors.password = '请输入密码';
+    } else if (formData.password.length < 6) {
+      newErrors.password = '密码至少6个字符';
+    }
+
+    if (!formData.confirmPassword) {
+      newErrors.confirmPassword = '请确认密码';
+    } else if (formData.password !== formData.confirmPassword) {
+      newErrors.confirmPassword = '两次输入的密码不一致';
+    }
+
+    if (formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      newErrors.email = '请输入有效的邮箱地址';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleRegister = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!validateForm()) {
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      // TODO: 调用真实的注册API
+      // const response = await authApi.register(formData);
+
+      // Mock: 模拟注册成功
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      alert('注册成功!请登录');
+      navigate('/login');
+    } catch (error: any) {
+      console.error('注册失败:', error);
+      alert(error.response?.data?.message || '注册失败,请重试');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-white flex items-center justify-center p-4">
+      <div className="w-full max-w-md">
+        {/* Logo和标题 */}
+        <div className="text-center mb-8">
+          <div className="flex items-center justify-center gap-2 mb-4">
+            <BookOpen className="w-8 h-8 text-gray-800" />
+            <h1 className="text-2xl font-semibold text-gray-900">书灯</h1>
+          </div>
+          <p className="text-gray-600">创建新账号</p>
+        </div>
+
+        {/* 注册表单 */}
+        <form onSubmit={handleRegister} className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">
+              用户名 *
+            </label>
+            <input
+              type="text"
+              value={formData.username}
+              onChange={(e) => {
+                setFormData({ ...formData, username: e.target.value });
+                setErrors({ ...errors, username: '' });
+              }}
+              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              placeholder="请输入用户名(至少3个字符)"
+              disabled={loading}
+            />
+            {errors.username && (
+              <p className="text-sm text-red-600 mt-1">{errors.username}</p>
+            )}
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">
+              昵称
+            </label>
+            <input
+              type="text"
+              value={formData.nickname}
+              onChange={(e) => setFormData({ ...formData, nickname: e.target.value })}
+              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              placeholder="请输入昵称(可选)"
+              disabled={loading}
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">
+              邮箱
+            </label>
+            <input
+              type="email"
+              value={formData.email}
+              onChange={(e) => {
+                setFormData({ ...formData, email: e.target.value });
+                setErrors({ ...errors, email: '' });
+              }}
+              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              placeholder="请输入邮箱(可选)"
+              disabled={loading}
+            />
+            {errors.email && (
+              <p className="text-sm text-red-600 mt-1">{errors.email}</p>
+            )}
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">
+              密码 *
+            </label>
+            <div className="relative">
+              <input
+                type={showPasswords.password ? 'text' : 'password'}
+                value={formData.password}
+                onChange={(e) => {
+                  setFormData({ ...formData, password: e.target.value });
+                  setErrors({ ...errors, password: '' });
+                }}
+                className="w-full px-4 py-2.5 pr-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="请输入密码(至少6个字符)"
+                disabled={loading}
+              />
+              <button
+                type="button"
+                onClick={() =>
+                  setShowPasswords({ ...showPasswords, password: !showPasswords.password })
+                }
+                className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-gray-600"
+              >
+                {showPasswords.password ? (
+                  <EyeOff className="w-5 h-5" />
+                ) : (
+                  <Eye className="w-5 h-5" />
+                )}
+              </button>
+            </div>
+            {errors.password && (
+              <p className="text-sm text-red-600 mt-1">{errors.password}</p>
+            )}
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">
+              确认密码 *
+            </label>
+            <div className="relative">
+              <input
+                type={showPasswords.confirm ? 'text' : 'password'}
+                value={formData.confirmPassword}
+                onChange={(e) => {
+                  setFormData({ ...formData, confirmPassword: e.target.value });
+                  setErrors({ ...errors, confirmPassword: '' });
+                }}
+                className="w-full px-4 py-2.5 pr-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="请再次输入密码"
+                disabled={loading}
+              />
+              <button
+                type="button"
+                onClick={() =>
+                  setShowPasswords({ ...showPasswords, confirm: !showPasswords.confirm })
+                }
+                className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-gray-600"
+              >
+                {showPasswords.confirm ? (
+                  <EyeOff className="w-5 h-5" />
+                ) : (
+                  <Eye className="w-5 h-5" />
+                )}
+              </button>
+            </div>
+            {errors.confirmPassword && (
+              <p className="text-sm text-red-600 mt-1">{errors.confirmPassword}</p>
+            )}
+          </div>
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full px-4 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition font-medium"
+          >
+            {loading ? (
+              <div className="flex items-center justify-center gap-2">
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                注册中...
+              </div>
+            ) : (
+              '注册'
+            )}
+          </button>
+        </form>
+
+        {/* 登录链接 */}
+        <div className="mt-6 text-center">
+          <p className="text-sm text-gray-600">
+            已有账号?{' '}
+            <Link to="/login" className="text-blue-600 hover:text-blue-700 font-medium">
+              立即登录
+            </Link>
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default RegisterPage;
