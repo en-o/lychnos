@@ -6,9 +6,11 @@ import {
   UserCircle,
   Key,
   Brain,
-  ChevronDown
+  ChevronDown,
+  History,
+  Heart
 } from 'lucide-react';
-import { mockBookApi, type BookAnalysis, type FeedbackHistory } from '../api/book';
+import { mockBookApi, type BookAnalysis, type AnalysisHistory } from '../api/book';
 import Logo from '../components/Logo';
 import { toast } from '../components/ToastContainer';
 import ConfirmDialog from '../components/ConfirmDialog';
@@ -18,15 +20,26 @@ const HomePage: React.FC = () => {
   const [bookTitle, setBookTitle] = useState('');
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<BookAnalysis | null>(null);
-  const [feedbackHistory, setFeedbackHistory] = useState<FeedbackHistory[]>([]);
+  const [feedbackHistory, setFeedbackHistory] = useState<AnalysisHistory[]>([]);
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showLoginConfirm, setShowLoginConfirm] = useState(false);
+  const [selectedHistoryItem, setSelectedHistoryItem] = useState<AnalysisHistory | null>(null);
+  const [showBackConfirm, setShowBackConfirm] = useState(false);
 
   // 检查是否已登录
   const token = localStorage.getItem('token');
   const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
 
   const quickBooks = ['三体', '活着', '解忧杂货店', '人类简史'];
+
+  // 加载历史记录
+  React.useEffect(() => {
+    if (token) {
+      const historyStr = localStorage.getItem('analysisHistory') || '[]';
+      const history: AnalysisHistory[] = JSON.parse(historyStr);
+      setFeedbackHistory(history);
+    }
+  }, [token]);
 
   const handleSearch = async (title = bookTitle) => {
     if (!title.trim()) {
@@ -70,15 +83,24 @@ const HomePage: React.FC = () => {
       );
 
       if (response.success) {
-        const newFeedback: FeedbackHistory = {
+        // 保存到历史记录
+        const historyItem: AnalysisHistory = {
+          id: Date.now().toString(),
           bookId: result.bookId,
           title: result.summary.title,
           interested,
-          reason: '',
-          timestamp: new Date().toISOString(),
+          analysisData: result,
+          createdAt: new Date().toISOString(),
         };
 
-        setFeedbackHistory((prev) => [newFeedback, ...prev]);
+        const historyStr = localStorage.getItem('analysisHistory') || '[]';
+        const history: AnalysisHistory[] = JSON.parse(historyStr);
+        history.unshift(historyItem);
+        localStorage.setItem('analysisHistory', JSON.stringify(history));
+
+        // 更新页面显示的历史
+        setFeedbackHistory(history);
+
         toast.success('反馈已提交!');
         setResult(null);
         setBookTitle('');
@@ -110,6 +132,31 @@ const HomePage: React.FC = () => {
     navigate(path);
   };
 
+  const handleBackToSearch = () => {
+    setShowBackConfirm(true);
+  };
+
+  const confirmBackToSearch = () => {
+    setResult(null);
+    setBookTitle('');
+    setShowBackConfirm(false);
+  };
+
+  // 点击外部关闭下拉菜单
+  React.useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      if (showUserMenu && !target.closest('.user-menu-container')) {
+        setShowUserMenu(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showUserMenu]);
+
   return (
     <div className="min-h-screen bg-white">
       {/* 顶部导航栏 - ChatGPT 风格 */}
@@ -124,7 +171,7 @@ const HomePage: React.FC = () => {
           {/* 用户区域 */}
           <div className="flex items-center gap-3">
             {token ? (
-              <div className="relative">
+              <div className="relative user-menu-container">
                 <button
                   onClick={() => setShowUserMenu(!showUserMenu)}
                   className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-gray-100 transition"
@@ -158,6 +205,22 @@ const HomePage: React.FC = () => {
                     >
                       <UserCircle className="w-4 h-4" />
                       个人资料
+                    </button>
+
+                    <button
+                      onClick={() => handleMenuClick('/history')}
+                      className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3"
+                    >
+                      <History className="w-4 h-4" />
+                      我的历史
+                    </button>
+
+                    <button
+                      onClick={() => handleMenuClick('/preference')}
+                      className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3"
+                    >
+                      <Heart className="w-4 h-4" />
+                      我的偏好
                     </button>
 
                     <button
@@ -258,13 +321,10 @@ const HomePage: React.FC = () => {
             <div className="animate-fadeIn">
               {/* 返回按钮 */}
               <button
-                onClick={() => {
-                  setResult(null);
-                  setBookTitle('');
-                }}
+                onClick={handleBackToSearch}
                 className="mb-6 text-sm text-gray-600 hover:text-gray-900 flex items-center gap-1"
               >
-                ← 返回搜索
+                ← 返回分析
               </button>
 
               {/* 书籍信息卡片 */}
@@ -354,20 +414,56 @@ const HomePage: React.FC = () => {
           )}
 
           {/* 反馈历史 */}
-          {feedbackHistory.length > 0 && !result && (
+          {feedbackHistory.length > 0 && !result && token && (
             <div className="mt-8">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">最近反馈</h3>
-              <div className="space-y-2">
-                {feedbackHistory.slice(0, 5).map((item, i) => (
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-gray-900">最近反馈</h3>
+                <button
+                  onClick={() => navigate('/history')}
+                  className="text-sm text-blue-600 hover:text-blue-700 transition"
+                >
+                  查看全部 →
+                </button>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {feedbackHistory.slice(0, 10).map((item) => (
                   <div
-                    key={i}
-                    className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg"
+                    key={item.id}
+                    onClick={() => setSelectedHistoryItem(item)}
+                    className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md hover:border-blue-300 transition cursor-pointer"
                   >
-                    <div className="text-lg">{item.interested ? '👍' : '👎'}</div>
-                    <div className="flex-1">
-                      <div className="font-medium text-gray-900">{item.title}</div>
-                      <div className="text-sm text-gray-500">
-                        {new Date(item.timestamp).toLocaleDateString('zh-CN')}
+                    <div className="flex items-start gap-3">
+                      <div className="flex-shrink-0">
+                        {item.interested ? (
+                          <span className="inline-flex items-center justify-center w-8 h-8 bg-green-100 text-green-600 rounded-full">
+                            👍
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center justify-center w-8 h-8 bg-gray-100 text-gray-600 rounded-full">
+                            👎
+                          </span>
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h4 className="font-medium text-gray-900 mb-1 truncate">
+                          {item.title}
+                        </h4>
+                        <div className="flex flex-wrap gap-1 mb-2">
+                          <span className="px-2 py-0.5 bg-blue-50 text-blue-700 rounded text-xs">
+                            {item.analysisData.summary.genre}
+                          </span>
+                          <span className="px-2 py-0.5 bg-purple-50 text-purple-700 rounded text-xs">
+                            {item.analysisData.summary.tone}
+                          </span>
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          {new Date(item.createdAt).toLocaleDateString('zh-CN', {
+                            month: '2-digit',
+                            day: '2-digit',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                          })}
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -404,6 +500,115 @@ const HomePage: React.FC = () => {
           }}
           onCancel={() => setShowLoginConfirm(false)}
         />
+      )}
+
+      {/* 返回确认对话框 */}
+      {showBackConfirm && (
+        <ConfirmDialog
+          message="你还没有提交反馈，确定要返回吗？"
+          onConfirm={confirmBackToSearch}
+          onCancel={() => setShowBackConfirm(false)}
+        />
+      )}
+
+      {/* 历史详情弹窗 */}
+      {selectedHistoryItem && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[10000] p-4">
+          <div className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6">
+            <div className="flex items-start justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <h2 className="text-2xl font-semibold text-gray-900">
+                  {selectedHistoryItem.title}
+                </h2>
+                {selectedHistoryItem.interested ? (
+                  <span className="inline-flex items-center gap-1 px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm">
+                    <span>👍</span>
+                    感兴趣
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1 px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-sm">
+                    <span>👎</span>
+                    不感兴趣
+                  </span>
+                )}
+              </div>
+              <button
+                onClick={() => setSelectedHistoryItem(null)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div className="flex gap-2">
+                <span className="px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-sm">
+                  {selectedHistoryItem.analysisData.summary.genre}
+                </span>
+                <span className="px-3 py-1 bg-purple-50 text-purple-700 rounded-full text-sm">
+                  {selectedHistoryItem.analysisData.summary.tone}
+                </span>
+              </div>
+
+              {selectedHistoryItem.analysisData.showPoster && (
+                <div>
+                  <img
+                    src={selectedHistoryItem.analysisData.posterUrl}
+                    alt={selectedHistoryItem.title}
+                    className="w-full h-64 object-cover rounded-lg"
+                  />
+                </div>
+              )}
+
+              <div className="p-4 bg-gray-50 rounded-lg border-l-4 border-blue-500">
+                <p className="text-gray-800">{selectedHistoryItem.analysisData.recommendation}</p>
+              </div>
+
+              <div>
+                <h3 className="text-sm font-medium text-gray-900 mb-2">核心主题</h3>
+                <div className="flex flex-wrap gap-2">
+                  {selectedHistoryItem.analysisData.summary.themes.map((theme, i) => (
+                    <span key={i} className="px-3 py-1 bg-gray-100 text-gray-700 rounded-lg text-sm">
+                      {theme}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <h3 className="text-sm font-medium text-gray-900 mb-2">关键元素</h3>
+                <ul className="space-y-1">
+                  {selectedHistoryItem.analysisData.summary.keyElements.map((element, i) => (
+                    <li key={i} className="text-sm text-gray-600 flex items-center gap-2">
+                      <span className="w-1 h-1 bg-gray-400 rounded-full" />
+                      {element}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {selectedHistoryItem.analysisData.summary.triggerWarnings.length > 0 && (
+                <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                  <p className="text-sm text-amber-800">
+                    ⚠️ {selectedHistoryItem.analysisData.summary.triggerWarnings.join('、')}
+                  </p>
+                </div>
+              )}
+
+              <div className="pt-4 border-t border-gray-200 text-sm text-gray-500">
+                分析时间: {new Date(selectedHistoryItem.createdAt).toLocaleDateString('zh-CN', {
+                  year: 'numeric',
+                  month: '2-digit',
+                  day: '2-digit',
+                  hour: '2-digit',
+                  minute: '2-digit',
+                })}
+              </div>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

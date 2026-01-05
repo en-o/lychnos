@@ -3,6 +3,8 @@ import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import HomePage from './pages/HomePage';
 import ProfilePage from './pages/ProfilePage';
+import HistoryPage from './pages/HistoryPage';
+import PreferencePage from './pages/PreferencePage';
 import ModelSettingsPage from './pages/ModelSettingsPage';
 import ChangePasswordPage from './pages/ChangePasswordPage';
 import PrivateRoute from './components/PrivateRoute';
@@ -24,6 +26,22 @@ function App() {
           element={
             <PrivateRoute>
               <ProfilePage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/history"
+          element={
+            <PrivateRoute>
+              <HistoryPage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/preference"
+          element={
+            <PrivateRoute>
+              <PreferencePage />
             </PrivateRoute>
           }
         />
