@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { BookOpen, ArrowLeft, Plus, Trash2, Check, Brain, Image as ImageIcon } from 'lucide-react';
+import { ArrowLeft, Plus, Trash2, Check, Brain, Image as ImageIcon } from 'lucide-react';
 import type { AIAnalysisModel, AIImageModel } from '../types/settings';
+import Logo from '../components/Logo';
+import { toast } from '../components/ToastContainer';
 
 type TabType = 'analysis' | 'image';
 
@@ -80,7 +82,7 @@ const ModelSettingsPage: React.FC = () => {
 
   const handleSaveAnalysisModel = () => {
     if (!analysisFormData.name || !analysisFormData.type) {
-      alert('请填写必填项');
+      toast.warning('请填写必填项');
       return;
     }
 
@@ -131,7 +133,7 @@ const ModelSettingsPage: React.FC = () => {
 
   const handleSaveImageModel = () => {
     if (!imageFormData.name || !imageFormData.type) {
-      alert('请填写必填项');
+      toast.warning('请填写必填项');
       return;
     }
 
@@ -227,7 +229,7 @@ const ModelSettingsPage: React.FC = () => {
             >
               <ArrowLeft className="w-5 h-5 text-gray-600" />
             </button>
-            <BookOpen className="w-5 h-5 text-gray-800" />
+            <Logo className="w-5 h-5" />
             <span className="font-semibold text-gray-800">AI模型设置</span>
           </div>
         </div>

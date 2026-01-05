@@ -6,10 +6,12 @@ import ProfilePage from './pages/ProfilePage';
 import ModelSettingsPage from './pages/ModelSettingsPage';
 import ChangePasswordPage from './pages/ChangePasswordPage';
 import PrivateRoute from './components/PrivateRoute';
+import ToastContainer from './components/ToastContainer';
 
 function App() {
   return (
     <Router>
+      <ToastContainer />
       <Routes>
         {/* 公开页面 */}
         <Route path="/login" element={<LoginPage />} />

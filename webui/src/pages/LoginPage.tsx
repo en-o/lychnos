@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
-import { BookOpen } from 'lucide-react';
 import { mockAuthApi } from '../api/auth';
+import Logo from '../components/Logo';
+import { toast } from '../components/ToastContainer';
 
 const LoginPage: React.FC = () => {
   const navigate = useNavigate();
@@ -16,7 +17,7 @@ const LoginPage: React.FC = () => {
     e.preventDefault();
 
     if (!username || !password) {
-      alert('请输入用户名和密码');
+      toast.warning('请输入用户名和密码');
       return;
     }
 
@@ -38,11 +39,11 @@ const LoginPage: React.FC = () => {
         // 跳转到redirect指定的页面
         navigate(redirect);
       } else {
-        alert(response.message);
+        toast.error(response.message);
       }
     } catch (error: any) {
       console.error('登录失败:', error);
-      alert(error.response?.data?.message || '登录失败,请重试');
+      toast.error(error.response?.data?.message || '登录失败,请重试');
     } finally {
       setLoading(false);
     }
@@ -54,7 +55,7 @@ const LoginPage: React.FC = () => {
         {/* Logo和标题 */}
         <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-2 mb-4">
-            <BookOpen className="w-8 h-8 text-gray-800" />
+            <Logo className="w-8 h-8" />
             <h1 className="text-2xl font-semibold text-gray-900">书灯</h1>
           </div>
           <p className="text-gray-600">欢迎回来</p>

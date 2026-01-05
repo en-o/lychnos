@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  BookOpen,
   Search,
   LogOut,
   UserCircle,
@@ -10,6 +9,9 @@ import {
   ChevronDown
 } from 'lucide-react';
 import { mockBookApi, type BookAnalysis, type FeedbackHistory } from '../api/book';
+import Logo from '../components/Logo';
+import { toast } from '../components/ToastContainer';
+import ConfirmDialog from '../components/ConfirmDialog';
 
 const HomePage: React.FC = () => {
   const navigate = useNavigate();
@@ -18,6 +20,7 @@ const HomePage: React.FC = () => {
   const [result, setResult] = useState<BookAnalysis | null>(null);
   const [feedbackHistory, setFeedbackHistory] = useState<FeedbackHistory[]>([]);
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [showLoginConfirm, setShowLoginConfirm] = useState(false);
 
   // 检查是否已登录
   const token = localStorage.getItem('token');
@@ -27,16 +30,13 @@ const HomePage: React.FC = () => {
 
   const handleSearch = async (title = bookTitle) => {
     if (!title.trim()) {
-      alert('请输入书名');
+      toast.warning('请输入书名');
       return;
     }
 
     // 检查登录状态
     if (!token) {
-      const shouldLogin = window.confirm('需要登录才能使用分析功能，是否前往登录？');
-      if (shouldLogin) {
-        navigate('/login?redirect=/');
-      }
+      setShowLoginConfirm(true);
       return;
     }
 
@@ -49,11 +49,11 @@ const HomePage: React.FC = () => {
       if (response.success) {
         setResult(response.data);
       } else {
-        alert(response.message || '分析失败');
+        toast.error(response.message || '分析失败');
       }
     } catch (error) {
       console.error('分析失败:', error);
-      alert('分析失败,请重试');
+      toast.error('分析失败,请重试');
     } finally {
       setLoading(false);
     }
@@ -79,13 +79,13 @@ const HomePage: React.FC = () => {
         };
 
         setFeedbackHistory((prev) => [newFeedback, ...prev]);
-        alert('✅ 反馈已提交!');
+        toast.success('反馈已提交!');
         setResult(null);
         setBookTitle('');
       }
     } catch (error) {
       console.error('提交失败:', error);
-      alert('提交失败,请重试');
+      toast.error('提交失败,请重试');
     }
   };
 
@@ -117,7 +117,7 @@ const HomePage: React.FC = () => {
         <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
           {/* Logo */}
           <div className="flex items-center gap-2">
-            <BookOpen className="w-5 h-5 text-gray-800" />
+            <Logo className="w-5 h-5" />
             <span className="font-semibold text-gray-800">书灯</span>
           </div>
 
@@ -129,9 +129,7 @@ const HomePage: React.FC = () => {
                   onClick={() => setShowUserMenu(!showUserMenu)}
                   className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-gray-100 transition"
                 >
-                  <div className="w-7 h-7 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-white text-sm font-medium">
-                    {userInfo.nickname?.[0] || userInfo.username?.[0] || 'tan'}
-                  </div>
+                 ·
                   <ChevronDown className="w-4 h-4 text-gray-600" />
                 </button>
 

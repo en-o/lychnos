@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { BookOpen, ArrowLeft, Save } from 'lucide-react';
+import { ArrowLeft, Save } from 'lucide-react';
 import type { UserProfile } from '../types/settings';
+import Logo from '../components/Logo';
+import { toast } from '../components/ToastContainer';
 
 const ProfilePage: React.FC = () => {
   const navigate = useNavigate();
@@ -41,7 +43,7 @@ const ProfilePage: React.FC = () => {
 
     setProfile(formData);
     setIsEditing(false);
-    alert('保存成功');
+    toast.success('保存成功');
 
     // TODO: 这里应该调用后端 API 保存
     // await api.updateProfile(formData);
@@ -64,7 +66,7 @@ const ProfilePage: React.FC = () => {
             >
               <ArrowLeft className="w-5 h-5 text-gray-600" />
             </button>
-            <BookOpen className="w-5 h-5 text-gray-800" />
+            <Logo className="w-5 h-5" />
             <span className="font-semibold text-gray-800">个人资料</span>
           </div>
 

@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { BookOpen, Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff } from 'lucide-react';
+import Logo from '../components/Logo';
+import { toast } from '../components/ToastContainer';
 
 const RegisterPage: React.FC = () => {
   const navigate = useNavigate();
@@ -63,11 +65,11 @@ const RegisterPage: React.FC = () => {
       // Mock: 模拟注册成功
       await new Promise(resolve => setTimeout(resolve, 1000));
 
-      alert('注册成功!请登录');
+      toast.success('注册成功!请登录');
       navigate('/login');
     } catch (error: any) {
       console.error('注册失败:', error);
-      alert(error.response?.data?.message || '注册失败,请重试');
+      toast.error(error.response?.data?.message || '注册失败,请重试');
     } finally {
       setLoading(false);
     }
@@ -79,7 +81,7 @@ const RegisterPage: React.FC = () => {
         {/* Logo和标题 */}
         <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-2 mb-4">
-            <BookOpen className="w-8 h-8 text-gray-800" />
+            <Logo className="w-8 h-8" />
             <h1 className="text-2xl font-semibold text-gray-900">书灯</h1>
           </div>
           <p className="text-gray-600">创建新账号</p>

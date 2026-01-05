@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { BookOpen, ArrowLeft, Eye, EyeOff } from 'lucide-react';
+import { ArrowLeft, Eye, EyeOff } from 'lucide-react';
+import Logo from '../components/Logo';
+import { toast } from '../components/ToastContainer';
 
 const ChangePasswordPage: React.FC = () => {
   const navigate = useNavigate();
@@ -63,7 +65,7 @@ const ChangePasswordPage: React.FC = () => {
     // }
 
     // Mock: 模拟成功
-    alert('密码修改成功,请重新登录');
+    toast.success('密码修改成功,请重新登录');
     localStorage.removeItem('token');
     localStorage.removeItem('userInfo');
     navigate('/login');
@@ -81,7 +83,7 @@ const ChangePasswordPage: React.FC = () => {
             >
               <ArrowLeft className="w-5 h-5 text-gray-600" />
             </button>
-            <BookOpen className="w-5 h-5 text-gray-800" />
+            <Logo className="w-5 h-5" />
             <span className="font-semibold text-gray-800">修改密码</span>
           </div>
         </div>
