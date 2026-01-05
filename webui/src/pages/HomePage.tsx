@@ -130,7 +130,7 @@ const HomePage: React.FC = () => {
                   className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-gray-100 transition"
                 >
                   <div className="w-7 h-7 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-white text-sm font-medium">
-                    {userInfo.nickname?.[0] || userInfo.username?.[0] || 'U'}
+                    {userInfo.nickname?.[0] || userInfo.username?.[0] || 'tan'}
                   </div>
                   <ChevronDown className="w-4 h-4 text-gray-600" />
                 </button>
