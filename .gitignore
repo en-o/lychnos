@@ -8,7 +8,7 @@ target/
 # idea
 /.idea
 *.iml
-*.json
+#*.json
 *.iws
 *.ipr
 
@@ -68,3 +68,4 @@ build/
 __MACOSX
 .shire
 .txt
+.claude
