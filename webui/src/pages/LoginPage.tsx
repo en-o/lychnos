@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { BookOpen } from 'lucide-react';
 import { mockAuthApi } from '../api/auth';
 
 const LoginPage: React.FC = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const redirect = searchParams.get('redirect') || '/';
+
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -32,8 +35,8 @@ const LoginPage: React.FC = () => {
           localStorage.setItem('userInfo', JSON.stringify(userInfoRes.data));
         }
 
-        // 跳转到主页
-        navigate('/');
+        // 跳转到redirect指定的页面
+        navigate(redirect);
       } else {
         alert(response.message);
       }
@@ -46,44 +49,42 @@ const LoginPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md">
+    <div className="min-h-screen bg-white flex items-center justify-center p-4">
+      <div className="w-full max-w-md">
         {/* Logo和标题 */}
         <div className="text-center mb-8">
-          <div className="flex items-center justify-center gap-3 mb-3">
-            <BookOpen className="w-10 h-10 text-indigo-600" />
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
-              图书阅读助理
-            </h1>
+          <div className="flex items-center justify-center gap-2 mb-4">
+            <BookOpen className="w-8 h-8 text-gray-800" />
+            <h1 className="text-2xl font-semibold text-gray-900">书灯</h1>
           </div>
-          <p className="text-gray-600">AI 驱动的个性化阅读推荐系统</p>
+          <p className="text-gray-600">欢迎回来</p>
         </div>
 
         {/* 登录表单 */}
-        <form onSubmit={handleLogin} className="space-y-6">
+        <form onSubmit={handleLogin} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">
               用户名
             </label>
             <input
               type="text"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-indigo-500 transition"
+              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               placeholder="请输入用户名"
               disabled={loading}
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">
               密码
             </label>
             <input
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-indigo-500 transition"
+              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               placeholder="请输入密码"
               disabled={loading}
             />
@@ -92,11 +93,11 @@ const LoginPage: React.FC = () => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full px-6 py-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl hover:from-indigo-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition font-medium shadow-lg"
+            className="w-full px-4 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition font-medium"
           >
             {loading ? (
               <div className="flex items-center justify-center gap-2">
-                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
                 登录中...
               </div>
             ) : (
@@ -106,10 +107,9 @@ const LoginPage: React.FC = () => {
         </form>
 
         {/* 提示信息 */}
-        <div className="mt-6 p-4 bg-indigo-50 rounded-xl">
-          <p className="text-sm text-indigo-900 font-medium mb-1">演示账号:</p>
-          <p className="text-sm text-indigo-700">用户名: admin</p>
-          <p className="text-sm text-indigo-700">密码: admin</p>
+        <div className="mt-6 p-3 bg-gray-50 rounded-lg border border-gray-200">
+          <p className="text-xs text-gray-600 mb-1">演示账号:</p>
+          <p className="text-xs text-gray-700">用户名: admin / 密码: admin</p>
         </div>
       </div>
     </div>
