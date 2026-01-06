@@ -1,5 +1,6 @@
 import axios, { type AxiosInstance, type AxiosRequestConfig, AxiosError } from 'axios';
 import { AuthErrorCode, type Result } from '../models';
+import { toast } from '../components/ToastContainer';
 
 // 创建axios实例
 const instance: AxiosInstance = axios.create({
@@ -54,7 +55,7 @@ instance.interceptors.response.use(
     } else {
       // 网络错误
       console.error('网络错误:', error.message);
-      alert('网络连接失败,请检查网络');
+      toast.error('网络连接失败，请检查网络');
     }
 
     return Promise.reject(error);
@@ -83,31 +84,31 @@ function handleForbiddenError(data?: Result) {
   const errorCode = data?.message || '';
 
   if (errorCode.includes(AuthErrorCode.UNAUTHENTICATED)) {
-    alert('当前用户无访问权限');
+    toast.error('当前用户无访问权限');
   } else if (errorCode.includes(AuthErrorCode.UNAUTHENTICATED_PLATFORM)) {
-    alert('非法令牌访问');
+    toast.error('非法令牌访问');
     clearAuthAndRedirect();
   } else {
-    alert(data?.message || '无访问权限');
+    toast.error(data?.message || '无访问权限');
   }
 }
 
 // 处理402授权过期
 function handleExpiredError(data?: Result) {
-  alert(data?.message || '系统授权已过期');
+  toast.error(data?.message || '系统授权已过期');
 }
 
 // 处理其他错误
 function handleOtherError(status: number, data?: Result) {
   const message = data?.message || `请求失败 (${status})`;
   console.error('请求错误:', message);
-  alert(message);
+  toast.error(message);
 }
 
 // 处理业务错误
 function handleBusinessError(data: Result) {
   console.error('业务错误:', data.message);
-  alert(data.message || '操作失败');
+  toast.error(data.message || '操作失败');
 }
 
 // 清除认证信息并跳转登录
