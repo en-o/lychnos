@@ -10,7 +10,8 @@ import {
   History,
   Heart
 } from 'lucide-react';
-import { mockBookApi, type BookAnalysis, type AnalysisHistory } from '../api/book';
+import { bookApi } from '../api/book';
+import type { BookAnalysis, AnalysisHistory } from '../models';
 import Logo from '../components/Logo';
 import { toast } from '../components/ToastContainer';
 import ConfirmDialog from '../components/ConfirmDialog';
@@ -25,12 +26,28 @@ const HomePage: React.FC = () => {
   const [showLoginConfirm, setShowLoginConfirm] = useState(false);
   const [selectedHistoryItem, setSelectedHistoryItem] = useState<AnalysisHistory | null>(null);
   const [showBackConfirm, setShowBackConfirm] = useState(false);
+  const [quickBooks, setQuickBooks] = useState<string[]>([]);
 
   // 检查是否已登录
   const token = localStorage.getItem('token');
   const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
 
-  const quickBooks = ['三体', '活着', '解忧杂货店', '人类简史'];
+  // 加载快速推荐书籍
+  React.useEffect(() => {
+    const loadQuickBooks = async () => {
+      try {
+        const response = await bookApi.getQuickBooks();
+        if (response.success && response.data) {
+          setQuickBooks(response.data);
+        }
+      } catch (error) {
+        console.error('获取快速推荐失败:', error);
+        // 降级使用默认值
+        setQuickBooks(['三体', '活着', '解忧杂货店', '人类简史']);
+      }
+    };
+    loadQuickBooks();
+  }, []);
 
   // 加载历史记录
   React.useEffect(() => {
@@ -57,7 +74,7 @@ const HomePage: React.FC = () => {
     setResult(null);
 
     try {
-      const response = await mockBookApi.analyzeBook(title);
+      const response = await bookApi.analyzeBook(title);
 
       if (response.success) {
         setResult(response.data);
@@ -76,7 +93,7 @@ const HomePage: React.FC = () => {
     if (!result) return;
 
     try {
-      const response = await mockBookApi.submitFeedback(
+      const response = await bookApi.submitFeedback(
         result.bookId,
         interested,
         ''

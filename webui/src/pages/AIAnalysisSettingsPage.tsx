@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { BookOpen, ArrowLeft, Plus, Trash2, Check } from 'lucide-react';
-import type { AIAnalysisModel } from '../types/settings';
+import type { AIAnalysisModel } from '../models';
 
 const AIAnalysisSettingsPage: React.FC = () => {
   const navigate = useNavigate();

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
-import { mockAuthApi } from '../api/auth';
+import { authApi } from '../api/auth';
 import Logo from '../components/Logo';
 import { toast } from '../components/ToastContainer';
 
@@ -24,14 +24,14 @@ const LoginPage: React.FC = () => {
     setLoading(true);
 
     try {
-      const response = await mockAuthApi.login({ username, password });
+      const response = await authApi.login({ username, password });
 
       if (response.success && response.data) {
         // 保存token
         localStorage.setItem('token', response.data.token);
 
         // 获取用户信息
-        const userInfoRes = await mockAuthApi.getUserInfo();
+        const userInfoRes = await authApi.getUserInfo();
         if (userInfoRes.success) {
           localStorage.setItem('userInfo', JSON.stringify(userInfoRes.data));
         }

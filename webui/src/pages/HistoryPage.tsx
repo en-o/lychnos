@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, ThumbsUp, ThumbsDown, ChevronLeft, ChevronRight, Eye } from 'lucide-react';
-import { mockBookApi, type AnalysisHistory, type PaginatedResponse } from '../api/book';
+import { bookApi } from '../api/book';
+import type { AnalysisHistory, PaginatedResponse } from '../models';
 import Logo from '../components/Logo';
 import { toast } from '../components/ToastContainer';
 
@@ -20,7 +21,7 @@ const HistoryPage: React.FC = () => {
   const loadHistory = async (page: number) => {
     setLoading(true);
     try {
-      const response = await mockBookApi.getAnalysisHistory(page, pageSize);
+      const response = await bookApi.getAnalysisHistory(page, pageSize);
       if (response.success) {
         setHistoryData(response.data);
       } else {

@@ -1,4 +1,11 @@
-// JWT响应格式
+/**
+ * 认证相关实体类
+ */
+
+/**
+ * @deprecated 请使用 Result<T> 替代
+ * 兼容性保留，将在下个版本移除
+ */
 export interface ApiResponse<T = any> {
   code: number;
   message: string;

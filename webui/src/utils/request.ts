@@ -1,5 +1,5 @@
 import axios, { type AxiosInstance, type AxiosRequestConfig, AxiosError } from 'axios';
-import { AuthErrorCode, type ApiResponse } from '../types/auth';
+import { AuthErrorCode, type ApiResponse } from '../models';
 
 // 创建axios实例
 const instance: AxiosInstance = axios.create({

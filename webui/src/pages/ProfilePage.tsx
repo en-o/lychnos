@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Save } from 'lucide-react';
-import type { UserProfile } from '../types/settings';
+import type { UserProfile } from '../models';
 import Logo from '../components/Logo';
 import { toast } from '../components/ToastContainer';
 
