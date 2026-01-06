@@ -8,7 +8,7 @@ import type { Result, TokenInfo, UserInfo } from '../src/models';
 export default [
   // 登录接口
   {
-    url: '/api/auth/login',
+    url: '/auth/login',
     method: 'post',
     timeout: 1000,
     response: ({ body }: any): Result<TokenInfo> => {
@@ -41,7 +41,7 @@ export default [
 
   // 登出接口
   {
-    url: '/api/auth/logout',
+    url: '/auth/logout',
     method: 'post',
     timeout: 500,
     response: (): Result<null> => {
@@ -57,7 +57,7 @@ export default [
 
   // 获取用户信息
   {
-    url: '/api/auth/userInfo',
+    url: '/auth/userInfo',
     method: 'get',
     timeout: 500,
     response: ({ headers }: any): Result<UserInfo> => {
@@ -89,7 +89,7 @@ export default [
 
   // 刷新token
   {
-    url: '/api/auth/refresh',
+    url: '/auth/refresh',
     method: 'post',
     timeout: 500,
     response: (): Result<TokenInfo> => {

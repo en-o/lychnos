@@ -17,7 +17,15 @@ export default defineConfig(() => {
     ],
     server: {
       port: 3000,
-      proxy: isMock ? undefined : {
+      proxy: isMock ? {
+        // Mock 模式下也需要代理，将 /api 开头的请求交给 mock 处理
+        '/api': {
+          target: 'http://localhost:3000',
+          changeOrigin: true,
+          rewrite: (path) => path.replace(/^\/api/, '')
+        }
+      } : {
+        // 真实接口模式
         '/api': {
           target: 'http://localhost:8080',
           changeOrigin: true,
