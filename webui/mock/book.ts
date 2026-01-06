@@ -12,7 +12,7 @@ let feedbackCount = 0;
 export default [
   // 获取快速推荐书籍列表
   {
-    url: '/book/quick',
+    url: '/api/book/quick',
     method: 'get',
     timeout: 300,
     response: (): Result<string[]> => {
@@ -28,7 +28,7 @@ export default [
 
   // 分析图书
   {
-    url: '/book/analyze',
+    url: '/api/book/analyze',
     method: 'post',
     timeout: 2000,
     response: ({ body }: any): Result<BookAnalysis> => {
@@ -47,7 +47,7 @@ export default [
 
   // 提交反馈
   {
-    url: '/book/feedback',
+    url: '/api/book/feedback',
     method: 'post',
     timeout: 500,
     response: ({ body }: any): Result<null> => {
@@ -77,7 +77,7 @@ export default [
 
   // 获取反馈历史
   {
-    url: '/book/feedback/history',
+    url: '/api/book/feedback/history',
     method: 'get',
     timeout: 500,
     response: (): Result<FeedbackHistory[]> => {
@@ -100,7 +100,7 @@ export default [
 
   // 获取分析历史（分页）
   {
-    url: '/book/history',
+    url: '/api/book/history',
     method: 'get',
     timeout: 500,
     response: ({ query }: any): Result<PageResult<AnalysisHistory>> => {
@@ -133,7 +133,7 @@ export default [
 
   // 获取用户偏好
   {
-    url: '/user/preference',
+    url: '/api/user/preference',
     method: 'get',
     timeout: 800,
     response: (): Result<UserPreference> => {
@@ -242,7 +242,7 @@ export default [
 
   // 下载年度报告
   {
-    url: '/user/report/:year/download',
+    url: '/api/user/report/:year/download',
     method: 'get',
     timeout: 1000,
     response: (): Result<null> => {
