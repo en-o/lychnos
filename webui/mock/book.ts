@@ -6,7 +6,7 @@ import { getMockBook } from './data/book.data';
 import type { Result, PageResult, AnalysisHistory, BookAnalysis, UserPreference, FeedbackHistory } from '../src/models';
 
 // 使用内存存储模拟持久化（实际项目中可以用localStorage）
-let analysisHistory: AnalysisHistory[] = [];
+const analysisHistory: AnalysisHistory[] = [];
 let feedbackCount = 0;
 
 export default [
@@ -51,7 +51,7 @@ export default [
     method: 'post',
     timeout: 500,
     response: ({ body }: any): Result<null> => {
-      const { bookId, interested, reason } = body;
+      const { bookId, interested } = body;
       feedbackCount++;
 
       // 记录到历史（简化版，实际应该从analyze结果中获取完整数据）
