@@ -1,5 +1,5 @@
 import axios, { type AxiosInstance, type AxiosRequestConfig, AxiosError } from 'axios';
-import { AuthErrorCode, type ApiResponse } from '../models';
+import { AuthErrorCode, type Result } from '../models';
 
 // 创建axios实例
 const instance: AxiosInstance = axios.create({
@@ -24,10 +24,10 @@ instance.interceptors.request.use(
   }
 );
 
-// 响应拦截器 - 统一处理错误
+// 响应拦截器 - 统一处理Result包裹的响应
 instance.interceptors.response.use(
   (response) => {
-    const data: ApiResponse = response.data;
+    const data: Result = response.data;
 
     // 如果返回success为false，视为业务错误
     if (data.success === false) {
@@ -37,7 +37,7 @@ instance.interceptors.response.use(
 
     return response;
   },
-  (error: AxiosError<ApiResponse>) => {
+  (error: AxiosError<Result>) => {
     if (error.response) {
       const { status, data } = error.response;
 
@@ -62,7 +62,7 @@ instance.interceptors.response.use(
 );
 
 // 处理401认证错误
-function handleAuthError(data?: ApiResponse) {
+function handleAuthError(data?: Result) {
   const errorCode = data?.message || '';
 
   // 根据错误类型处理
@@ -79,7 +79,7 @@ function handleAuthError(data?: ApiResponse) {
 }
 
 // 处理403权限错误
-function handleForbiddenError(data?: ApiResponse) {
+function handleForbiddenError(data?: Result) {
   const errorCode = data?.message || '';
 
   if (errorCode.includes(AuthErrorCode.UNAUTHENTICATED)) {
@@ -93,19 +93,19 @@ function handleForbiddenError(data?: ApiResponse) {
 }
 
 // 处理402授权过期
-function handleExpiredError(data?: ApiResponse) {
+function handleExpiredError(data?: Result) {
   alert(data?.message || '系统授权已过期');
 }
 
 // 处理其他错误
-function handleOtherError(status: number, data?: ApiResponse) {
+function handleOtherError(status: number, data?: Result) {
   const message = data?.message || `请求失败 (${status})`;
   console.error('请求错误:', message);
   alert(message);
 }
 
 // 处理业务错误
-function handleBusinessError(data: ApiResponse) {
+function handleBusinessError(data: Result) {
   console.error('业务错误:', data.message);
   alert(data.message || '操作失败');
 }
@@ -121,21 +121,21 @@ function clearAuthAndRedirect() {
   }
 }
 
-// 封装请求方法
+// 封装请求方法 - 直接返回完整的Result对象
 export const request = {
-  get: <T = any>(url: string, config?: AxiosRequestConfig): Promise<ApiResponse<T>> => {
+  get: <T = Result>(url: string, config?: AxiosRequestConfig): Promise<T> => {
     return instance.get(url, config).then(res => res.data);
   },
 
-  post: <T = any>(url: string, data?: any, config?: AxiosRequestConfig): Promise<ApiResponse<T>> => {
+  post: <T = Result>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T> => {
     return instance.post(url, data, config).then(res => res.data);
   },
 
-  put: <T = any>(url: string, data?: any, config?: AxiosRequestConfig): Promise<ApiResponse<T>> => {
+  put: <T = Result>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T> => {
     return instance.put(url, data, config).then(res => res.data);
   },
 
-  delete: <T = any>(url: string, config?: AxiosRequestConfig): Promise<ApiResponse<T>> => {
+  delete: <T = Result>(url: string, config?: AxiosRequestConfig): Promise<T> => {
     return instance.delete(url, config).then(res => res.data);
   },
 };

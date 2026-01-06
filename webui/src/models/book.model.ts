@@ -74,22 +74,6 @@ export class AnalysisHistory {
   }
 }
 
-// 分页响应
-export class PaginatedResponse<T> {
-  items: T[];
-  total: number;
-  page: number;
-  pageSize: number;
-  totalPages: number;
-
-  constructor(data: Partial<PaginatedResponse<T>> = {}) {
-    this.items = data.items || [];
-    this.total = data.total || 0;
-    this.page = data.page || 1;
-    this.pageSize = data.pageSize || 10;
-    this.totalPages = data.totalPages || 0;
-  }
-}
 
 // 年度报告
 export class AnnualReport {

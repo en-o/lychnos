@@ -2,14 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, ThumbsUp, ThumbsDown, ChevronLeft, ChevronRight, Eye } from 'lucide-react';
 import { bookApi } from '../api/book';
-import type { AnalysisHistory, PaginatedResponse } from '../models';
+import type { AnalysisHistory, PageResult } from '../models';
 import Logo from '../components/Logo';
 import { toast } from '../components/ToastContainer';
 
 const HistoryPage: React.FC = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
-  const [historyData, setHistoryData] = useState<PaginatedResponse<AnalysisHistory> | null>(null);
+  const [historyData, setHistoryData] = useState<PageResult<AnalysisHistory> | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedItem, setSelectedItem] = useState<AnalysisHistory | null>(null);
   const pageSize = 10;
@@ -77,22 +77,22 @@ const HistoryPage: React.FC = () => {
               <div className="inline-block w-8 h-8 border-4 border-gray-300 border-t-blue-600 rounded-full animate-spin"></div>
               <p className="text-gray-600 mt-4">加载中...</p>
             </div>
-          ) : historyData && historyData.items.length > 0 ? (
+          ) : historyData && historyData.rows.length > 0 ? (
             <>
               {/* 统计信息 */}
               <div className="mb-6 bg-white rounded-lg border border-gray-200 p-4">
                 <div className="flex items-center justify-between text-sm text-gray-600">
                   <span>共 {historyData.total} 条分析记录</span>
                   <span>
-                    感兴趣: {historyData.items.filter(h => h.interested).length} / 不感兴趣:{' '}
-                    {historyData.items.filter(h => !h.interested).length}
+                    感兴趣: {historyData.rows.filter(h => h.interested).length} / 不感兴趣:{' '}
+                    {historyData.rows.filter(h => !h.interested).length}
                   </span>
                 </div>
               </div>
 
               {/* 历史列表 */}
               <div className="space-y-3">
-                {historyData.items.map((item) => (
+                {historyData.rows.map((item) => (
                   <div
                     key={item.id}
                     className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition"

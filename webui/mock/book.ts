@@ -3,7 +3,7 @@
  */
 import { MockMethod } from 'vite-plugin-mock';
 import { getMockBook } from './data/book.data';
-import { AnalysisHistory, PaginatedResponse } from '../src/models';
+import type { Result, PageResult, AnalysisHistory, BookAnalysis, UserPreference, FeedbackHistory } from '../src/models';
 
 // 使用内存存储模拟持久化（实际项目中可以用localStorage）
 let analysisHistory: AnalysisHistory[] = [];
@@ -15,7 +15,7 @@ export default [
     url: '/api/book/quick',
     method: 'get',
     timeout: 300,
-    response: () => {
+    response: (): Result<string[]> => {
       return {
         code: 200,
         message: '获取成功',
@@ -31,7 +31,7 @@ export default [
     url: '/api/book/analyze',
     method: 'post',
     timeout: 2000,
-    response: ({ body }: any) => {
+    response: ({ body }: any): Result<BookAnalysis> => {
       const { title } = body;
       const book = getMockBook(title, feedbackCount);
 
@@ -50,12 +50,12 @@ export default [
     url: '/api/book/feedback',
     method: 'post',
     timeout: 500,
-    response: ({ body }: any) => {
+    response: ({ body }: any): Result<null> => {
       const { bookId, interested, reason } = body;
       feedbackCount++;
 
       // 记录到历史（简化版，实际应该从analyze结果中获取完整数据）
-      const historyItem: AnalysisHistory = {
+      const historyItem: any = {
         id: Date.now().toString(),
         bookId,
         title: '书籍标题',
@@ -80,8 +80,8 @@ export default [
     url: '/api/book/feedback/history',
     method: 'get',
     timeout: 500,
-    response: () => {
-      const feedbackHistory = analysisHistory.map(item => ({
+    response: (): Result<FeedbackHistory[]> => {
+      const feedbackHistory: FeedbackHistory[] = analysisHistory.map(item => ({
         bookId: item.bookId,
         title: item.title,
         interested: item.interested,
@@ -103,7 +103,7 @@ export default [
     url: '/api/book/history',
     method: 'get',
     timeout: 500,
-    response: ({ query }: any) => {
+    response: ({ query }: any): Result<PageResult<AnalysisHistory>> => {
       const page = parseInt(query.page) || 1;
       const pageSize = parseInt(query.pageSize) || 10;
 
@@ -113,10 +113,10 @@ export default [
       const end = start + pageSize;
       const items = analysisHistory.slice(start, end);
 
-      const paginatedResponse: PaginatedResponse<AnalysisHistory> = {
-        items,
+      const pageResult: PageResult<AnalysisHistory> = {
+        rows: items,
         total,
-        page,
+        currentPage: page,
         pageSize,
         totalPages,
       };
@@ -125,7 +125,7 @@ export default [
         code: 200,
         message: '获取成功',
         ts: Date.now(),
-        data: paginatedResponse,
+        data: pageResult,
         success: true,
       };
     },
@@ -136,7 +136,7 @@ export default [
     url: '/api/user/preference',
     method: 'get',
     timeout: 800,
-    response: () => {
+    response: (): Result<UserPreference> => {
       const totalBooks = analysisHistory.length;
       const interestedBooks = analysisHistory.filter(h => h.interested).length;
 
@@ -206,35 +206,35 @@ export default [
         .slice(0, 10)
         .map(([theme, count]) => ({ theme, count }));
 
-      const annualReport = {
-        year: currentYear,
-        totalBooks: yearHistory.length,
-        interestedCount: yearHistory.filter(h => h.interested).length,
-        topGenres,
-        topThemes,
-        monthlyTrend,
-        highlights: [
-          `${currentYear}年，你探索了 ${yearHistory.length} 本书`,
-          `最喜欢的类型：${topGenres[0]?.genre || '暂无'}`,
-          `最关注的主题：${topThemes.slice(0, 3).map(t => t.theme).join('、') || '暂无'}`,
-        ],
+      const preference: UserPreference = {
+        summary,
+        readingReport: {
+          totalBooks,
+          interestedBooks,
+          favoriteGenres,
+          favoriteThemes,
+          readingTrend: totalBooks > 10 ? '持续增长' : totalBooks > 5 ? '稳步探索' : '刚刚起步',
+        },
+        annualReport: {
+          year: currentYear,
+          totalBooks: yearHistory.length,
+          interestedCount: yearHistory.filter(h => h.interested).length,
+          topGenres,
+          topThemes,
+          monthlyTrend,
+          highlights: [
+            `${currentYear}年，你探索了 ${yearHistory.length} 本书`,
+            `最喜欢的类型：${topGenres[0]?.genre || '暂无'}`,
+            `最关注的主题：${topThemes.slice(0, 3).map(t => t.theme).join('、') || '暂无'}`,
+          ],
+        },
       };
 
       return {
         code: 200,
         message: '获取成功',
         ts: Date.now(),
-        data: {
-          summary,
-          readingReport: {
-            totalBooks,
-            interestedBooks,
-            favoriteGenres,
-            favoriteThemes,
-            readingTrend: totalBooks > 10 ? '持续增长' : totalBooks > 5 ? '稳步探索' : '刚刚起步',
-          },
-          annualReport,
-        },
+        data: preference,
         success: true,
       };
     },
@@ -245,7 +245,7 @@ export default [
     url: '/api/user/report/:year/download',
     method: 'get',
     timeout: 1000,
-    response: () => {
+    response: (): Result<null> => {
       // 返回模拟的文件下载响应
       return {
         code: 200,

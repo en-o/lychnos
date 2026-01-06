@@ -3,6 +3,7 @@
  */
 import { MockMethod } from 'vite-plugin-mock';
 import { validateUser } from './data/user.data';
+import type { Result, TokenInfo, UserInfo } from '../src/models';
 
 export default [
   // 登录接口
@@ -10,7 +11,7 @@ export default [
     url: '/api/auth/login',
     method: 'post',
     timeout: 1000,
-    response: ({ body }: any) => {
+    response: ({ body }: any): Result<TokenInfo> => {
       const { username, password } = body;
       const user = validateUser(username, password);
 
@@ -31,7 +32,7 @@ export default [
           code: 401,
           message: '用户名或密码错误',
           ts: Date.now(),
-          data: null,
+          data: null as any,
           success: false,
         };
       }
@@ -43,7 +44,7 @@ export default [
     url: '/api/auth/logout',
     method: 'post',
     timeout: 500,
-    response: () => {
+    response: (): Result<null> => {
       return {
         code: 200,
         message: '登出成功',
@@ -59,7 +60,7 @@ export default [
     url: '/api/auth/userInfo',
     method: 'get',
     timeout: 500,
-    response: ({ headers }: any) => {
+    response: ({ headers }: any): Result<UserInfo> => {
       const token = headers.token;
 
       if (!token || !token.startsWith('mock_token_')) {
@@ -67,7 +68,7 @@ export default [
           code: 401,
           message: 'TOKEN_ERROR',
           ts: Date.now(),
-          data: null,
+          data: null as any,
           success: false,
         };
       }
@@ -91,7 +92,7 @@ export default [
     url: '/api/auth/refresh',
     method: 'post',
     timeout: 500,
-    response: () => {
+    response: (): Result<TokenInfo> => {
       const newToken = 'mock_token_' + Date.now();
       return {
         code: 200,
