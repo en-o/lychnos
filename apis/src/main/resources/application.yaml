@@ -1,13 +1,15 @@
 server:
   port: 6125
 spring:
+  profiles:
+    active: ${CONFIG_ENV:dev}
   application:
     name: lychnos
   servlet:
     multipart:
       enabled: true
-      max-file-size: 100MB
-      max-request-size: 100MB
+      max-file-size:  ${FILE_MAX_SIZE:100MB}
+      max-request-size: ${FILE_MAX_SIZE:100MB}
 
 jdevelops:
   swagger:
