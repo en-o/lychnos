@@ -1,12 +1,11 @@
 package cn.tannn.lychnos.controller;
 
 import cn.tannn.jdevelops.annotations.web.authentication.ApiMapping;
-import cn.tannn.jdevelops.annotations.web.constant.PlatformConstant;
 import cn.tannn.jdevelops.annotations.web.mapping.PathRestController;
 import cn.tannn.jdevelops.result.response.ResultVO;
-import cn.tannn.jdevelops.utils.validation.account.Account;
 import cn.tannn.lychnos.controller.dto.LoginPassword;
 import cn.tannn.lychnos.controller.vo.LoginVO;
+import cn.tannn.lychnos.service.UserInfoService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
@@ -15,9 +14,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMethod;
-
-import java.util.Collections;
-import java.util.List;
 
 /**
  * 登录
@@ -31,6 +27,8 @@ import java.util.List;
 @RequiredArgsConstructor
 @Slf4j
 public class LoginController {
+
+    private final UserInfoService userInfoService;
 
     /**
      * 登录-管理端登录
