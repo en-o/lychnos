@@ -25,7 +25,7 @@ public class UserInfoRegister extends SerializableBean<UserInfoRegister> {
     // 基本信息
     @Schema(description = "登录名", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotBlank(message = "登录名不能为空")
-    @Size(min = 4, max = 50, message = "登录名长度必须在4-50个字符之间")
+    @Size(min = 3, max = 50, message = "登录名长度必须在4-50个字符之间")
     private String loginName;
 
     @Schema(description = "登录密码", requiredMode = Schema.RequiredMode.REQUIRED)
@@ -35,6 +35,7 @@ public class UserInfoRegister extends SerializableBean<UserInfoRegister> {
 
     @Schema(description = "昵称", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotBlank(message = "昵称不能为空")
+    @Size(min = 3, max = 50, message = "昵称长度必须在4-50个字符之间")
     private  String  nickname ;
 
     @Schema(description = "邮箱", example = "test@gmail.com")
