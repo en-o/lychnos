@@ -1,0 +1,6 @@
+server:
+  port: 6125
+spring:
+  application:
+    name: lychnos
+
