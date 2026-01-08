@@ -30,8 +30,24 @@
         </dependency>
         <dependency>
             <groupId>cn.tannn.jdevelops</groupId>
-            <artifactId>jdevelops-annotations-web</artifactId>
+            <artifactId>jdevelops-spring-boot-starter</artifactId>
             <version>1.0.3</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>cn.tannn.jdevelops</groupId>
+                    <artifactId>jdevelops-apis-knife4j</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>cn.tannn.jdevelops</groupId>
+            <artifactId>jdevelops-dals-jdbctemplate</artifactId>
+            <version>1.0.3.1</version>
+        </dependency>
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>8.0.33</version>
         </dependency>
         <dependency>
             <groupId>cn.tannn.jdevelops</groupId>
@@ -40,7 +56,7 @@
         </dependency>
         <dependency>
             <groupId>cn.tannn.jdevelops</groupId>
-            <artifactId>jdevelops-apis-exception</artifactId>
+            <artifactId>jdevelops-dals-autoschema</artifactId>
             <version>1.0.3</version>
         </dependency>
         <dependency>

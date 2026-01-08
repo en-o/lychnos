@@ -3,7 +3,11 @@ server:
 spring:
   application:
     name: lychnos
-
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 100MB
+      max-request-size: 100MB
 
 jdevelops:
   swagger:
@@ -16,6 +20,15 @@ jdevelops:
     description: Lychnos
     email: 1445763190@qq.com
     title: lychnos
+  jwt:
+    token-secret: b40715ff972d60c4yff8044acfb33ba091544b2e21825672edc38799f52f1895
+    web:
+      interceptor:
+        exclude-path-patterns:
+          - /login
+          - /error
+          - /logout
+    verify-platform: true
 
 knife4j:
   enable: true
@@ -24,24 +37,3 @@ knife4j:
     custom-code: 500
     enable-footer-custom: false
     enable-dynamic-parameter: true
-
-# ??
-management:
-  endpoints:
-    # ????????
-    #    enabled-by-default: false
-    web:
-      #      discovery:
-      #        enabled: false #????????
-      exposure:
-        include:
-          - info # prometheus
-          - health
-        exclude:
-          - shutdown
-          - sessions
-          - beans
-          - env
-  metrics:
-    tags:
-      application: ${spring.application.name}
