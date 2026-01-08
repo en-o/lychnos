@@ -11,6 +11,7 @@ import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.Comment;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
@@ -39,11 +40,11 @@ import org.hibernate.annotations.DynamicUpdate;
 public class UserInfo extends JpaCommonBean<UserInfo> {
 
     /**
-     * 登录名
+     * 登录名/用户名
      */
     @Column(columnDefinition = " varchar(100)  not null ")
-    @Comment("登录名")
-    @Schema(description = "登录名")
+    @Comment("登录名/用户名")
+    @Schema(description = "登录名/用户名")
     private String loginName;
 
     /**
@@ -54,4 +55,19 @@ public class UserInfo extends JpaCommonBean<UserInfo> {
     @Schema(description = "登录密码")
     @JsonView(Views.UserPassword.class)
     private String password;
+
+    /**
+     * 昵称
+     */
+    @Column(columnDefinition = " varchar(100) ")
+    @Comment("昵称")
+    @ColumnDefault("'贵宾'")
+    @Schema(description = "昵称")
+    private String nickname;
+
+    @Column(columnDefinition = " varchar(100) ")
+    @Comment("邮箱")
+    @Schema(description = "邮箱")
+    private String email;
+
 }
