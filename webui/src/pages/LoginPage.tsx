@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
-import { useNavigate, useSearchParams, Link } from 'react-router-dom';
-import { authApi } from '../api/auth';
+import React, {useState} from 'react';
+import {Link, useNavigate, useSearchParams} from 'react-router-dom';
+import {authApi} from '../api/auth';
 import Logo from '../components/Logo';
-import { toast } from '../components/ToastContainer';
+import {toast} from '../components/ToastContainer';
 
 const LoginPage: React.FC = () => {
   const navigate = useNavigate();

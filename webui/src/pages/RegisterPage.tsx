@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import { Eye, EyeOff } from 'lucide-react';
+import React, {useState} from 'react';
+import {Link, useNavigate} from 'react-router-dom';
+import {Eye, EyeOff} from 'lucide-react';
 import Logo from '../components/Logo';
-import { toast } from '../components/ToastContainer';
+import {toast} from '../components/ToastContainer';
 
 const RegisterPage: React.FC = () => {
   const navigate = useNavigate();

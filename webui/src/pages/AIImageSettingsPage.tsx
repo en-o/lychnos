@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { BookOpen, ArrowLeft, Plus, Trash2, Check } from 'lucide-react';
-import type { AIImageModel } from '../models';
+import React, {useEffect, useState} from 'react';
+import {useNavigate} from 'react-router-dom';
+import {ArrowLeft, BookOpen, Check, Plus, Trash2} from 'lucide-react';
+import type {AIImageModel} from '../models';
 
 const AIImageSettingsPage: React.FC = () => {
   const navigate = useNavigate();

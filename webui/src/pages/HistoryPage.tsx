@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, ThumbsUp, ThumbsDown, ChevronLeft, ChevronRight, Eye } from 'lucide-react';
-import { bookApi } from '../api/book';
-import type { AnalysisHistory, PageResult } from '../models';
+import React, {useEffect, useState} from 'react';
+import {useNavigate} from 'react-router-dom';
+import {ArrowLeft, ChevronLeft, ChevronRight, Eye, ThumbsDown, ThumbsUp} from 'lucide-react';
+import {bookApi} from '../api/book';
+import type {AnalysisHistory, PageResult} from '../models';
 import Logo from '../components/Logo';
-import { toast } from '../components/ToastContainer';
+import {toast} from '../components/ToastContainer';
 
 const HistoryPage: React.FC = () => {
   const navigate = useNavigate();

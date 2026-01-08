@@ -1,5 +1,5 @@
-import { request } from '../utils/request';
-import type { LoginRequest, TokenInfo, UserInfo, Result } from '../models';
+import {request} from '../utils/request';
+import type {LoginRequest, Result, TokenInfo, UserInfo} from '../models';
 
 // 认证API
 export const authApi = {

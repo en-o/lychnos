@@ -4,6 +4,7 @@ import cn.tannn.jdevelops.exception.built.BusinessException;
 import cn.tannn.jdevelops.exception.built.UserException;
 import cn.tannn.jdevelops.jpa.service.J2ServiceImpl;
 import cn.tannn.lychnos.controller.dto.LoginPassword;
+import cn.tannn.lychnos.controller.dto.UserInfoFix;
 import cn.tannn.lychnos.dao.UserInfoDao;
 import cn.tannn.lychnos.entity.UserInfo;
 import org.apache.commons.lang3.StringUtils;
@@ -35,7 +36,7 @@ public class UserInfoService extends J2ServiceImpl<UserInfoDao, UserInfo,Long> {
      * @param login     login
      * @return Account
      */
-    UserInfo authenticateUser(LoginPassword login){
+    public UserInfo authenticateUser(LoginPassword login){
 
         Optional<UserInfo> byLoginName = getJpaBasicsDao().findByLoginName(login.getLoginName());
         if (byLoginName.isEmpty()) {
@@ -91,5 +92,29 @@ public class UserInfoService extends J2ServiceImpl<UserInfoDao, UserInfo,Long> {
             entity.setPassword(md5Password);
             getJpaBasicsDao().save(entity);
         });
+    }
+
+
+    /**
+     * 更新基础信息
+     * @param fix AccountFixInfo
+     * @return Account
+     */
+    public UserInfo updateInfo(UserInfoFix fix) {
+        UserInfo account = getJpaBasicsDao().findById(fix.getId())
+                .orElseThrow(() -> new BusinessException("请核对用户信息"));
+        fix.update(account);
+        getJpaBasicsDao().save(account);
+        return account;
+    }
+
+
+    /**
+     * 根据登录名查询用户
+     * @param loginName 登录名
+     * @return 用户信息
+     */
+    public Optional<UserInfo> findByLoginName(String loginName) {
+        return getJpaBasicsDao().findByLoginName(loginName);
     }
 }

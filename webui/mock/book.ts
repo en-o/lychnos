@@ -1,9 +1,9 @@
 /**
  * Mock接口 - 图书相关
  */
-import { MockMethod } from 'vite-plugin-mock';
-import { getMockBook } from './data/book.data';
-import type { Result, PageResult, AnalysisHistory, BookAnalysis, UserPreference, FeedbackHistory } from '../src/models';
+import {MockMethod} from 'vite-plugin-mock';
+import {getMockBook} from './data/book.data';
+import type {AnalysisHistory, BookAnalysis, FeedbackHistory, PageResult, Result, UserPreference} from '../src/models';
 
 // 使用内存存储模拟持久化（实际项目中可以用localStorage）
 const analysisHistory: AnalysisHistory[] = [];

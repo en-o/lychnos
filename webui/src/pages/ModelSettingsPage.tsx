@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
-import { ArrowLeft, Plus, Trash2, Check, Brain, Image as ImageIcon } from 'lucide-react';
-import type { AIAnalysisModel, AIImageModel } from '../models';
+import React, {useEffect, useState} from 'react';
+import {useNavigate, useSearchParams} from 'react-router-dom';
+import {ArrowLeft, Brain, Check, Image as ImageIcon, Plus, Trash2} from 'lucide-react';
+import type {AIAnalysisModel, AIImageModel} from '../models';
 import Logo from '../components/Logo';
-import { toast } from '../components/ToastContainer';
+import {toast} from '../components/ToastContainer';
 import ConfirmDialog from '../components/ConfirmDialog';
 
 type TabType = 'analysis' | 'image';

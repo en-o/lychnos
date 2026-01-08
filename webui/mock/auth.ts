@@ -1,9 +1,9 @@
 /**
  * Mock接口 - 认证相关
  */
-import { MockMethod } from 'vite-plugin-mock';
-import { validateUser } from './data/user.data';
-import type { Result, TokenInfo, UserInfo } from '../src/models';
+import {MockMethod} from 'vite-plugin-mock';
+import {validateUser} from './data/user.data';
+import type {Result, TokenInfo, UserInfo} from '../src/models';
 
 export default [
   // 登录接口

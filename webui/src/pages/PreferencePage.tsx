@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Download, TrendingUp, BookOpen, Heart } from 'lucide-react';
-import { bookApi } from '../api/book';
-import type { UserPreference } from '../models';
+import React, {useEffect, useState} from 'react';
+import {useNavigate} from 'react-router-dom';
+import {ArrowLeft, BookOpen, Download, Heart, TrendingUp} from 'lucide-react';
+import {bookApi} from '../api/book';
+import type {UserPreference} from '../models';
 import Logo from '../components/Logo';
-import { toast } from '../components/ToastContainer';
+import {toast} from '../components/ToastContainer';
 
 const PreferencePage: React.FC = () => {
   const navigate = useNavigate();

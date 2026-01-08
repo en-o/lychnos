@@ -1,19 +1,10 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import {
-  Search,
-  LogOut,
-  UserCircle,
-  Key,
-  Brain,
-  ChevronDown,
-  History,
-  Heart
-} from 'lucide-react';
-import { bookApi } from '../api/book';
-import type { BookAnalysis, AnalysisHistory } from '../models';
+import React, {useState} from 'react';
+import {useNavigate} from 'react-router-dom';
+import {Brain, ChevronDown, Heart, History, Key, LogOut, Search, UserCircle} from 'lucide-react';
+import {bookApi} from '../api/book';
+import type {AnalysisHistory, BookAnalysis} from '../models';
 import Logo from '../components/Logo';
-import { toast } from '../components/ToastContainer';
+import {toast} from '../components/ToastContainer';
 import ConfirmDialog from '../components/ConfirmDialog';
 
 const HomePage: React.FC = () => {

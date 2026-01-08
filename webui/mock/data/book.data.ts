@@ -1,7 +1,7 @@
 /**
  * Mock数据 - 图书数据
  */
-import { BookAnalysis} from '../../src/models';
+import {BookAnalysis} from '../../src/models';
 
 // Mock图书数据库
 export const mockBooksData: Record<string, BookAnalysis> = {

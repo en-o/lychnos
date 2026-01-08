@@ -1,12 +1,5 @@
-import { request } from '../utils/request';
-import type {
-  BookAnalysis,
-  FeedbackHistory,
-  AnalysisHistory,
-  PageResult,
-  UserPreference,
-  Result,
-} from '../models';
+import {request} from '../utils/request';
+import type {AnalysisHistory, BookAnalysis, FeedbackHistory, PageResult, Result, UserPreference,} from '../models';
 
 // 图书API
 export const bookApi = {

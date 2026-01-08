@@ -1,6 +1,6 @@
-import axios, { type AxiosInstance, type AxiosRequestConfig, AxiosError } from 'axios';
-import { AuthErrorCode, type Result } from '../models';
-import { toast } from '../components/ToastContainer';
+import axios, {AxiosError, type AxiosInstance, type AxiosRequestConfig} from 'axios';
+import {AuthErrorCode, type Result} from '../models';
+import {toast} from '../components/ToastContainer';
 
 // 创建axios实例
 const instance: AxiosInstance = axios.create({
