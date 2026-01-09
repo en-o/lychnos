@@ -2,6 +2,7 @@ package cn.tannn.lychnos.entity;
 
 import cn.tannn.lychnos.common.pojo.JpaCommonBean;
 import cn.tannn.lychnos.common.views.Views;
+import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import com.fasterxml.jackson.annotation.JsonView;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -59,7 +60,7 @@ public class BookAnalyse extends JpaCommonBean<BookAnalyse> {
     @Comment("主题")
     @Schema(description = "主题")
     @JdbcTypeCode(SqlTypes.JSON)
-    private JSONObject themes;
+    private JSONArray themes;
 
     /**
      * 基调
@@ -76,7 +77,7 @@ public class BookAnalyse extends JpaCommonBean<BookAnalyse> {
     @Comment("关键要素")
     @Schema(description = "关键要素")
     @JdbcTypeCode(SqlTypes.JSON)
-    private JSONObject keyElements;
+    private JSONArray keyElements;
 
 
     /**
