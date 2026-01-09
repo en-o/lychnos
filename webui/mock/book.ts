@@ -42,26 +42,26 @@ export default [
       };
     },
   },
-
+// 分析图书（通过 title 查询或创建书籍分析）
   {
-    // 分析图书（通过 title 查询或创建书籍分析）
-    url: '/api/book/analyze/:title',   // ① 动态路由
+    url: '/api/book/analyze/:title',
     method: 'put',
     timeout: 2000,
-    response: ({ params }: any): Result<BookAnalysis> => {
-      const { title } = params;          // ② 从路径里拿 title
+    response: (req: any) => {
+      // 从 URL 中提取 title 参数
+      const urlParts = req.url.split('/');
+      const encodedTitle = urlParts[urlParts.length - 1].split('?')[0];
+      const title = decodeURIComponent(encodedTitle);
 
-      // 这里只是演示：如果 title 是三体就返回三体，否则随机给一本
-      let bookAnalysis = mockBookAnalysisData.find(b => b.title === title);
-      if (!bookAnalysis) {
-        bookAnalysis = getRandomBookForAnalysis(); // 你已有的随机函数
-      }
+      // ② 业务逻辑
+      let book = mockBookAnalysisData.find(b => b.title === title);
+      if (!book) book = getRandomBookForAnalysis();
 
       return {
         code: 200,
         message: '分析完成',
         ts: Date.now(),
-        data: bookAnalysis,
+        data: book,
         success: true,
       };
     },
