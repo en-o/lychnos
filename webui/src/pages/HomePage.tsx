@@ -94,7 +94,7 @@ const HomePage: React.FC = () => {
 
     try {
       const response = await bookApi.submitFeedback(
-        result.bookId,
+        result.id,
         interested,
         ''
       );

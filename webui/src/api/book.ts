@@ -7,6 +7,7 @@ import {
   type PageResult,
   type Result,
   type UserPreference,
+  type UserInterest,
 } from '../models';
 
 // 图书API
@@ -21,9 +22,9 @@ export const bookApi = {
     return request.post<Result<BookAnalysis>>('/book/analyze', { id });
   },
 
-  // 提交反馈
-  submitFeedback: (bookId: number, interested: boolean, reason?: string) => {
-    return request.post<Result<null>>('/book/feedback', { bookId, interested, reason });
+  // 提交用户反馈（创建或更新用户兴趣）
+  submitFeedback: (bookAnalyseId: string, interested: boolean, reason?: string) => {
+    return request.post<Result<UserInterest>>('/user/interest', { bookAnalyseId, interested, reason });
   },
 
   // 获取反馈历史
