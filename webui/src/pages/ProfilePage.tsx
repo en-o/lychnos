@@ -43,7 +43,13 @@ const ProfilePage: React.FC = () => {
     localStorage.setItem('userInfo', JSON.stringify(updatedUserInfo));
     setProfile(formData);
     setIsEditing(false);
-    authApi.fixUserInfo(formData);
+
+    // 调用 API 保存
+    authApi.fixUserInfo({
+      loginName: formData.loginName,
+      nickname: formData.nickname || '',
+      email: formData.email,
+    });
     toast.success('保存成功');
   };
 
