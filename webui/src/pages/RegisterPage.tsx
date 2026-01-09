@@ -3,6 +3,7 @@ import {Link, useNavigate} from 'react-router-dom';
 import {Eye, EyeOff} from 'lucide-react';
 import Logo from '../components/Logo';
 import {toast} from '../components/ToastContainer';
+import {authApi} from '../api/auth';
 
 const RegisterPage: React.FC = () => {
   const navigate = useNavigate();
@@ -31,7 +32,7 @@ const RegisterPage: React.FC = () => {
 
     if (!formData.password) {
       newErrors.password = '请输入密码';
-    } else if (formData.password.length < 6) {
+    } else if (formData.password.length < 3) {
       newErrors.password = '密码至少6个字符';
     }
 
@@ -60,11 +61,7 @@ const RegisterPage: React.FC = () => {
 
     try {
       // TODO: 调用真实的注册API
-      // const response = await authApi.register(formData);
-
-      // Mock: 模拟注册成功
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
+      await authApi.register(formData);
       toast.success('注册成功!请登录');
       navigate('/login');
     } catch (error: any) {
@@ -156,7 +153,7 @@ const RegisterPage: React.FC = () => {
                   setErrors({ ...errors, password: '' });
                 }}
                 className="w-full px-4 py-2.5 pr-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="请输入密码(至少6个字符)"
+                placeholder="请输入密码(至少3个字符)"
                 disabled={loading}
               />
               <button

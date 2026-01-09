@@ -23,6 +23,15 @@ export interface UserInfo {
   email?: string;
 }
 
+
+// 注册用户信息
+export interface UserInfoRegister {
+  loginName: string;
+  nickname: string;
+  password: string;
+  email?: string;
+}
+
 // 错误码常量
 export const AuthErrorCode = {
   TOKEN_ERROR: 'TOKEN_ERROR',

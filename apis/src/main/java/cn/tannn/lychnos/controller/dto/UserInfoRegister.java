@@ -30,7 +30,8 @@ public class UserInfoRegister extends SerializableBean<UserInfoRegister> {
 
     @Schema(description = "登录密码", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotBlank(message = "密码不能为空")
-    @Password
+    @Size(min = 3, max = 30, message = "密码长度必须在3-30个字符之间")
+//    @Password
     private String password;
 
     @Schema(description = "昵称", requiredMode = Schema.RequiredMode.REQUIRED)
