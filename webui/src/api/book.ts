@@ -23,7 +23,7 @@ export const bookApi = {
     return request.put<Result<BookAnalysis>>(`/book/analyze/${encodeURIComponent(title)}`);
   },
 
-  // 提交用户反馈（创建用户兴趣）
+  // 提交用户分析
   submitFeedback: (data: InterestFeedback) => {
     return request.post<Result<UserInterest>>('/user/interest', data);
   },
