@@ -4,6 +4,7 @@ import {ArrowLeft, ChevronLeft, ChevronRight, Eye, ThumbsDown, ThumbsUp} from 'l
 import {bookApi} from '../api/book';
 import type {AnalysisHistory, PageResult} from '../models';
 import Logo from '../components/Logo';
+import ImagePreview from '../components/ImagePreview';
 
 const HistoryPage: React.FC = () => {
   const navigate = useNavigate();
@@ -12,6 +13,7 @@ const HistoryPage: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedItem, setSelectedItem] = useState<AnalysisHistory | null>(null);
   const [imageError, setImageError] = useState<Record<string, boolean>>({});
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
   const pageSize = 10;
 
   useEffect(() => {
@@ -231,8 +233,9 @@ const HistoryPage: React.FC = () => {
                     <img
                       src={selectedItem.analysisData.posterUrl}
                       alt={selectedItem.title}
-                      className="w-full max-h-48 object-contain rounded-lg bg-gray-50"
+                      className="w-full max-h-48 object-cover rounded-lg cursor-pointer hover:opacity-90 transition"
                       onError={() => setImageError(prev => ({ ...prev, [selectedItem.id]: true }))}
+                      onClick={() => setPreviewImage(selectedItem.analysisData.posterUrl || null)}
                     />
                   ) : (
                     <div className="w-full h-48 bg-gray-100 rounded-lg flex items-center justify-center">
@@ -280,6 +283,15 @@ const HistoryPage: React.FC = () => {
             </div>
           </div>
         </div>
+      )}
+
+      {/* 图片预览 */}
+      {previewImage && (
+        <ImagePreview
+          src={previewImage}
+          alt="图片预览"
+          onClose={() => setPreviewImage(null)}
+        />
       )}
     </div>
   );

@@ -6,6 +6,7 @@ import type {AnalysisHistory, BookAnalysis, BookRecommendItem} from '../models';
 import Logo from '../components/Logo';
 import {toast} from '../components/ToastContainer';
 import ConfirmDialog from '../components/ConfirmDialog';
+import ImagePreview from '../components/ImagePreview';
 
 // 装饰主题类型
 type DecorationTheme = 'daily' | 'christmas' | 'spring-festival';
@@ -452,8 +453,9 @@ const HomePage: React.FC = () => {
                       <img
                         src={result.posterUrl}
                         alt={result.title}
-                        className="w-full h-64 object-cover rounded-lg"
+                        className="w-full h-64 object-cover rounded-lg cursor-pointer hover:opacity-90 transition"
                         onError={() => setImageError(prev => ({ ...prev, [result.id]: true }))}
+                        onClick={() => setPreviewImage(result.posterUrl)}
                       />
                     ) : (
                       <div className="w-full h-64 bg-gray-100 rounded-lg flex items-center justify-center">
@@ -783,8 +785,9 @@ const HomePage: React.FC = () => {
                     <img
                       src={selectedHistoryItem.analysisData.posterUrl}
                       alt={selectedHistoryItem.title}
-                      className="w-full max-h-48 object-contain rounded-lg bg-gray-50"
+                      className="w-full max-h-48 object-cover rounded-lg cursor-pointer hover:opacity-90 transition"
                       onError={() => setImageError(prev => ({ ...prev, [selectedHistoryItem.id]: true }))}
+                      onClick={() => setPreviewImage(selectedHistoryItem.analysisData.posterUrl || null)}
                     />
                   ) : (
                     <div className="w-full h-48 bg-gray-100 rounded-lg flex items-center justify-center">
@@ -838,6 +841,15 @@ const HomePage: React.FC = () => {
             </div>
           </div>
         </div>
+      )}
+
+      {/* 图片预览 */}
+      {previewImage && (
+        <ImagePreview
+          src={previewImage}
+          alt="图片预览"
+          onClose={() => setPreviewImage(null)}
+        />
       )}
     </div>
   );
