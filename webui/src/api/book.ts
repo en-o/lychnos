@@ -30,12 +30,12 @@ export const bookApi = {
 
   // 获取反馈历史
   getFeedbackHistory: () => {
-    return request.get<Result<AnalysisHistory[]>>('/book/feedback/history');
+    return request.get<Result<AnalysisHistory[]>>('/user/feedback/history');
   },
 
   // 获取分析历史（分页）
   getAnalysisHistory: (page: number, pageSize: number) => {
-    return request.get<Result<PageResult<AnalysisHistory>>>('/book/history', {
+    return request.get<Result<PageResult<AnalysisHistory>>>('/user/history', {
       params: { page, pageSize }
     });
   },
