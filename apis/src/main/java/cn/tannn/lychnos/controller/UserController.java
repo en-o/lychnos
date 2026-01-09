@@ -81,10 +81,10 @@ public class UserController {
 
 
     /**
-     * 提交用户反馈（创建用户兴趣）
+     * 提交用户分析
      */
     @PostMapping(value = "/interest")
-    @Operation(summary = "提交用户反馈（创建用户兴趣）")
+    @Operation(summary = "提交用户分析")
     @Transactional(rollbackFor = Exception.class)
     public ResultVO<String> interest(@RequestBody @Valid UserInterestFeedback interest, HttpServletRequest request) {
         Long userId = UserUtil.userId2(request);
