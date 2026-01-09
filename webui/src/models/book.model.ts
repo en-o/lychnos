@@ -23,18 +23,24 @@ export class BookSummary {
 
 // 图书分析结果
 export class BookAnalysis {
+  id: string;
   bookId: number;
   summary: BookSummary;
   posterUrl: string;
   recommendation: string;
   showPoster: boolean;
+  createTime?: string;
+  createUser?: string;
 
   constructor(data: Partial<BookAnalysis> = {}) {
+    this.id = data.id || '1';
     this.bookId = data.bookId || 0;
     this.summary = data.summary ? new BookSummary(data.summary) : new BookSummary();
     this.posterUrl = data.posterUrl || '';
     this.recommendation = data.recommendation || '';
     this.showPoster = data.showPoster ?? true;
+    this.createTime = data.createTime;
+    this.createUser = data.createUser;
   }
 }
 
