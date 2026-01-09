@@ -21,6 +21,7 @@ export interface UserInfo {
   nickname: string;
   id: string;
   email?: string;
+  createTime?: string;
 }
 
 

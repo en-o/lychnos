@@ -62,7 +62,7 @@ export class AnalysisHistory {
   title: string;
   interested: boolean;
   analysisData: BookAnalysis;
-  createdAt: string;
+  createTime: string;
 
   constructor(data: Partial<AnalysisHistory> = {}) {
     this.id = data.id || '';
@@ -70,7 +70,7 @@ export class AnalysisHistory {
     this.title = data.title || '';
     this.interested = data.interested ?? false;
     this.analysisData = data.analysisData ? new BookAnalysis(data.analysisData) : new BookAnalysis();
-    this.createdAt = data.createdAt || new Date().toISOString();
+    this.createTime = data.createTime || new Date().toISOString();
   }
 }
 

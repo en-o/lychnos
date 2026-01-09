@@ -13,7 +13,7 @@ const ProfilePage: React.FC = () => {
     nickname: '',
     email: '',
     avatar: '',
-    createdAt: '',
+    createTime: '',
   });
 
   const [formData, setFormData] = useState<UserProfile>(profile);
@@ -26,7 +26,7 @@ const ProfilePage: React.FC = () => {
       nickname: userInfo.nickname || '',
       email: userInfo.email || '',
       avatar: userInfo.avatar || '',
-      createdAt: userInfo.createdAt || new Date().toISOString(),
+      createTime: userInfo.createTime || new Date().toISOString(),
     };
     setProfile(userProfile);
     setFormData(userProfile);
@@ -168,8 +168,8 @@ const ProfilePage: React.FC = () => {
                 <input
                   type="text"
                   value={
-                    profile.createdAt
-                      ? new Date(profile.createdAt).toLocaleDateString('zh-CN')
+                    profile.createTime
+                      ? new Date(profile.createTime).toLocaleDateString('zh-CN')
                       : '-'
                   }
                   disabled

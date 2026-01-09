@@ -98,7 +98,7 @@ const HomePage: React.FC = () => {
           title: result.summary.title,
           interested,
           analysisData: result,
-          createdAt: new Date().toISOString(),
+          createTime: new Date().toISOString(),
         };
 
         const historyStr = localStorage.getItem('analysisHistory') || '[]';
@@ -465,7 +465,7 @@ const HomePage: React.FC = () => {
                           </span>
                         </div>
                         <div className="text-xs text-gray-500">
-                          {new Date(item.createdAt).toLocaleDateString('zh-CN', {
+                          {new Date(item.createTime).toLocaleDateString('zh-CN', {
                             month: '2-digit',
                             day: '2-digit',
                             hour: '2-digit',
@@ -606,7 +606,7 @@ const HomePage: React.FC = () => {
               )}
 
               <div className="pt-4 border-t border-gray-200 text-sm text-gray-500">
-                分析时间: {new Date(selectedHistoryItem.createdAt).toLocaleDateString('zh-CN', {
+                分析时间: {new Date(selectedHistoryItem.createTime).toLocaleDateString('zh-CN', {
                   year: 'numeric',
                   month: '2-digit',
                   day: '2-digit',

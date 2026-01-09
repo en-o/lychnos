@@ -52,14 +52,14 @@ export class UserProfile {
   nickname?: string;
   email?: string;
   avatar?: string;
-  createdAt?: string;
+  createTime?: string;
 
   constructor(data: Partial<UserProfile> = {}) {
     this.loginName = data.loginName || '';
     this.nickname = data.nickname;
     this.email = data.email;
     this.avatar = data.avatar;
-    this.createdAt = data.createdAt;
+    this.createTime = data.createTime;
   }
 }
 

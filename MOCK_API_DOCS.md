@@ -350,7 +350,7 @@ Result<{
   userId?: string;      // 用户ID
   email?: string;       // 邮箱
   avatar?: string;      // 头像URL
-  createdAt?: string;   // 注册时间
+   createTime?: string;   // 注册时间
 }>
 ```
 
@@ -526,7 +526,7 @@ Result<{
     title: string;
     interested: boolean;
     analysisData: BookAnalysis;
-    createdAt: string;
+     createTime: string;
   }>;
 }>
 ```
@@ -549,7 +549,7 @@ Result<{
         title: '三体',
         interested: true,
         analysisData: { /* BookAnalysis 数据 */ },
-        createdAt: '2026-01-06T10:00:00.000Z'
+         createTime: '2026-01-06T10:00:00.000Z'
       }
     ]
   },

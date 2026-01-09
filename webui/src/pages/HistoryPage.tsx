@@ -130,7 +130,7 @@ const HistoryPage: React.FC = () => {
                         </p>
 
                         <p className="text-xs text-gray-500">
-                          分析时间: {formatDate(item.createdAt)}
+                          分析时间: {formatDate(item.createTime)}
                         </p>
                       </div>
 
@@ -263,7 +263,7 @@ const HistoryPage: React.FC = () => {
               )}
 
               <div className="pt-4 border-t border-gray-200 text-sm text-gray-500">
-                分析时间: {formatDate(selectedItem.createdAt)}
+                分析时间: {formatDate(selectedItem.createTime)}
               </div>
             </div>
           </div>

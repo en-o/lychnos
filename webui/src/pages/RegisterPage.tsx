@@ -66,7 +66,7 @@ const RegisterPage: React.FC = () => {
       navigate('/login');
     } catch (error: any) {
       console.error('注册失败:', error);
-      toast.error(error.response?.data?.message || '注册失败,请重试');
+      // 错误提示已在request拦截器中统一处理，不需要重复提示
     } finally {
       setLoading(false);
     }

@@ -61,7 +61,7 @@ export default [
         title: '书籍标题',
         interested,
         analysisData: getMockBook('人类简史', feedbackCount),
-        createdAt: new Date().toISOString(),
+        createTime: new Date().toISOString(),
       };
       analysisHistory.unshift(historyItem);
 
@@ -85,7 +85,7 @@ export default [
         bookId: item.bookId,
         title: item.title,
         interested: item.interested,
-        timestamp: item.createdAt,
+        timestamp: item.createTime,
       }));
 
       return {
@@ -176,12 +176,12 @@ export default [
       // 年度报告
       const currentYear = new Date().getFullYear();
       const yearHistory = analysisHistory.filter(h =>
-        new Date(h.createdAt).getFullYear() === currentYear
+        new Date(h.createTime).getFullYear() === currentYear
       );
 
       const monthlyTrend = Array.from({ length: 12 }, (_, i) => ({
         month: i + 1,
-        count: yearHistory.filter(h => new Date(h.createdAt).getMonth() === i).length,
+        count: yearHistory.filter(h => new Date(h.createTime).getMonth() === i).length,
       }));
 
       const yearGenreMap: Record<string, number> = {};

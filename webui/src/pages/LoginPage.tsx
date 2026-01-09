@@ -43,7 +43,7 @@ const LoginPage: React.FC = () => {
       }
     } catch (error: any) {
       console.error('登录失败:', error);
-      toast.error(error.response?.data?.message || '登录失败,请重试');
+      // 错误提示已在request拦截器中统一处理，不需要重复提示
     } finally {
       setLoading(false);
     }
