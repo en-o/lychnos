@@ -24,12 +24,10 @@ const HistoryPage: React.FC = () => {
       const response = await bookApi.getAnalysisHistory(page, pageSize);
       if (response.success) {
         setHistoryData(response.data);
-      } else {
-        toast.error('加载失败');
       }
     } catch (error) {
       console.error('加载历史失败:', error);
-      toast.error('加载失败,请重试');
+      // 错误提示已在request拦截器中统一处理，不需要重复提示
     } finally {
       setLoading(false);
     }

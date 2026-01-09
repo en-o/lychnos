@@ -22,12 +22,10 @@ const PreferencePage: React.FC = () => {
       const response = await bookApi.getUserPreference();
       if (response.success) {
         setPreference(response.data);
-      } else {
-        toast.error('加载失败');
       }
     } catch (error) {
       console.error('加载偏好失败:', error);
-      toast.error('加载失败,请重试');
+      // 错误提示已在request拦截器中统一处理，不需要重复提示
     } finally {
       setLoading(false);
     }
@@ -77,7 +75,7 @@ ${preference.annualReport.highlights.map((h, i) => `${i + 1}. ${h}`).join('\n')}
       toast.success('报告已下载');
     } catch (error) {
       console.error('下载失败:', error);
-      toast.error('下载失败,请重试');
+      // 错误提示已在request拦截器中统一处理，不需要重复提示
     } finally {
       setDownloading(false);
     }

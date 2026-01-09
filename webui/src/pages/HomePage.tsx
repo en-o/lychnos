@@ -69,12 +69,10 @@ const HomePage: React.FC = () => {
 
       if (response.success) {
         setResult(response.data);
-      } else {
-        toast.error(response.message || '分析失败');
       }
     } catch (error) {
       console.error('分析失败:', error);
-      toast.error('分析失败,请重试');
+      // 错误提示已在request拦截器中统一处理，不需要重复提示
     } finally {
       setLoading(false);
     }
@@ -115,7 +113,7 @@ const HomePage: React.FC = () => {
       }
     } catch (error) {
       console.error('提交失败:', error);
-      toast.error('提交失败,请重试');
+      // 错误提示已在request拦截器中统一处理，不需要重复提示
     }
   };
 
