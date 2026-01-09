@@ -19,7 +19,8 @@ export const bookApi = {
 
   // 分析图书
   analyzeBook: (title: string) => {
-    return request.put<Result<BookAnalysis>>(`/book/analyze/${title}`);
+
+    return request.put<Result<BookAnalysis>>(`/book/analyze/${encodeURIComponent(title)}`);
   },
 
   // 提交用户反馈（创建或更新用户兴趣）
