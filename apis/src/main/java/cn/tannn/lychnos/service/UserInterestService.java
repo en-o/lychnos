@@ -1,6 +1,9 @@
 package cn.tannn.lychnos.service;
 
+import cn.tannn.jdevelops.jpa.result.JpaPageResult;
 import cn.tannn.jdevelops.jpa.service.J2ServiceImpl;
+import cn.tannn.jdevelops.util.jpa.select.EnhanceSpecification;
+import cn.tannn.lychnos.controller.dto.AnalysisHistoryPage;
 import cn.tannn.lychnos.controller.dto.UserInterestFeedback;
 import cn.tannn.lychnos.controller.vo.AnalysisHistoryVO;
 import cn.tannn.lychnos.dao.UserInterestDao;
@@ -13,6 +16,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -76,17 +80,17 @@ public class UserInterestService extends J2ServiceImpl<UserInterestDao, UserInte
     /**
      * 获取分析历史（分页）
      * @param userId 用户ID
-     * @param page 页码（从0开始）
-     * @param pageSize 每页数量
-     * @return Page<AnalysisHistoryVO>
+     * @param page 分页查询参数
+     * @return JpaPageResult<AnalysisHistoryVO>
      */
-    public Page<AnalysisHistoryVO> analysisHistory(Long userId, int page, int pageSize) {
-        PageRequest pageRequest = PageRequest.of(page, pageSize, Sort.by(Sort.Direction.DESC, "createTime"));
+    public JpaPageResult<AnalysisHistoryVO> analysisHistory(Long userId, AnalysisHistoryPage page) {
+        Specification<UserInterest> where = EnhanceSpecification.where(s -> {
+            s.eq(true, "userId", userId);
+        });
         Page<UserInterest> interests = getJpaBasicsDao().findAll(
-                (root, query, cb) -> cb.equal(root.get("userId"), userId),
-                pageRequest
+                where,
+                page.getPage().pageable()
         );
-
         return interests.map(this::convertToVO);
     }
 

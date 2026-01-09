@@ -3,9 +3,12 @@ package cn.tannn.lychnos.controller;
 import cn.tannn.jdevelops.annotations.web.authentication.ApiMapping;
 import cn.tannn.jdevelops.annotations.web.mapping.PathRestController;
 import cn.tannn.jdevelops.exception.built.BusinessException;
+import cn.tannn.jdevelops.jpa.result.JpaPageResult;
+import cn.tannn.jdevelops.result.response.ResultPageVO;
 import cn.tannn.jdevelops.result.response.ResultVO;
 import cn.tannn.lychnos.common.util.UserUtil;
 import cn.tannn.lychnos.common.views.Views;
+import cn.tannn.lychnos.controller.dto.AnalysisHistoryPage;
 import cn.tannn.lychnos.controller.dto.PasswordEdit;
 import cn.tannn.lychnos.controller.dto.UserInfoFix;
 import cn.tannn.lychnos.controller.dto.UserInterestFeedback;
@@ -106,14 +109,13 @@ public class UserController {
     /**
      * 获取分析历史（分页）
      */
-    @GetMapping("/history/analysis")
+    @PostMapping("/history/analysis")
     @Operation(summary = "获取分析历史(分页)")
-    public ResultVO<Page<AnalysisHistoryVO>> getAnalysisHistory(
-            @RequestParam(defaultValue = "1") int page,
-            @RequestParam(defaultValue = "10") int pageSize,
+    public ResultPageVO<AnalysisHistoryVO, JpaPageResult<AnalysisHistoryVO>> getAnalysisHistory(
+            @RequestBody @Valid AnalysisHistoryPage page,
             HttpServletRequest request) {
         Long userId = UserUtil.userId2(request);
-        Page<AnalysisHistoryVO> history = userInterestService.analysisHistory(userId, page - 1, pageSize);
-        return ResultVO.success(history);
+        JpaPageResult<AnalysisHistoryVO> history = userInterestService.analysisHistory(userId, page);
+        return ResultPageVO.success(history);
     }
 }
