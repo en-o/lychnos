@@ -24,9 +24,9 @@ import org.hibernate.annotations.DynamicUpdate;
 @Entity
 @Table(name = "tb_user_interest",
         indexes = {
-                @Index(name = "idx_login_name", columnList = "loginName"),
+                @Index(name = "idx_user", columnList = "userId"),
                 @Index(name = "idx_book_analyse_id", columnList = "bookAnalyseId"),
-                @Index(name = "idx_user_book", columnList = "loginName,bookAnalyseId", unique = true)
+                @Index(name = "idx_user_book", columnList = "userId,bookAnalyseId", unique = true)
         }
 )
 @Comment("用户兴趣关联表")
