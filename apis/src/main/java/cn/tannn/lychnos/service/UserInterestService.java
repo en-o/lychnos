@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -113,5 +114,15 @@ public class UserInterestService extends J2ServiceImpl<UserInterestDao, UserInte
         }
 
         return vo;
+    }
+
+    /**
+     * 检查用户是否已经分析过该书籍
+     * @param userId 用户ID
+     * @param bookTitle 书名
+     * @return 用户兴趣（如果已分析）
+     */
+    public Optional<UserInterest> checkAnalyzed(Long userId, String bookTitle) {
+        return getJpaBasicsDao().findByUserIdAndBookTitle(userId, bookTitle);
     }
 }

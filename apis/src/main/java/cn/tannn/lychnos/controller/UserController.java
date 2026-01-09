@@ -93,6 +93,12 @@ public class UserController {
     @Transactional(rollbackFor = Exception.class)
     public ResultVO<String> interest(@RequestBody @Valid UserInterestFeedback interest, HttpServletRequest request) {
         Long userId = UserUtil.userId2(request);
+
+        // 检查是否已经分析过该书籍
+        if (userInterestService.checkAnalyzed(userId, interest.getBookTitle()).isPresent()) {
+            throw new BusinessException("该书籍已经分析过，请到历史记录中查看");
+        }
+
         userInterestService.feedback(interest, userId);
         return ResultVO.successMessage("反馈已提交！");
     }
