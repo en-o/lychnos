@@ -1,5 +1,5 @@
 import React, {useEffect, useState, useRef, useCallback} from 'react';
-import {useNavigate} from 'react-router-dom';
+import {useNavigate, useSearchParams} from 'react-router-dom';
 import {ArrowLeft, Eye, ThumbsDown, ThumbsUp, Search, X} from 'lucide-react';
 import {bookApi} from '../api/book';
 import type {AnalysisHistory, PageResult} from '../models';
@@ -8,6 +8,7 @@ import ImagePreview from '../components/ImagePreview';
 
 const HistoryPage: React.FC = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [loading, setLoading] = useState(false);
   const [historyList, setHistoryList] = useState<AnalysisHistory[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
@@ -20,6 +21,15 @@ const HistoryPage: React.FC = () => {
   const [searchInput, setSearchInput] = useState('');
   const pageSize = 10;
   const observerTarget = useRef<HTMLDivElement>(null);
+
+  // 从 URL 参数获取搜索关键词
+  useEffect(() => {
+    const searchFromUrl = searchParams.get('search');
+    if (searchFromUrl) {
+      setSearchInput(searchFromUrl);
+      setSearchQuery(searchFromUrl);
+    }
+  }, [searchParams]);
 
   // 加载历史数据
   const loadHistory = useCallback(async (page: number, query: string, append: boolean = false) => {

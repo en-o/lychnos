@@ -53,7 +53,7 @@ export default [
       const encodedTitle = urlParts[urlParts.length - 1].split('?')[0];
       const title = decodeURIComponent(encodedTitle);
 
-      // ② 业务逻辑
+      // 业务逻辑：查找或创建书籍分析
       let book = mockBookAnalysisData.find(b => b.title === title);
       if (!book) book = getRandomBookForAnalysis();
 
@@ -62,6 +62,32 @@ export default [
         message: '分析完成',
         ts: Date.now(),
         data: book,
+        success: true,
+      };
+    },
+  },
+
+  // 检查书籍是否已分析
+  {
+    url: '/api/book/check/:title',
+    method: 'get',
+    timeout: 300,
+    response: (req: any): Result<UserInterest | null> => {
+      const urlParts = req.url.split('/');
+      const encodedTitle = urlParts[urlParts.length - 1].split('?')[0];
+      const title = decodeURIComponent(encodedTitle);
+      const userId = 'user_001'; // 实际项目中从token获取用户ID
+
+      // 根据用户ID和书名查找用户兴趣
+      const userInterest = mockUserInterestData.find(
+        item => item.userId === userId && item.bookTitle === title
+      );
+
+      return {
+        code: 200,
+        message: userInterest ? '已分析' : '未分析',
+        ts: Date.now(),
+        data: userInterest || null,
         success: true,
       };
     },
@@ -104,6 +130,20 @@ export default [
     response: ({ body }: any): Result<UserInterest> => {
       const { bookAnalyseId, bookTitle, interested, reason } = body;
       const userId = 'user_001'; // 实际项目中从token获取用户ID
+
+      // 检查是否已经分析过该书籍
+      const existingInterest = mockUserInterestData.find(
+        item => item.userId === userId && item.bookTitle === bookTitle
+      );
+      if (existingInterest) {
+        return {
+          code: 400,
+          message: '该书籍已经分析过，请到历史记录中查看',
+          ts: Date.now(),
+          data: null as any,
+          success: false,
+        };
+      }
 
       const userInterest = addOrUpdateUserInterest(
         userId,

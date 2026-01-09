@@ -86,15 +86,28 @@ const HomePage: React.FC = () => {
     setResult(null);
 
     try {
-      // 则从快速推荐列表中查找
+      // 先检查是否已经分析过
+      const checkResponse = await bookApi.checkAnalyzed(title);
+      if (checkResponse.success && checkResponse.data) {
+        // 已经分析过，跳转到历史页面
+        toast.info('该书籍已经分析过，正在跳转到历史记录...');
+        navigate(`/history?search=${encodeURIComponent(title)}`);
+        return;
+      }
+
+      // 未分析过，执行分析
       const response = await bookApi.analyzeBook(title);
 
       if (response.success) {
         setResult(response.data);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('分析失败:', error);
-      // 错误提示已在request拦截器中统一处理，不需要重复提示
+      // 如果是"已分析过"的错误，跳转到历史页面
+      if (error?.message?.includes('已经分析过')) {
+        navigate(`/history?search=${encodeURIComponent(title)}`);
+      }
+      // 其他错误提示已在request拦截器中统一处理
     } finally {
       setLoading(false);
     }

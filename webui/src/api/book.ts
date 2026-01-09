@@ -17,6 +17,11 @@ export const bookApi = {
     return request.get<Result<BookRecommendItem[]>>('/book/recommend');
   },
 
+  // 检查书籍是否已分析
+  checkAnalyzed: (title: string) => {
+    return request.get<Result<UserInterest | null>>(`/book/check/${encodeURIComponent(title)}`);
+  },
+
   // 分析图书
   analyzeBook: (title: string) => {
 
