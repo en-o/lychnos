@@ -1,7 +1,6 @@
 package cn.tannn.lychnos.controller.dto;
 
 import cn.tannn.jdevelops.annotations.jpa.JpaSelectIgnoreField;
-import cn.tannn.jdevelops.jdectemplate.sql.PageInfo;
 import cn.tannn.jdevelops.util.jpa.request.PagingSorteds;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
