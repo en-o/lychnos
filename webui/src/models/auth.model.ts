@@ -40,6 +40,14 @@ export interface UserInfoFix {
   email?: string;
 }
 
+
+// 修改密码
+export interface PasswordEdit {
+  oldPassword: string;
+  newPassword: string;
+}
+
+
 // 错误码常量
 export const AuthErrorCode = {
   TOKEN_ERROR: 'TOKEN_ERROR',

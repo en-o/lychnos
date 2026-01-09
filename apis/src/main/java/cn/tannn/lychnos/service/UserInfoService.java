@@ -4,6 +4,7 @@ import cn.tannn.jdevelops.exception.built.BusinessException;
 import cn.tannn.jdevelops.exception.built.UserException;
 import cn.tannn.jdevelops.jpa.service.J2ServiceImpl;
 import cn.tannn.lychnos.controller.dto.LoginPassword;
+import cn.tannn.lychnos.controller.dto.PasswordEdit;
 import cn.tannn.lychnos.controller.dto.UserInfoFix;
 import cn.tannn.lychnos.dao.UserInfoDao;
 import cn.tannn.lychnos.entity.UserInfo;
@@ -83,15 +84,18 @@ public class UserInfoService extends J2ServiceImpl<UserInfoDao, UserInfo,Long> {
     /**
      * 修改密码
      * @param loginName   登录名
-     * @param newPassword 新密码
+     * @param password 新密码
      */
-    public void editPassword(String loginName, String newPassword) {
-        Optional<UserInfo> byLoginName = getJpaBasicsDao().findByLoginName(loginName);
-        byLoginName.ifPresent(entity -> {
-            String md5Password = getMd5Password(loginName, newPassword);
-            entity.setPassword(md5Password);
-            getJpaBasicsDao().save(entity);
-        });
+    public void editPassword(String loginName, PasswordEdit password) {
+        UserInfo userInfo = getJpaBasicsDao().findByLoginName(loginName)
+                .orElseThrow(() -> new UserException("请重新登录后再试"));
+        // 验证旧密码
+        userInfo.verifyUserPassMd5(loginName, password.getOldPassword());
+
+        // 设置新密码
+        String md5Password = getMd5Password(loginName, password.getNewPassword());
+        userInfo.setPassword(md5Password);
+        getJpaBasicsDao().save(userInfo);
     }
 
 

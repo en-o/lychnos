@@ -1,5 +1,5 @@
 import {request} from '../utils/request';
-import type {LoginRequest, Result, TokenInfo, UserInfo, UserInfoFix, UserInfoRegister} from '../models';
+import type {LoginRequest, PasswordEdit, Result, TokenInfo, UserInfo, UserInfoFix, UserInfoRegister} from '../models';
 
 // 认证API
 export const authApi = {
@@ -21,6 +21,11 @@ export const authApi = {
     // 修改基础信息
     fixUserInfo: (data: UserInfoFix) => {
         return request.post<Result<UserInfo>>('/user/fixInfo', data);
+    },
+
+    // 修改密码
+    fixPassword: (data: PasswordEdit) => {
+        return request.post<Result<string>>('/user/fix/password', data);
     },
 
     // 获取用户信息

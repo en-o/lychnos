@@ -5,7 +5,6 @@ import type {UserProfile} from '../models';
 import Logo from '../components/Logo';
 import {toast} from '../components/ToastContainer';
 import {authApi} from '../api/auth';
-import * as console from "node:console";
 
 const ProfilePage: React.FC = () => {
   const navigate = useNavigate();

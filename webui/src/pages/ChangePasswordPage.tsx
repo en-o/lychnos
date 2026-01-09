@@ -3,6 +3,8 @@ import {useNavigate} from 'react-router-dom';
 import {ArrowLeft, Eye, EyeOff} from 'lucide-react';
 import Logo from '../components/Logo';
 import {toast} from '../components/ToastContainer';
+import {authApi} from '../api/auth';
+
 
 const ChangePasswordPage: React.FC = () => {
   const navigate = useNavigate();
@@ -29,8 +31,8 @@ const ChangePasswordPage: React.FC = () => {
 
     if (!formData.newPassword) {
       newErrors.newPassword = '请输入新密码';
-    } else if (formData.newPassword.length < 6) {
-      newErrors.newPassword = '密码长度至少6位';
+    } else if (formData.newPassword.length < 3) {
+      newErrors.newPassword = '密码长度至少3位';
     }
 
     if (!formData.confirmPassword) {
@@ -53,19 +55,8 @@ const ChangePasswordPage: React.FC = () => {
     if (!validateForm()) {
       return;
     }
-
-    // TODO: 调用后端 API
-    // try {
-    //   await api.changePassword(formData);
-    //   alert('密码修改成功,请重新登录');
-    //   localStorage.removeItem('token');
-    //   navigate('/login');
-    // } catch (error) {
-    //   alert('密码修改失败');
-    // }
-
-    // Mock: 模拟成功
-    toast.success('密码修改成功,请重新登录');
+    const apiResult = await authApi.fixPassword(formData);
+    toast.success(apiResult.message);
     localStorage.removeItem('token');
     localStorage.removeItem('userInfo');
     navigate('/login');
