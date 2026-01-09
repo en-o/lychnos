@@ -1,88 +1,210 @@
 /**
  * Mock接口 - 图书相关
  */
-import {MockMethod} from 'vite-plugin-mock';
-import {getMockBook} from './data/book.data';
-import type {AnalysisHistory, BookAnalysis, FeedbackHistory, PageResult, Result, UserPreference} from '../src/models';
+import { MockMethod } from 'vite-plugin-mock';
+import {
+  getMockBookAnalysis,
+  getMockUserInterestDetail,
+  getMockUserInterests,
+  addOrUpdateUserInterest,
+  getRandomBookForAnalysis,
+  mockBookAnalysisData,
+  mockBookRecommendList,
+} from './data/book.data';
+import type {
+  AnalysisHistory,
+  BookAnalysis,
+  BookRecommendItem,
+  UserInterest,
+  UserInterestDetail,
+  FeedbackHistory,
+  PageResult,
+  Result,
+  UserPreference,
+} from '../src/models';
 
-// 使用内存存储模拟持久化（实际项目中可以用localStorage）
+// 使用内存存储模拟持久化
 const analysisHistory: AnalysisHistory[] = [];
-let feedbackCount = 0;
 
 export default [
-  // 获取快速推荐书籍列表
+  // 获取快速推荐书籍列表（返回 id+title）
   {
     url: '/api/book/recommend',
     method: 'get',
     timeout: 300,
-    response: (): Result<string[]> => {
+    response: (): Result<BookRecommendItem[]> => {
       return {
         code: 200,
         message: '获取成功',
         ts: Date.now(),
-        data: ['三体', '活着', '解忧杂货店', '人类简史'],
+        data: mockBookRecommendList,
         success: true,
       };
     },
   },
 
-  // 分析图书
+  // 分析图书（通过ID查询或创建书籍分析）
   {
     url: '/api/book/analyze',
     method: 'post',
     timeout: 2000,
     response: ({ body }: any): Result<BookAnalysis> => {
-      const { title } = body;
-      const book = getMockBook(title, feedbackCount);
+      const { id } = body;
+
+      // 先查找是否已存在分析
+      let bookAnalysis = getMockBookAnalysis(id);
+
+      // 如果不存在，创建新的分析（模拟AI分析）
+      if (!bookAnalysis) {
+        bookAnalysis = getRandomBookForAnalysis();
+      }
 
       return {
         code: 200,
         message: '分析完成',
         ts: Date.now(),
-        data: book,
+        data: bookAnalysis,
         success: true,
       };
     },
   },
 
-  // 提交反馈
+  // 获取书籍分析详情
   {
-    url: '/api/book/feedback',
+    url: '/api/book/analysis/:id',
+    method: 'get',
+    timeout: 300,
+    response: ({ query }: any): Result<BookAnalysis | null> => {
+      const id = query.id;
+      const bookAnalysis = getMockBookAnalysis(id);
+
+      if (!bookAnalysis) {
+        return {
+          code: 404,
+          message: '书籍分析不存在',
+          ts: Date.now(),
+          data: null,
+          success: false,
+        };
+      }
+
+      return {
+        code: 200,
+        message: '获取成功',
+        ts: Date.now(),
+        data: bookAnalysis,
+        success: true,
+      };
+    },
+  },
+
+  // 提交用户反馈（创建或更新用户兴趣）
+  {
+    url: '/api/user/interest',
     method: 'post',
     timeout: 500,
-    response: ({ body }: any): Result<null> => {
-      const { bookId, interested } = body;
-      feedbackCount++;
+    response: ({ body }: any): Result<UserInterest> => {
+      const { bookAnalyseId, interested, reason } = body;
+      const userId = 'user_001'; // 实际项目中从token获取用户ID
 
-      // 记录到历史（简化版，实际应该从analyze结果中获取完整数据）
-      const historyItem: any = {
-        id: Date.now().toString(),
-        bookId,
-        title: '书籍标题',
+      const userInterest = addOrUpdateUserInterest(
+        userId,
+        bookAnalyseId,
         interested,
-        analysisData: getMockBook('人类简史', feedbackCount),
-        createTime: new Date().toISOString(),
-      };
-      analysisHistory.unshift(historyItem);
+        reason
+      );
+
+      // 同时更新历史记录
+      const bookAnalysis = mockBookAnalysisData[bookAnalyseId];
+
+      if (bookAnalysis) {
+        const existingHistoryIndex = analysisHistory.findIndex(
+          (h) => h.id === bookAnalysis.id
+        );
+
+        const historyItem: AnalysisHistory = {
+          id: userInterest.id,
+          title: bookAnalysis.title,
+          interested: interested ?? false,
+          analysisData: bookAnalysis,
+          createTime: userInterest.createTime || new Date().toISOString(),
+        };
+
+        if (existingHistoryIndex >= 0) {
+          analysisHistory[existingHistoryIndex] = historyItem;
+        } else {
+          analysisHistory.unshift(historyItem);
+        }
+      }
 
       return {
         code: 200,
         message: '反馈提交成功',
         ts: Date.now(),
-        data: null,
+        data: userInterest,
         success: true,
       };
     },
   },
 
-  // 获取反馈历史
+  // 获取用户兴趣详情（包含书籍分析）
+  {
+    url: '/api/user/interest/:bookAnalyseId',
+    method: 'get',
+    timeout: 300,
+    response: ({ query }: any): Result<UserInterestDetail | null> => {
+      const bookAnalyseId = query.bookAnalyseId;
+      const userId = 'user_001';
+
+      const detail = getMockUserInterestDetail(userId, bookAnalyseId);
+
+      if (!detail) {
+        return {
+          code: 404,
+          message: '数据不存在',
+          ts: Date.now(),
+          data: null,
+          success: false,
+        };
+      }
+
+      return {
+        code: 200,
+        message: '获取成功',
+        ts: Date.now(),
+        data: detail,
+        success: true,
+      };
+    },
+  },
+
+  // 获取用户所有兴趣列表
+  {
+    url: '/api/user/interests',
+    method: 'get',
+    timeout: 300,
+    response: (): Result<UserInterestDetail[]> => {
+      const userId = 'user_001';
+      const interests = getMockUserInterests(userId);
+
+      return {
+        code: 200,
+        message: '获取成功',
+        ts: Date.now(),
+        data: interests,
+        success: true,
+      };
+    },
+  },
+
+  // 获取反馈历史（简化版）
   {
     url: '/api/book/feedback/history',
     method: 'get',
     timeout: 500,
     response: (): Result<FeedbackHistory[]> => {
-      const feedbackHistory: FeedbackHistory[] = analysisHistory.map(item => ({
-        bookId: item.bookId,
+      const feedbackHistory: FeedbackHistory[] = analysisHistory.map((item) => ({
+        id: item.id,
         title: item.title,
         interested: item.interested,
         timestamp: item.createTime,
@@ -131,24 +253,24 @@ export default [
     },
   },
 
-  // 获取用户偏好
+  // 获取用户偏好分析
   {
     url: '/api/user/preference',
     method: 'get',
     timeout: 800,
     response: (): Result<UserPreference> => {
       const totalBooks = analysisHistory.length;
-      const interestedBooks = analysisHistory.filter(h => h.interested).length;
+      const interestedBooks = analysisHistory.filter((h) => h.interested).length;
 
       // 统计类型和主题
       const genreMap: Record<string, number> = {};
       const themeMap: Record<string, number> = {};
 
-      analysisHistory.forEach(h => {
-        const genre = h.analysisData.summary.genre;
+      analysisHistory.forEach((h) => {
+        const genre = h.analysisData.genre;
         genreMap[genre] = (genreMap[genre] || 0) + 1;
 
-        h.analysisData.summary.themes.forEach(theme => {
+        h.analysisData.themes.forEach((theme) => {
           themeMap[theme] = (themeMap[theme] || 0) + 1;
         });
       });
@@ -175,23 +297,23 @@ export default [
 
       // 年度报告
       const currentYear = new Date().getFullYear();
-      const yearHistory = analysisHistory.filter(h =>
-        new Date(h.createTime).getFullYear() === currentYear
+      const yearHistory = analysisHistory.filter(
+        (h) => new Date(h.createTime).getFullYear() === currentYear
       );
 
       const monthlyTrend = Array.from({ length: 12 }, (_, i) => ({
         month: i + 1,
-        count: yearHistory.filter(h => new Date(h.createTime).getMonth() === i).length,
+        count: yearHistory.filter((h) => new Date(h.createTime).getMonth() === i).length,
       }));
 
       const yearGenreMap: Record<string, number> = {};
       const yearThemeMap: Record<string, number> = {};
 
-      yearHistory.forEach(h => {
-        const genre = h.analysisData.summary.genre;
+      yearHistory.forEach((h) => {
+        const genre = h.analysisData.genre;
         yearGenreMap[genre] = (yearGenreMap[genre] || 0) + 1;
 
-        h.analysisData.summary.themes.forEach(theme => {
+        h.analysisData.themes.forEach((theme) => {
           yearThemeMap[theme] = (yearThemeMap[theme] || 0) + 1;
         });
       });
@@ -218,14 +340,14 @@ export default [
         annualReport: {
           year: currentYear,
           totalBooks: yearHistory.length,
-          interestedCount: yearHistory.filter(h => h.interested).length,
+          interestedCount: yearHistory.filter((h) => h.interested).length,
           topGenres,
           topThemes,
           monthlyTrend,
           highlights: [
             `${currentYear}年，你探索了 ${yearHistory.length} 本书`,
             `最喜欢的类型：${topGenres[0]?.genre || '暂无'}`,
-            `最关注的主题：${topThemes.slice(0, 3).map(t => t.theme).join('、') || '暂无'}`,
+            `最关注的主题：${topThemes.slice(0, 3).map((t) => t.theme).join('、') || '暂无'}`,
           ],
         },
       };

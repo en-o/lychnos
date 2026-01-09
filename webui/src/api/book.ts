@@ -1,11 +1,19 @@
 import {request} from '../utils/request';
-import type {AnalysisHistory, BookAnalysis, FeedbackHistory, PageResult, Result, UserPreference,} from '../models';
+import {
+  type AnalysisHistory,
+  type BookAnalysis,
+  type BookRecommendItem,
+  type FeedbackHistory,
+  type PageResult,
+  type Result,
+  type UserPreference,
+} from '../models';
 
 // 图书API
 export const bookApi = {
   // 获取快速推荐书籍列表
   getQuickBooks: () => {
-    return request.get<Result<string[]>>('/book/recommend');
+    return request.get<Result<BookRecommendItem[]>>('/book/recommend');
   },
 
   // 分析图书
