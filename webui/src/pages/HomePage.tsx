@@ -92,11 +92,11 @@ const HomePage: React.FC = () => {
     if (!result) return;
 
     try {
-      const response = await bookApi.submitFeedback(
-        result.id,
+      const response = await bookApi.submitFeedback({
+        bookAnalyseId: result.id,
         interested,
-        ''
-      );
+        reason: ''
+      });
 
       if (response.success) {
         // 保存到历史记录
