@@ -2,13 +2,23 @@ package cn.tannn.lychnos.service;
 
 import cn.tannn.jdevelops.jpa.service.J2ServiceImpl;
 import cn.tannn.lychnos.controller.dto.UserInterestFeedback;
+import cn.tannn.lychnos.controller.vo.AnalysisHistoryVO;
 import cn.tannn.lychnos.dao.UserInterestDao;
+import cn.tannn.lychnos.entity.BookAnalyse;
 import cn.tannn.lychnos.entity.UserInterest;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 用户兴趣
@@ -21,8 +31,12 @@ import java.time.LocalDateTime;
 @Slf4j
 public class UserInterestService extends J2ServiceImpl<UserInterestDao, UserInterest, Long> {
 
-    public UserInterestService() {
+    private final BookAnalyseService bookAnalyseService;
+    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
+    public UserInterestService(BookAnalyseService bookAnalyseService) {
         super(UserInterest.class);
+        this.bookAnalyseService = bookAnalyseService;
     }
 
 
@@ -40,5 +54,58 @@ public class UserInterestService extends J2ServiceImpl<UserInterestDao, UserInte
         userInterest.setInterestSummary("ai还没准备好");
         userInterest.setCreateTime(LocalDateTime.now());
         getJpaBasicsDao().save(userInterest);
+    }
+
+    /**
+     * 获取最近分析（返回完整分析历史）
+     * @param userId 用户ID
+     * @param top 最近多少
+     * @return List<AnalysisHistoryVO>
+     */
+    public List<AnalysisHistoryVO> recentAnalysis(Long userId, int top) {
+        // 按创建时间倒序查询
+        PageRequest pageRequest = PageRequest.of(0, top, Sort.by(Sort.Direction.DESC, "createTime"));
+        List<UserInterest> interests = getJpaBasicsDao().findAll(
+                (root, query, cb) -> cb.equal(root.get("userId"), userId),
+                pageRequest
+        ).getContent();
+
+        return interests.stream().map(this::convertToVO).collect(Collectors.toList());
+    }
+
+    /**
+     * 获取分析历史（分页）
+     * @param userId 用户ID
+     * @param page 页码（从0开始）
+     * @param pageSize 每页数量
+     * @return Page<AnalysisHistoryVO>
+     */
+    public Page<AnalysisHistoryVO> analysisHistory(Long userId, int page, int pageSize) {
+        PageRequest pageRequest = PageRequest.of(page, pageSize, Sort.by(Sort.Direction.DESC, "createTime"));
+        Page<UserInterest> interests = getJpaBasicsDao().findAll(
+                (root, query, cb) -> cb.equal(root.get("userId"), userId),
+                pageRequest
+        );
+
+        return interests.map(this::convertToVO);
+    }
+
+    /**
+     * 转换为 VO
+     */
+    private AnalysisHistoryVO convertToVO(UserInterest interest) {
+        AnalysisHistoryVO vo = new AnalysisHistoryVO();
+        vo.setId(interest.getId());
+        vo.setInterested(interest.getInterested());
+        vo.setCreateTime(interest.getCreateTime().format(FORMATTER));
+
+        // 获取书籍分析数据
+        BookAnalyse bookAnalyse = bookAnalyseService.findById(interest.getBookAnalyseId()).orElse(null);
+        if (bookAnalyse != null) {
+            vo.setTitle(bookAnalyse.getTitle());
+            vo.setAnalysisData(bookAnalyse);
+        }
+
+        return vo;
     }
 }

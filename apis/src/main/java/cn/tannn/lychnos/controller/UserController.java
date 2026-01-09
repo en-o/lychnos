@@ -9,6 +9,7 @@ import cn.tannn.lychnos.common.views.Views;
 import cn.tannn.lychnos.controller.dto.PasswordEdit;
 import cn.tannn.lychnos.controller.dto.UserInfoFix;
 import cn.tannn.lychnos.controller.dto.UserInterestFeedback;
+import cn.tannn.lychnos.controller.vo.AnalysisHistoryVO;
 import cn.tannn.lychnos.entity.UserInfo;
 import cn.tannn.lychnos.service.UserInfoService;
 import cn.tannn.lychnos.service.UserInterestService;
@@ -21,12 +22,12 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 /**
  * 用户
@@ -89,5 +90,30 @@ public class UserController {
         Long userId = UserUtil.userId2(request);
         userInterestService.feedback(interest, userId);
         return ResultVO.successMessage("反馈已提交！");
+    }
+
+    /**
+     * 获取最近分析（返回完整分析历史）
+     */
+    @GetMapping("/recent/analysis")
+    @Operation(summary = "获取最近分析",description = "最多10个")
+    public ResultVO<List<AnalysisHistoryVO>> recentHistory(HttpServletRequest request) {
+        Long userId = UserUtil.userId2(request);
+        List<AnalysisHistoryVO> history = userInterestService.recentAnalysis(userId,10);
+        return ResultVO.success(history);
+    }
+
+    /**
+     * 获取分析历史（分页）
+     */
+    @GetMapping("/history/analysis")
+    @Operation(summary = "获取分析历史(分页)")
+    public ResultVO<Page<AnalysisHistoryVO>> getAnalysisHistory(
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int pageSize,
+            HttpServletRequest request) {
+        Long userId = UserUtil.userId2(request);
+        Page<AnalysisHistoryVO> history = userInterestService.analysisHistory(userId, page - 1, pageSize);
+        return ResultVO.success(history);
     }
 }

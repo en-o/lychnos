@@ -523,7 +523,7 @@ const HomePage: React.FC = () => {
           {feedbackHistory.length > 0 && !result && token && (
             <div className="mt-8">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold text-gray-900">最近反馈</h3>
+                <h3 className="text-lg font-semibold text-gray-900">最近分析</h3>
                 <button
                   onClick={() => navigate('/history')}
                   className="text-sm text-blue-600 hover:text-blue-700 transition"

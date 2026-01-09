@@ -7,6 +7,8 @@ import cn.tannn.lychnos.entity.BookAnalyse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 /**
  * 书籍分析
  *
@@ -34,4 +36,12 @@ public class BookAnalyseService extends J2ServiceImpl<BookAnalyseDao, BookAnalys
 
     }
 
+    /**
+     * 根据id查询书籍分析
+     * @param bookAnalyseId BookAnalyse
+     * @return BookAnalyse
+     */
+    public Optional<BookAnalyse> findById(Long bookAnalyseId) {
+        return getJpaBasicsDao().findById(bookAnalyseId);
+    }
 }

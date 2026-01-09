@@ -28,14 +28,14 @@ export const bookApi = {
     return request.post<Result<UserInterest>>('/user/interest', data);
   },
 
-  // 获取反馈历史
+  // 获取最近分析（返回完整分析历史）
   getFeedbackHistory: () => {
-    return request.get<Result<AnalysisHistory[]>>('/user/feedback/history');
+    return request.get<Result<AnalysisHistory[]>>('/user/recent/analysis');
   },
 
   // 获取分析历史（分页）
   getAnalysisHistory: (page: number, pageSize: number) => {
-    return request.get<Result<PageResult<AnalysisHistory>>>('/user/history', {
+    return request.get<Result<PageResult<AnalysisHistory>>>('/user/history/analysis', {
       params: { page, pageSize }
     });
   },

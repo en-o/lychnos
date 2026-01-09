@@ -195,9 +195,9 @@ export default [
     },
   },
 
-  // 获取反馈历史（返回完整分析历史）
+  // 获取最近分析（返回完整分析历史）
   {
-    url: '/api/user/feedback/history',
+    url: '/api/user/recent/analysis',
     method: 'get',
     timeout: 500,
     response: (): Result<AnalysisHistory[]> => {
@@ -213,7 +213,7 @@ export default [
 
   // 获取分析历史（分页）
   {
-    url: '/api/user/history',
+    url: '/api/user/history/analysis',
     method: 'get',
     timeout: 500,
     response: ({ query }: any): Result<PageResult<AnalysisHistory>> => {
