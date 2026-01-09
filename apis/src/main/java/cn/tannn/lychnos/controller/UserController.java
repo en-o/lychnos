@@ -41,7 +41,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 @Slf4j
 @Validated
 @RequiredArgsConstructor
-public class UserInfoController {
+public class UserController {
 
     private final UserInfoService userInfoService;
 
