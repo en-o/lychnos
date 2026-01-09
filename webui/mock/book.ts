@@ -115,7 +115,7 @@ export default [
       );
 
       // 同时更新历史记录
-      const bookAnalysis = mockBookAnalysisData[bookAnalyseId];
+      const bookAnalysis = mockBookAnalysisData.find(book => book.id === bookAnalyseId);
 
       if (bookAnalysis) {
         const existingHistoryIndex = analysisHistory.findIndex(

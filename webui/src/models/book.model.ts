@@ -9,7 +9,6 @@ export class BookSummary {
   themes: string[];
   tone: string;
   keyElements: string[];
-  triggerWarnings: string[];
 
   constructor(data: Partial<BookSummary> = {}) {
     this.title = data.title || '';
@@ -17,43 +16,107 @@ export class BookSummary {
     this.themes = data.themes || [];
     this.tone = data.tone || '';
     this.keyElements = data.keyElements || [];
-    this.triggerWarnings = data.triggerWarnings || [];
   }
 }
 
-// 图书分析结果
+// 书籍分析结果（平台共享数据）
 export class BookAnalysis {
   id: string;
-  bookId: number;
-  summary: BookSummary;
+  title: string;
+  genre: string;
+  themes: string[];
+  tone: string;
+  keyElements: string[];
   posterUrl: string;
   recommendation: string;
-  showPoster: boolean;
   createTime?: string;
+  updateTime?: string;
   createUser?: string;
+  updateUser?: string;
 
   constructor(data: Partial<BookAnalysis> = {}) {
-    this.id = data.id || '1';
-    this.bookId = data.bookId || 0;
-    this.summary = data.summary ? new BookSummary(data.summary) : new BookSummary();
+    this.id = data.id || '';
+    this.title = data.title || '';
+    this.genre = data.genre || '';
+    this.themes = data.themes || [];
+    this.tone = data.tone || '';
+    this.keyElements = data.keyElements || [];
     this.posterUrl = data.posterUrl || '';
     this.recommendation = data.recommendation || '';
-    this.showPoster = data.showPoster ?? true;
     this.createTime = data.createTime;
+    this.updateTime = data.updateTime;
     this.createUser = data.createUser;
+    this.updateUser = data.updateUser;
   }
+
+  // 转换为 BookSummary
+  toSummary(): BookSummary {
+    return new BookSummary({
+      title: this.title,
+      genre: this.genre,
+      themes: this.themes,
+      tone: this.tone,
+      keyElements: this.keyElements,
+    });
+  }
+}
+
+// 用户兴趣关联（用户与书籍分析的关联）
+export class UserInterest {
+  id: string;
+  userId: string;
+  bookAnalyseId: string;
+  interested?: boolean;
+  reason?: string;
+  interestSummary?: string;
+  createTime?: string;
+  updateTime?: string;
+  createUser?: string;
+  updateUser?: string;
+
+  constructor(data: Partial<UserInterest> = {}) {
+    this.id = data.id || '';
+    this.userId = data.userId || '';
+    this.bookAnalyseId = data.bookAnalyseId || '';
+    this.interested = data.interested;
+    this.reason = data.reason;
+    this.interestSummary = data.interestSummary;
+    this.createTime = data.createTime;
+    this.updateTime = data.updateTime;
+    this.createUser = data.createUser;
+    this.updateUser = data.updateUser;
+  }
+}
+
+// 用户兴趣详情（包含书籍分析数据）
+export class UserInterestDetail {
+  userInterest: UserInterest;
+  bookAnalysis: BookAnalysis;
+  showPoster: boolean;
+
+  constructor(data: Partial<UserInterestDetail> = {}) {
+    this.userInterest = data.userInterest ? new UserInterest(data.userInterest) : new UserInterest();
+    this.bookAnalysis = data.bookAnalysis ? new BookAnalysis(data.bookAnalysis) : new BookAnalysis();
+    this.showPoster = data.showPoster ?? true;
+  }
+}
+
+// 书籍推荐项
+export interface BookRecommendItem {
+  id: string;
+  title: string;
 }
 
 // 反馈历史
 export class FeedbackHistory {
-  bookId: number;
+  id: string;
   title: string;
   interested: boolean;
   reason?: string;
   timestamp: string;
 
   constructor(data: Partial<FeedbackHistory> = {}) {
-    this.bookId = data.bookId || 0;
+    this.id = data.id || '';
     this.title = data.title || '';
     this.interested = data.interested ?? false;
     this.reason = data.reason;
@@ -64,7 +127,6 @@ export class FeedbackHistory {
 // 分析历史（包含完整分析数据）
 export class AnalysisHistory {
   id: string;
-  bookId: number;
   title: string;
   interested: boolean;
   analysisData: BookAnalysis;
@@ -72,7 +134,6 @@ export class AnalysisHistory {
 
   constructor(data: Partial<AnalysisHistory> = {}) {
     this.id = data.id || '';
-    this.bookId = data.bookId || 0;
     this.title = data.title || '';
     this.interested = data.interested ?? false;
     this.analysisData = data.analysisData ? new BookAnalysis(data.analysisData) : new BookAnalysis();

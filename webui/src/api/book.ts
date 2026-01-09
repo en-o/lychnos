@@ -17,8 +17,8 @@ export const bookApi = {
   },
 
   // 分析图书
-  analyzeBook: (title: string) => {
-    return request.post<Result<BookAnalysis>>('/book/analyze', { title });
+  analyzeBook: (id: string) => {
+    return request.post<Result<BookAnalysis>>('/book/analyze', { id });
   },
 
   // 提交反馈

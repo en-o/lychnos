@@ -2,7 +2,7 @@ import React, {useState} from 'react';
 import {useNavigate} from 'react-router-dom';
 import {Brain, ChevronDown, Heart, History, Key, LogOut, Search, UserCircle} from 'lucide-react';
 import {bookApi} from '../api/book';
-import type {AnalysisHistory, BookAnalysis} from '../models';
+import type {AnalysisHistory, BookAnalysis, BookRecommendItem} from '../models';
 import Logo from '../components/Logo';
 import {toast} from '../components/ToastContainer';
 import ConfirmDialog from '../components/ConfirmDialog';
@@ -20,7 +20,7 @@ const HomePage: React.FC = () => {
   const [showLoginConfirm, setShowLoginConfirm] = useState(false);
   const [selectedHistoryItem, setSelectedHistoryItem] = useState<AnalysisHistory | null>(null);
   const [showBackConfirm, setShowBackConfirm] = useState(false);
-  const [quickBooks, setQuickBooks] = useState<string[]>([]);
+  const [quickBooks, setQuickBooks] = useState<BookRecommendItem[]>([]);
   const [decorationTheme, setDecorationTheme] = useState<DecorationTheme>('daily');
 
   // 检查是否已登录
@@ -38,7 +38,12 @@ const HomePage: React.FC = () => {
       } catch (error) {
         console.error('获取快速推荐失败:', error);
         // 降级使用默认值
-        setQuickBooks(['三体', '活着', '解忧杂货店', '人类简史']);
+        setQuickBooks([
+          { id: '1001', title: '三体' },
+          { id: '1002', title: '活着' },
+          { id: '1003', title: '解忧杂货店' },
+          { id: '1004', title: '人类简史' },
+        ]);
       }
     };
     loadQuickBooks();
@@ -53,7 +58,7 @@ const HomePage: React.FC = () => {
     }
   }, [token]);
 
-  const handleSearch = async (title = bookTitle) => {
+  const handleSearch = async (title = bookTitle, bookId?: string) => {
     if (!title.trim()) {
       toast.warning('请输入书名');
       return;
@@ -69,7 +74,9 @@ const HomePage: React.FC = () => {
     setResult(null);
 
     try {
-      const response = await bookApi.analyzeBook(title);
+      // 如果没有传入 bookId，则从快速推荐列表中查找
+      const id = bookId || quickBooks.find(book => book.title === title)?.id || title;
+      const response = await bookApi.analyzeBook(id);
 
       if (response.success) {
         setResult(response.data);
@@ -121,9 +128,9 @@ const HomePage: React.FC = () => {
     }
   };
 
-  const handleQuickSearch = (title: string) => {
+  const handleQuickSearch = (id: string, title: string) => {
     setBookTitle(title);
-    handleSearch(title);
+    handleSearch(title, id);
   };
 
   const handleLogin = () => {
@@ -415,12 +422,12 @@ const HomePage: React.FC = () => {
                 <span className="text-sm text-gray-500">试试:</span>
                 {quickBooks.map((book) => (
                   <button
-                    key={book}
-                    onClick={() => handleQuickSearch(book)}
+                    key={book.id}
+                    onClick={() => handleQuickSearch(book.id, book.title)}
                     disabled={loading}
                     className="px-3 py-1.5 text-sm text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition disabled:opacity-50"
                   >
-                    {book}
+                    {book.title}
                   </button>
                 ))}
               </div>
