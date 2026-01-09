@@ -92,7 +92,14 @@ const HistoryPage: React.FC = () => {
 
   // 处理搜索
   const handleSearch = () => {
-    setSearchQuery(searchInput);
+    // 如果搜索内容相同，手动触发重新加载
+    if (searchInput === searchQuery) {
+      setCurrentPage(1);
+      setHistoryList([]);
+      loadHistory(1, searchInput);
+    } else {
+      setSearchQuery(searchInput);
+    }
   };
 
   // 清除搜索
