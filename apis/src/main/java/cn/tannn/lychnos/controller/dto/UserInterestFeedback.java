@@ -20,6 +20,9 @@ public class UserInterestFeedback {
     @Schema(description = "书籍分析ID")
     private Long bookAnalyseId;
 
+    @Schema(description = "书名")
+    private String bookTitle;
+
     @Schema(description = "是否感兴趣")
     private Boolean interested;
 

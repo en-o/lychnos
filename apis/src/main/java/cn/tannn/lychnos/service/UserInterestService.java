@@ -52,6 +52,7 @@ public class UserInterestService extends J2ServiceImpl<UserInterestDao, UserInte
         UserInterest userInterest = new UserInterest();
         userInterest.setUserId(userId);
         userInterest.setBookAnalyseId(interest.getBookAnalyseId());
+        userInterest.setBookTitle(interest.getBookTitle());
         userInterest.setInterested(interest.getInterested());
         userInterest.setReason(interest.getReason());
         // 这个数据需要异步写入，因为ai可能很慢
@@ -86,6 +87,8 @@ public class UserInterestService extends J2ServiceImpl<UserInterestDao, UserInte
     public JpaPageResult<AnalysisHistoryVO> analysisHistory(Long userId, AnalysisHistoryPage page) {
         Specification<UserInterest> where = EnhanceSpecification.where(s -> {
             s.eq(true, "userId", userId);
+            s.like(page.getBookTitle() != null && !page.getBookTitle().trim().isEmpty(),
+                   "bookTitle", page.getBookTitle());
         });
         Page<UserInterest> interests = getJpaBasicsDao().findAll(
                 where,

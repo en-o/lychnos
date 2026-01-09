@@ -72,6 +72,14 @@ public class UserInterest {
     private Long bookAnalyseId;
 
     /**
+     * 书名（冗余字段，用于检索）
+     */
+    @Column(columnDefinition = " varchar(255) ")
+    @Comment("书名")
+    @Schema(description = "书名")
+    private String bookTitle;
+
+    /**
      * 是否感兴趣
      */
     @Column(columnDefinition = " tinyint(1) ")

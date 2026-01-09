@@ -38,7 +38,7 @@ public class BookController {
         return ResultVO.success(List.of(
                 new BookRecommend(1L,"三体"),
                 new BookRecommend(2L,"活着"),
-                new BookRecommend(3L,"解忧杂货铺"),
+                new BookRecommend(3L,"解忧杂货店"),
                 new BookRecommend(4L,"人类简史"),
                 new BookRecommend(5L,"宵待草夜情")));
     }
