@@ -5,6 +5,7 @@ import cn.tannn.jdevelops.jwt.standalone.util.JwtWebUtil;
 import cn.tannn.jdevelops.utils.jwt.core.JwtService;
 import cn.tannn.jdevelops.utils.jwt.module.LoginJwtExtendInfo;
 import cn.tannn.lychnos.controller.LoginController;
+import cn.tannn.lychnos.entity.UserInfo;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 
@@ -51,7 +52,7 @@ public class UserUtil extends cn.tannn.jdevelops.jwt.standalone.util.UserUtil {
 
     /**
      * 获得 loginName
-     * <p> jwt subject = loginName   {@link LoginController#loginUserSign}</p>
+     * <p> jwt subject = loginName   {@link LoginController#loginUserSign(UserInfo, HttpServletRequest)}</p>
      * @param request HttpServletRequest
      * @return loginName
      */

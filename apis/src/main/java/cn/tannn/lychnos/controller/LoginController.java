@@ -5,6 +5,7 @@ import cn.tannn.jdevelops.annotations.web.mapping.PathRestController;
 import cn.tannn.jdevelops.jwt.standalone.service.LoginService;
 import cn.tannn.jdevelops.jwt.standalone.util.JwtWebUtil;
 import cn.tannn.jdevelops.result.response.ResultVO;
+import cn.tannn.jdevelops.utils.jwt.module.LoginJwtExtendInfo;
 import cn.tannn.jdevelops.utils.jwt.module.SignEntity;
 import cn.tannn.lychnos.controller.dto.LoginPassword;
 import cn.tannn.lychnos.controller.vo.LoginVO;
@@ -80,7 +81,14 @@ public class LoginController {
      * @return token
      */
     private String loginUserSign(UserInfo account, HttpServletRequest request) {
-        SignEntity<String> init = SignEntity.init(account.getLoginName());
+        SignEntity<LoginJwtExtendInfo<String>> init = SignEntity.init(account.getLoginName());
+        // 拓展信息
+        LoginJwtExtendInfo<String> loginJwtExtendInfo = new LoginJwtExtendInfo<>();
+        loginJwtExtendInfo.setUserId(account.getId() + "");
+        loginJwtExtendInfo.setUserNo(account.getId() + "");
+        loginJwtExtendInfo.setUserName(account.getLoginName());
+        loginJwtExtendInfo.setLoginName(account.getLoginName());
+        init.setMap(loginJwtExtendInfo);
         return loginService.login(init).getSign();
     }
 
