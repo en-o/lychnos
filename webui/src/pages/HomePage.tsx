@@ -453,7 +453,7 @@ const HomePage: React.FC = () => {
                       <img
                         src={result.posterUrl}
                         alt={result.title}
-                        className="w-full h-64 object-cover rounded-lg cursor-pointer hover:opacity-90 transition"
+                        className="w-full h-64 object-fill rounded-lg cursor-pointer hover:opacity-90 transition"
                         onError={() => setImageError(prev => ({ ...prev, [result.id]: true }))}
                         onClick={() => setPreviewImage(result.posterUrl)}
                       />
@@ -785,7 +785,7 @@ const HomePage: React.FC = () => {
                     <img
                       src={selectedHistoryItem.analysisData.posterUrl}
                       alt={selectedHistoryItem.title}
-                      className="w-full max-h-48 object-cover rounded-lg cursor-pointer hover:opacity-90 transition"
+                      className="w-full h-48 object-fill rounded-lg cursor-pointer hover:opacity-90 transition"
                       onError={() => setImageError(prev => ({ ...prev, [selectedHistoryItem.id]: true }))}
                       onClick={() => setPreviewImage(selectedHistoryItem.analysisData.posterUrl || null)}
                     />

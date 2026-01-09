@@ -233,7 +233,7 @@ const HistoryPage: React.FC = () => {
                     <img
                       src={selectedItem.analysisData.posterUrl}
                       alt={selectedItem.title}
-                      className="w-full max-h-48 object-cover rounded-lg cursor-pointer hover:opacity-90 transition"
+                      className="w-full h-48 object-fill rounded-lg cursor-pointer hover:opacity-90 transition"
                       onError={() => setImageError(prev => ({ ...prev, [selectedItem.id]: true }))}
                       onClick={() => setPreviewImage(selectedItem.analysisData.posterUrl || null)}
                     />
