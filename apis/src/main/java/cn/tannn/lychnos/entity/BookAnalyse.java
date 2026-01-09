@@ -36,9 +36,4 @@ import org.hibernate.annotations.DynamicUpdate;
 public class BookAnalyse extends JpaCommonBean<BookAnalyse> {
 
 
-    @Column(columnDefinition="varchar(100) not null ")
-    @Comment("userId")
-    @Schema(description = "创建者")
-    private String userId;
-
 }

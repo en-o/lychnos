@@ -108,10 +108,10 @@ const LoginPage: React.FC = () => {
         </form>
 
         {/* 提示信息 */}
-        <div className="mt-6 p-3 bg-gray-50 rounded-lg border border-gray-200">
-          <p className="text-xs text-gray-600 mb-1">演示账号:</p>
-          <p className="text-xs text-gray-700">用户名: admin / 密码: admin</p>
-        </div>
+        {/*<div className="mt-6 p-3 bg-gray-50 rounded-lg border border-gray-200">*/}
+        {/*  <p className="text-xs text-gray-600 mb-1">演示账号:</p>*/}
+        {/*  <p className="text-xs text-gray-700">用户名: admin / 密码: admin</p>*/}
+        {/*</div>*/}
 
         {/* 注册链接 */}
         <div className="mt-4 text-center">
