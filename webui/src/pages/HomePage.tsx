@@ -103,8 +103,7 @@ const HomePage: React.FC = () => {
         // 保存到历史记录
         const historyItem: AnalysisHistory = {
           id: Date.now().toString(),
-          bookId: result.bookId,
-          title: result.summary.title,
+          title: result.title,
           interested,
           analysisData: result,
           createTime: new Date().toISOString(),
@@ -447,26 +446,26 @@ const HomePage: React.FC = () => {
 
               {/* 书籍信息卡片 */}
               <div className="bg-white border border-gray-200 rounded-xl p-6 mb-4">
-                {result.showPoster && (
+                {result.posterUrl && (
                   <div className="mb-6">
                     <img
                       src={result.posterUrl}
-                      alt={result.summary.title}
+                      alt={result.title}
                       className="w-full h-64 object-cover rounded-lg"
                     />
                   </div>
                 )}
 
                 <h2 className="text-2xl font-semibold text-gray-900 mb-2">
-                  {result.summary.title}
+                  {result.title}
                 </h2>
 
                 <div className="flex gap-2 mb-4">
                   <span className="px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-sm">
-                    {result.summary.genre}
+                    {result.genre}
                   </span>
                   <span className="px-3 py-1 bg-purple-50 text-purple-700 rounded-full text-sm">
-                    {result.summary.tone}
+                    {result.tone}
                   </span>
                 </div>
 
@@ -479,7 +478,7 @@ const HomePage: React.FC = () => {
                 <div className="mb-4">
                   <h3 className="text-sm font-medium text-gray-900 mb-2">核心主题</h3>
                   <div className="flex flex-wrap gap-2">
-                    {result.summary.themes.map((theme, i) => (
+                    {result.themes.map((theme, i) => (
                       <span
                         key={i}
                         className="px-3 py-1 bg-gray-100 text-gray-700 rounded-lg text-sm"
@@ -494,7 +493,7 @@ const HomePage: React.FC = () => {
                 <div className="mb-6">
                   <h3 className="text-sm font-medium text-gray-900 mb-2">关键元素</h3>
                   <ul className="space-y-1">
-                    {result.summary.keyElements.map((element, i) => (
+                    {result.keyElements.map((element, i) => (
                       <li key={i} className="text-sm text-gray-600 flex items-center gap-2">
                         <span className="w-1 h-1 bg-gray-400 rounded-full" />
                         {element}
@@ -502,15 +501,6 @@ const HomePage: React.FC = () => {
                     ))}
                   </ul>
                 </div>
-
-                {/* 警告 */}
-                {result.summary.triggerWarnings.length > 0 && (
-                  <div className="mb-6 p-3 bg-amber-50 border border-amber-200 rounded-lg">
-                    <p className="text-sm text-amber-800">
-                      ⚠️ {result.summary.triggerWarnings.join('、')}
-                    </p>
-                  </div>
-                )}
 
                 {/* 反馈按钮 */}
                 <div className="flex gap-3">
@@ -568,10 +558,10 @@ const HomePage: React.FC = () => {
                         </h4>
                         <div className="flex flex-wrap gap-1 mb-2">
                           <span className="px-2 py-0.5 bg-blue-50 text-blue-700 rounded text-xs">
-                            {item.analysisData.summary.genre}
+                            {item.analysisData.genre}
                           </span>
                           <span className="px-2 py-0.5 bg-purple-50 text-purple-700 rounded text-xs">
-                            {item.analysisData.summary.tone}
+                            {item.analysisData.tone}
                           </span>
                         </div>
                         <div className="text-xs text-gray-500">
@@ -768,14 +758,14 @@ const HomePage: React.FC = () => {
             <div className="space-y-4">
               <div className="flex gap-2">
                 <span className="px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-sm">
-                  {selectedHistoryItem.analysisData.summary.genre}
+                  {selectedHistoryItem.analysisData.genre}
                 </span>
                 <span className="px-3 py-1 bg-purple-50 text-purple-700 rounded-full text-sm">
-                  {selectedHistoryItem.analysisData.summary.tone}
+                  {selectedHistoryItem.analysisData.tone}
                 </span>
               </div>
 
-              {selectedHistoryItem.analysisData.showPoster && (
+              {selectedHistoryItem.analysisData.posterUrl && (
                 <div>
                   <img
                     src={selectedHistoryItem.analysisData.posterUrl}
@@ -792,7 +782,7 @@ const HomePage: React.FC = () => {
               <div>
                 <h3 className="text-sm font-medium text-gray-900 mb-2">核心主题</h3>
                 <div className="flex flex-wrap gap-2">
-                  {selectedHistoryItem.analysisData.summary.themes.map((theme, i) => (
+                  {selectedHistoryItem.analysisData.themes.map((theme, i) => (
                     <span key={i} className="px-3 py-1 bg-gray-100 text-gray-700 rounded-lg text-sm">
                       {theme}
                     </span>
@@ -803,7 +793,7 @@ const HomePage: React.FC = () => {
               <div>
                 <h3 className="text-sm font-medium text-gray-900 mb-2">关键元素</h3>
                 <ul className="space-y-1">
-                  {selectedHistoryItem.analysisData.summary.keyElements.map((element, i) => (
+                  {selectedHistoryItem.analysisData.keyElements.map((element, i) => (
                     <li key={i} className="text-sm text-gray-600 flex items-center gap-2">
                       <span className="w-1 h-1 bg-gray-400 rounded-full" />
                       {element}
@@ -811,14 +801,6 @@ const HomePage: React.FC = () => {
                   ))}
                 </ul>
               </div>
-
-              {selectedHistoryItem.analysisData.summary.triggerWarnings.length > 0 && (
-                <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg">
-                  <p className="text-sm text-amber-800">
-                    ⚠️ {selectedHistoryItem.analysisData.summary.triggerWarnings.join('、')}
-                  </p>
-                </div>
-              )}
 
               <div className="pt-4 border-t border-gray-200 text-sm text-gray-500">
                 分析时间: {new Date(selectedHistoryItem.createTime).toLocaleDateString('zh-CN', {
