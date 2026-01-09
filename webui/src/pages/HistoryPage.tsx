@@ -2,7 +2,7 @@ import React, {useEffect, useState, useRef, useCallback} from 'react';
 import {useNavigate, useSearchParams} from 'react-router-dom';
 import {ArrowLeft, Eye, ThumbsDown, ThumbsUp, Search, X} from 'lucide-react';
 import {bookApi} from '../api/book';
-import type {AnalysisHistory, PageResult} from '../models';
+import type {AnalysisHistory} from '../models';
 import Logo from '../components/Logo';
 import ImagePreview from '../components/ImagePreview';
 

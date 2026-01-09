@@ -35,7 +35,7 @@ export interface UserInfoRegister {
 
 // 修改用户基础信息
 export interface UserInfoFix {
-  id: string;
+  loginName: string;
   nickname: string;
   email?: string;
 }
