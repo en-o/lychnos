@@ -13,6 +13,7 @@ import cn.tannn.lychnos.controller.dto.PasswordEdit;
 import cn.tannn.lychnos.controller.dto.UserInfoFix;
 import cn.tannn.lychnos.controller.dto.UserInterestFeedback;
 import cn.tannn.lychnos.controller.vo.AnalysisHistoryVO;
+import cn.tannn.lychnos.controller.vo.UserPreferenceVO;
 import cn.tannn.lychnos.entity.UserInfo;
 import cn.tannn.lychnos.service.UserInfoService;
 import cn.tannn.lychnos.service.UserInterestService;
@@ -125,5 +126,16 @@ public class UserController {
         Long userId = UserUtil.userId2(request);
         JpaPageResult<AnalysisHistoryVO> history = userInterestService.analysisHistory(userId, page);
         return ResultPageVO.success(history);
+    }
+
+    /**
+     * 获取用户偏好分析
+     */
+    @GetMapping("/preference")
+    @Operation(summary = "获取用户偏好分析")
+    public ResultVO<UserPreferenceVO> preference(HttpServletRequest request) {
+        Long userId = UserUtil.userId2(request);
+        UserPreferenceVO preference = userInterestService.getUserPreference(userId);
+        return ResultVO.success(preference);
     }
 }
