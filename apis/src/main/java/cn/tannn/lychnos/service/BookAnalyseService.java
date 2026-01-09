@@ -31,6 +31,7 @@ public class BookAnalyseService extends J2ServiceImpl<BookAnalyseDao, BookAnalys
      */
     public BookAnalyse analyse(String bookTitle){
         // 如果分析过了直接返回的，没有的则进行分析处理，当前暂不对接ai直接抛异常
+        // 分析完成之后要存库，给别人使用
         return getJpaBasicsDao().findByTitle(bookTitle)
                 .orElseThrow(() -> new BusinessException("分析功能暂未实现，只能使用提供的书籍进行测试"));
 
