@@ -3,7 +3,6 @@ import {
   type AnalysisHistory,
   type BookAnalysis,
   type BookRecommendItem,
-  type FeedbackHistory,
   type PageResult,
   type Result,
   type UserPreference,
@@ -31,7 +30,7 @@ export const bookApi = {
 
   // 获取反馈历史
   getFeedbackHistory: () => {
-    return request.get<Result<FeedbackHistory[]>>('/book/feedback/history');
+    return request.get<Result<AnalysisHistory[]>>('/book/feedback/history');
   },
 
   // 获取分析历史（分页）

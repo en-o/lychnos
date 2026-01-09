@@ -52,11 +52,20 @@ const HomePage: React.FC = () => {
   // 加载历史记录
   React.useEffect(() => {
     if (token) {
-      const historyStr = localStorage.getItem('analysisHistory') || '[]';
-      const history: AnalysisHistory[] = JSON.parse(historyStr);
-      setFeedbackHistory(history);
+      loadFeedbackHistory();
     }
   }, [token]);
+
+  const loadFeedbackHistory = async () => {
+    try {
+      const response = await bookApi.getFeedbackHistory();
+      if (response.success && response.data) {
+        setFeedbackHistory(response.data);
+      }
+    } catch (error) {
+      console.error('加载反馈历史失败:', error);
+    }
+  };
 
   const handleSearch = async (title = bookTitle) => {
     if (!title.trim()) {
@@ -99,24 +108,10 @@ const HomePage: React.FC = () => {
       });
 
       if (response.success) {
-        // 保存到历史记录
-        const historyItem: AnalysisHistory = {
-          id: Date.now().toString(),
-          title: result.title,
-          interested,
-          analysisData: result,
-          createTime: new Date().toISOString(),
-        };
-
-        const historyStr = localStorage.getItem('analysisHistory') || '[]';
-        const history: AnalysisHistory[] = JSON.parse(historyStr);
-        history.unshift(historyItem);
-        localStorage.setItem('analysisHistory', JSON.stringify(history));
-
-        // 更新页面显示的历史
-        setFeedbackHistory(history);
-
         toast.success('反馈已提交!');
+
+        // 重新加载反馈历史
+        await loadFeedbackHistory();
         setResult(null);
         setBookTitle('');
       }

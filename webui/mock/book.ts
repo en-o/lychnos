@@ -195,24 +195,17 @@ export default [
     },
   },
 
-  // 获取反馈历史（简化版）
+  // 获取反馈历史（返回完整分析历史）
   {
     url: '/api/book/feedback/history',
     method: 'get',
     timeout: 500,
-    response: (): Result<FeedbackHistory[]> => {
-      const feedbackHistory: FeedbackHistory[] = analysisHistory.map((item) => ({
-        id: item.id,
-        title: item.title,
-        interested: item.interested,
-        timestamp: item.createTime,
-      }));
-
+    response: (): Result<AnalysisHistory[]> => {
       return {
         code: 200,
         message: '获取成功',
         ts: Date.now(),
-        data: feedbackHistory,
+        data: analysisHistory,
         success: true,
       };
     },
