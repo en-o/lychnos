@@ -2,7 +2,7 @@
  * 分析相关的
  */
 
-// Token信息
+// 提交用户反馈
 export interface InterestFeedback {
   //书籍分析ID
   bookAnalyseId: string,
