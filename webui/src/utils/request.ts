@@ -108,6 +108,13 @@ function handleOtherError(status: number, data?: Result) {
 // 处理业务错误
 function handleBusinessError(data: Result) {
   console.error('业务错误:', data.message);
+
+  // 特殊处理错误码 1001 - 书籍已分析
+  if (data.code === 1001) {
+    // 不显示 toast，由调用方处理跳转
+    return;
+  }
+
   toast.error(data.message || '操作失败');
 }
 

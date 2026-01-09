@@ -19,17 +19,23 @@ const HistoryPage: React.FC = () => {
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchInput, setSearchInput] = useState('');
+  const [urlSearchProcessed, setUrlSearchProcessed] = useState(false);
   const pageSize = 10;
   const observerTarget = useRef<HTMLDivElement>(null);
 
-  // 从 URL 参数获取搜索关键词
+  // 从 URL 参数获取搜索关键词（只处理一次）
   useEffect(() => {
+    if (urlSearchProcessed) return;
+
     const searchFromUrl = searchParams.get('search');
     if (searchFromUrl) {
       setSearchInput(searchFromUrl);
       setSearchQuery(searchFromUrl);
+      setUrlSearchProcessed(true);
+    } else {
+      setUrlSearchProcessed(true);
     }
-  }, [searchParams]);
+  }, [searchParams, urlSearchProcessed]);
 
   // 加载历史数据
   const loadHistory = useCallback(async (page: number, query: string, append: boolean = false) => {

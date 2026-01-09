@@ -83,11 +83,21 @@ export default [
         item => item.userId === userId && item.bookTitle === title
       );
 
+      if (userInterest) {
+        return {
+          code: 1001,
+          message: '该书籍已经分析过，请到历史记录中查看',
+          ts: Date.now(),
+          data: null,
+          success: false,
+        };
+      }
+
       return {
         code: 200,
-        message: userInterest ? '已分析' : '未分析',
+        message: '该书籍未分析，可以进行分析',
         ts: Date.now(),
-        data: userInterest || null,
+        data: null,
         success: true,
       };
     },
@@ -137,7 +147,7 @@ export default [
       );
       if (existingInterest) {
         return {
-          code: 400,
+          code: 1001,
           message: '该书籍已经分析过，请到历史记录中查看',
           ts: Date.now(),
           data: null as any,

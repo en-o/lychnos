@@ -87,12 +87,18 @@ const HomePage: React.FC = () => {
 
     try {
       // 先检查是否已经分析过
-      const checkResponse = await bookApi.checkAnalyzed(title);
-      if (checkResponse.success && checkResponse.data) {
-        // 已经分析过，跳转到历史页面
-        toast.info('该书籍已经分析过，正在跳转到历史记录...');
-        navigate(`/history?search=${encodeURIComponent(title)}`);
-        return;
+      try {
+        await bookApi.checkAnalyzed(title);
+        // 未分析过，继续执行分析
+      } catch (checkError: any) {
+        // 如果是错误码 1001（已分析过），跳转到历史页面
+        if (checkError?.code === 1001) {
+          toast.info('该书籍已经分析过，正在跳转到历史记录...');
+          navigate(`/history?search=${encodeURIComponent(title)}`);
+          return;
+        }
+        // 其他检查错误直接抛出
+        throw checkError;
       }
 
       // 未分析过，执行分析
@@ -103,8 +109,9 @@ const HomePage: React.FC = () => {
       }
     } catch (error: any) {
       console.error('分析失败:', error);
-      // 如果是"已分析过"的错误，跳转到历史页面
-      if (error?.message?.includes('已经分析过')) {
+      // 如果分析时遇到错误码 1001（已分析过），跳转到历史页面
+      if (error?.code === 1001) {
+        toast.info('该书籍已经分析过，正在跳转到历史记录...');
         navigate(`/history?search=${encodeURIComponent(title)}`);
       }
       // 其他错误提示已在request拦截器中统一处理
