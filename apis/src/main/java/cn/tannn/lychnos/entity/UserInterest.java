@@ -1,7 +1,9 @@
 package cn.tannn.lychnos.entity;
 
+import cn.tannn.jdevelops.jpa.generator.UuidCustomGenerator;
 import cn.tannn.lychnos.common.pojo.JpaCommonBean;
 import cn.tannn.lychnos.common.views.Views;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
@@ -13,6 +15,10 @@ import lombok.ToString;
 import org.hibernate.annotations.Comment;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
+import org.hibernate.annotations.GenericGenerator;
+import org.springframework.data.annotation.CreatedDate;
+
+import java.time.LocalDateTime;
 
 /**
  * 用户兴趣关联表（关联用户与书籍分析，包含用户反馈）
@@ -37,7 +43,16 @@ import org.hibernate.annotations.DynamicUpdate;
 @DynamicInsert
 @Schema(description = "用户兴趣关联表")
 @JsonView({Views.Public.class})
-public class UserInterest extends JpaCommonBean<UserInterest> {
+public class UserInterest {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO, generator = "uuidCustomGenerator")
+    @GenericGenerator(name = "uuidCustomGenerator", type = UuidCustomGenerator.class)
+    @Column(columnDefinition="bigint")
+    @Comment("uuid")
+    @JsonSerialize(using = ToStringSerializer.class)
+    private Long id;
+
 
     /**
      * 用户id, 登录名可能存在更改的问题，id是不是自增的所有是稳定的
@@ -80,5 +95,11 @@ public class UserInterest extends JpaCommonBean<UserInterest> {
     @Comment("用户兴趣总结")
     @Schema(description = "用户兴趣总结")
     private String interestSummary;
+
+    @CreatedDate
+    @Column(columnDefinition = "timestamp", updatable = false)
+    @Comment("创建日期")
+    @JsonFormat(locale = "zh", timezone = "GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")
+    public LocalDateTime createTime;
 
 }
