@@ -25,14 +25,12 @@ const HistoryPage: React.FC = () => {
 
   // 从 URL 参数获取搜索关键词（只处理一次）
   useEffect(() => {
-    if (urlSearchProcessed) return;
-
     const searchFromUrl = searchParams.get('search');
-    if (searchFromUrl) {
+    if (searchFromUrl && !urlSearchProcessed) {
       setSearchInput(searchFromUrl);
       setSearchQuery(searchFromUrl);
       setUrlSearchProcessed(true);
-    } else {
+    } else if (!urlSearchProcessed) {
       setUrlSearchProcessed(true);
     }
   }, [searchParams, urlSearchProcessed]);
@@ -59,11 +57,30 @@ const HistoryPage: React.FC = () => {
     }
   }, []);
 
-  // 初始加载
+  // 初始加载（当 searchQuery 变化时）
   useEffect(() => {
-    loadHistory(1, searchQuery);
+    if (!urlSearchProcessed) return; // 等待 URL 参数处理完成
+
+    setLoading(true);
     setCurrentPage(1);
-  }, [searchQuery, loadHistory]);
+    setHistoryList([]);
+    setHasMore(true);
+
+    bookApi.getAnalysisHistory(1, pageSize, searchQuery)
+      .then(response => {
+        if (response.success) {
+          setHistoryList(response.data.rows);
+          setTotal(response.data.total);
+          setHasMore(1 < response.data.totalPages);
+        }
+      })
+      .catch(error => {
+        console.error('加载历史失败:', error);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }, [searchQuery, urlSearchProcessed]);
 
   // 滚动加载更多
   useEffect(() => {
