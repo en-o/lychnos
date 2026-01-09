@@ -7,6 +7,9 @@ import Logo from '../components/Logo';
 import {toast} from '../components/ToastContainer';
 import ConfirmDialog from '../components/ConfirmDialog';
 
+// 装饰主题类型
+type DecorationTheme = 'daily' | 'christmas' | 'spring-festival';
+
 const HomePage: React.FC = () => {
   const navigate = useNavigate();
   const [bookTitle, setBookTitle] = useState('');
@@ -18,6 +21,7 @@ const HomePage: React.FC = () => {
   const [selectedHistoryItem, setSelectedHistoryItem] = useState<AnalysisHistory | null>(null);
   const [showBackConfirm, setShowBackConfirm] = useState(false);
   const [quickBooks, setQuickBooks] = useState<string[]>([]);
+  const [decorationTheme, setDecorationTheme] = useState<DecorationTheme>('daily');
 
   // 检查是否已登录
   const token = localStorage.getItem('token');
@@ -148,6 +152,14 @@ const HomePage: React.FC = () => {
     setShowBackConfirm(false);
   };
 
+  // 切换主题
+  const toggleTheme = () => {
+    const themes: DecorationTheme[] = ['daily', 'christmas', 'spring-festival'];
+    const currentIndex = themes.indexOf(decorationTheme);
+    const nextIndex = (currentIndex + 1) % themes.length;
+    setDecorationTheme(themes[nextIndex]);
+  };
+
   // 点击外部关闭下拉菜单
   React.useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -168,11 +180,15 @@ const HomePage: React.FC = () => {
       {/* 顶部导航栏 - ChatGPT 风格 */}
       <nav className="fixed top-0 left-0 right-0 bg-white border-b border-gray-200 z-50">
         <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
-          {/* Logo */}
-          <div className="flex items-center gap-2">
-            <Logo className="w-5 h-5" />
+          {/* Logo - 点击切换主题 */}
+          <button
+            onClick={toggleTheme}
+            className="flex items-center gap-2 hover:opacity-80 transition group"
+            title="点击切换主题"
+          >
+            <Logo className="w-5 h-5 transition-transform group-hover:scale-110" />
             <span className="font-semibold text-gray-800">书灯</span>
-          </div>
+          </button>
 
           {/* 用户区域 */}
           <div className="flex items-center gap-3">
@@ -275,9 +291,98 @@ const HomePage: React.FC = () => {
           {/* 欢迎区域 */}
           {!result && (
             <div className="text-center py-12">
-              <p className="text-gray-600 mb-8">
-                在翻开书之前，先点一盏灯
-              </p>
+              {/* 装饰区域 */}
+              <div className="relative inline-block mb-8">
+                {/* 日常主题 */}
+                {decorationTheme === 'daily' && (
+                  <>
+                    {/* 不对称的书本和装饰 */}
+                    <div className="absolute -top-8 -left-4 text-3xl opacity-60 animate-float-slow" style={{transform: 'rotate(-15deg)'}}>
+                      📚
+                    </div>
+                    <div className="absolute -top-6 right-8 text-2xl opacity-50 animate-float-medium">💡</div>
+                    <div className="absolute -bottom-2 -right-6 text-xl opacity-40 animate-float-fast" style={{transform: 'rotate(20deg)'}}>✨</div>
+                  </>
+                )}
+
+                {/* 圣诞主题 */}
+                {decorationTheme === 'christmas' && (
+                  <>
+                    {/* 彩灯线 */}
+                    <svg className="absolute -top-12 left-1/2 -translate-x-1/2 w-[400px] h-16" style={{overflow: 'visible'}}>
+                      {/* 电线 */}
+                      <path
+                        d="M 20,20 Q 80,12 140,20 T 260,20 T 380,20"
+                        stroke="#9CA3AF"
+                        strokeWidth="1.5"
+                        fill="none"
+                        className="opacity-60"
+                      />
+
+                      {/* 彩灯泡 */}
+                      <g className="holiday-light">
+                        <line x1="60" y1="16" x2="60" y2="26" stroke="#9CA3AF" strokeWidth="1" />
+                        <ellipse cx="60" cy="31" rx="6" ry="8" fill="#EF4444" className="light-glow-red" />
+                      </g>
+
+                      <g className="holiday-light" style={{animationDelay: '0.3s'}}>
+                        <line x1="120" y1="18" x2="120" y2="30" stroke="#9CA3AF" strokeWidth="1" />
+                        <ellipse cx="120" cy="35" rx="6" ry="8" fill="#FBBF24" className="light-glow-yellow" />
+                      </g>
+
+                      <g className="holiday-light" style={{animationDelay: '0.6s'}}>
+                        <line x1="180" y1="20" x2="180" y2="28" stroke="#9CA3AF" strokeWidth="1" />
+                        <ellipse cx="180" cy="33" rx="6" ry="8" fill="#10B981" className="light-glow-green" />
+                      </g>
+
+                      <g className="holiday-light" style={{animationDelay: '0.9s'}}>
+                        <line x1="240" y1="18" x2="240" y2="29" stroke="#9CA3AF" strokeWidth="1" />
+                        <ellipse cx="240" cy="34" rx="6" ry="8" fill="#3B82F6" className="light-glow-blue" />
+                      </g>
+
+                      <g className="holiday-light" style={{animationDelay: '1.2s'}}>
+                        <line x1="300" y1="20" x2="300" y2="27" stroke="#9CA3AF" strokeWidth="1" />
+                        <ellipse cx="300" cy="32" rx="6" ry="8" fill="#8B5CF6" className="light-glow-purple" />
+                      </g>
+
+                      <g className="holiday-light" style={{animationDelay: '1.5s'}}>
+                        <line x1="340" y1="17" x2="340" y2="29" stroke="#9CA3AF" strokeWidth="1" />
+                        <ellipse cx="340" cy="34" rx="6" ry="8" fill="#EC4899" className="light-glow-pink" />
+                      </g>
+                    </svg>
+
+                    {/* 小装饰 */}
+                    <div className="absolute -right-6 top-0 text-xl opacity-50 animate-float-slow">❄️</div>
+                    <div className="absolute -left-6 top-2 text-lg opacity-40 animate-float-medium">✨</div>
+                  </>
+                )}
+
+                {/* 春节主题 */}
+                {decorationTheme === 'spring-festival' && (
+                  <>
+                    {/* 不对称的灯笼和装饰 */}
+                    <div className="absolute -top-14 -left-8 animate-swing-left">
+                      <div className="text-3xl">🏮</div>
+                    </div>
+                    <div className="absolute -top-10 right-12 animate-swing-right" style={{animationDelay: '0.3s'}}>
+                      <div className="text-2xl">🏮</div>
+                    </div>
+
+                    {/* 烟花和其他装饰 - 不对称布局 */}
+                    <div className="absolute -left-12 top-4 text-xl opacity-50 animate-float-slow">🎆</div>
+                    <div className="absolute -right-4 -top-4 text-2xl opacity-60 animate-float-medium" style={{transform: 'rotate(15deg)'}}>🎇</div>
+
+                    {/* 金币和红包 */}
+                    <div className="absolute left-2 -bottom-4 text-lg opacity-45 animate-float-fast">🪙</div>
+                    <div className="absolute -right-8 bottom-2 text-xl opacity-55 animate-float-slow" style={{transform: 'rotate(-10deg)'}}>🧧</div>
+                  </>
+                )}
+
+                {/* 文字内容 */}
+                <p className="text-gray-600 text-lg">
+                  在翻开书之前，先点一盏灯
+                </p>
+              </div>
 
               {/* 搜索框 */}
               <div className="max-w-2xl mx-auto mb-6">
@@ -493,6 +598,111 @@ const HomePage: React.FC = () => {
         }
         .animate-fadeIn {
           animation: fadeIn 0.3s ease-out;
+        }
+
+        /* Google风格彩灯闪烁动画 */
+        @keyframes holiday-twinkle {
+          0%, 100% {
+            opacity: 1;
+            filter: brightness(1);
+          }
+          50% {
+            opacity: 0.6;
+            filter: brightness(1.4);
+          }
+        }
+
+        .holiday-light {
+          animation: holiday-twinkle 2s ease-in-out infinite;
+        }
+
+        /* 各种颜色的发光效果 */
+        .light-glow-red {
+          filter: drop-shadow(0 0 3px rgba(239, 68, 68, 0.6));
+        }
+        .light-glow-yellow {
+          filter: drop-shadow(0 0 3px rgba(251, 191, 36, 0.6));
+        }
+        .light-glow-green {
+          filter: drop-shadow(0 0 3px rgba(16, 185, 129, 0.6));
+        }
+        .light-glow-blue {
+          filter: drop-shadow(0 0 3px rgba(59, 130, 246, 0.6));
+        }
+        .light-glow-purple {
+          filter: drop-shadow(0 0 3px rgba(139, 92, 246, 0.6));
+        }
+        .light-glow-pink {
+          filter: drop-shadow(0 0 3px rgba(236, 72, 153, 0.6));
+        }
+
+        /* 漂浮动画 */
+        @keyframes float-slow {
+          0%, 100% {
+            transform: translateY(0) rotate(0deg);
+          }
+          50% {
+            transform: translateY(-10px) rotate(5deg);
+          }
+        }
+
+        @keyframes float-medium {
+          0%, 100% {
+            transform: translateY(0) rotate(0deg);
+          }
+          50% {
+            transform: translateY(-8px) rotate(-3deg);
+          }
+        }
+
+        @keyframes float-fast {
+          0%, 100% {
+            transform: translateY(0) scale(1);
+          }
+          50% {
+            transform: translateY(-12px) scale(1.1);
+          }
+        }
+
+        .animate-float-slow {
+          animation: float-slow 4s ease-in-out infinite;
+        }
+
+        .animate-float-medium {
+          animation: float-medium 3.5s ease-in-out infinite;
+        }
+
+        .animate-float-fast {
+          animation: float-fast 3s ease-in-out infinite;
+        }
+
+        /* 灯笼摇摆动画 */
+        @keyframes swing-left {
+          0%, 100% {
+            transform: rotate(-5deg);
+          }
+          50% {
+            transform: rotate(5deg);
+          }
+        }
+
+        @keyframes swing-right {
+          0%, 100% {
+            transform: rotate(5deg);
+          }
+          50% {
+            transform: rotate(-5deg);
+          }
+        }
+
+        .animate-swing-left {
+          transform-origin: top center;
+          animation: swing-left 2s ease-in-out infinite;
+        }
+
+        .animate-swing-right {
+          transform-origin: top center;
+          animation: swing-right 2s ease-in-out infinite;
         }
       `}</style>
 
