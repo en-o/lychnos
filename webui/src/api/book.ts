@@ -9,6 +9,7 @@ import {
   type UserPreference,
   type UserInterest,
 } from '../models';
+import type {InterestFeedback} from "../models/interest.model.ts";
 
 // 图书API
 export const bookApi = {
@@ -23,9 +24,9 @@ export const bookApi = {
     return request.put<Result<BookAnalysis>>(`/book/analyze/${encodeURIComponent(title)}`);
   },
 
-  // 提交用户反馈（创建或更新用户兴趣）
-  submitFeedback: (bookAnalyseId: string, interested: boolean, reason?: string) => {
-    return request.post<Result<UserInterest>>('/user/interest', { bookAnalyseId, interested, reason });
+  // 提交用户反馈（创建用户兴趣）
+  submitFeedback: (data: InterestFeedback) => {
+    return request.post<Result<UserInterest>>('/user/interest', data);
   },
 
   // 获取反馈历史

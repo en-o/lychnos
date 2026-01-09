@@ -8,8 +8,10 @@ import cn.tannn.lychnos.common.util.UserUtil;
 import cn.tannn.lychnos.common.views.Views;
 import cn.tannn.lychnos.controller.dto.PasswordEdit;
 import cn.tannn.lychnos.controller.dto.UserInfoFix;
+import cn.tannn.lychnos.controller.dto.UserInterestFeedback;
 import cn.tannn.lychnos.entity.UserInfo;
 import cn.tannn.lychnos.service.UserInfoService;
+import cn.tannn.lychnos.service.UserInterestService;
 import com.fasterxml.jackson.annotation.JsonView;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.extensions.Extension;
@@ -44,6 +46,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 public class UserController {
 
     private final UserInfoService userInfoService;
+    private final UserInterestService userInterestService;
 
 
     @Operation(summary = "当前登录者信息")
@@ -76,4 +79,15 @@ public class UserController {
     }
 
 
+    /**
+     * 提交用户反馈（创建用户兴趣）
+     */
+    @PostMapping(value = "/interest")
+    @Operation(summary = "提交用户反馈（创建用户兴趣）")
+    @Transactional(rollbackFor = Exception.class)
+    public ResultVO<String> interest(@RequestBody @Valid UserInterestFeedback interest, HttpServletRequest request) {
+        Long userId = UserUtil.userId2(request);
+        userInterestService.feedback(interest, userId);
+        return ResultVO.successMessage("反馈已提交！");
+    }
 }

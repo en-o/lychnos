@@ -4,7 +4,6 @@ import cn.tannn.jdevelops.annotations.web.authentication.ApiMapping;
 import cn.tannn.jdevelops.annotations.web.mapping.PathRestController;
 import cn.tannn.jdevelops.result.response.ResultVO;
 import cn.tannn.lychnos.controller.vo.BookRecommend;
-import cn.tannn.lychnos.dao.BookAnalyseDao;
 import cn.tannn.lychnos.entity.BookAnalyse;
 import cn.tannn.lychnos.service.BookAnalyseService;
 import io.swagger.v3.oas.annotations.Operation;

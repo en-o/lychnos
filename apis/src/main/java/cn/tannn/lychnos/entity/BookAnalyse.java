@@ -3,11 +3,11 @@ package cn.tannn.lychnos.entity;
 import cn.tannn.lychnos.common.pojo.JpaCommonBean;
 import cn.tannn.lychnos.common.views.Views;
 import com.alibaba.fastjson2.JSONArray;
-import com.alibaba.fastjson2.JSONObject;
 import com.fasterxml.jackson.annotation.JsonView;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.Index;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
@@ -26,7 +26,11 @@ import org.hibernate.type.SqlTypes;
  * @date 2026/1/9 14:10
  */
 @Entity
-@Table(name = "tb_book_analyse")
+@Table(name = "tb_book_analyse",
+        indexes = {
+                @Index(name = "idx_title", columnList = "title", unique = true)
+        }
+)
 @Comment("书籍分析")
 @Getter
 @Setter
