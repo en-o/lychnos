@@ -111,7 +111,7 @@ public class UserController {
      */
     @PostMapping("/history/analysis")
     @Operation(summary = "获取分析历史(分页)")
-    public ResultPageVO<AnalysisHistoryVO, JpaPageResult<AnalysisHistoryVO>> getAnalysisHistory(
+    public ResultPageVO<AnalysisHistoryVO, JpaPageResult<AnalysisHistoryVO>> analysisHistoryPage(
             @RequestBody @Valid AnalysisHistoryPage page,
             HttpServletRequest request) {
         Long userId = UserUtil.userId2(request);
