@@ -23,12 +23,11 @@ import org.apache.commons.lang3.StringUtils;
 @Setter
 public class UserInfoFix extends SerializableBean<UserInfoFix> {
     /**
-     * 用户id
+     * 用户名
      */
-    @Schema(description = "用户id",requiredMode = Schema.RequiredMode.REQUIRED)
-    @NotNull
-    @JsonSerialize(using = ToStringSerializer.class)
-    Long id;
+    @Schema(description = "用户名",requiredMode = Schema.RequiredMode.REQUIRED)
+    @NotNull(message = "用户名不允许为空")
+    String loginName;
 
     /** 昵称 */
     @Schema(description = "昵称")

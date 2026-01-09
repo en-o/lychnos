@@ -101,7 +101,7 @@ public class UserInfoService extends J2ServiceImpl<UserInfoDao, UserInfo,Long> {
      * @return Account
      */
     public UserInfo updateInfo(UserInfoFix fix) {
-        UserInfo account = getJpaBasicsDao().findById(fix.getId())
+        UserInfo account = getJpaBasicsDao().findByLoginName(fix.getLoginName())
                 .orElseThrow(() -> new BusinessException("请核对用户信息"));
         fix.update(account);
         getJpaBasicsDao().save(account);

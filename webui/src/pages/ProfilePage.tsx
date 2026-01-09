@@ -4,6 +4,8 @@ import {ArrowLeft, Save} from 'lucide-react';
 import type {UserProfile} from '../models';
 import Logo from '../components/Logo';
 import {toast} from '../components/ToastContainer';
+import {authApi} from '../api/auth';
+import * as console from "node:console";
 
 const ProfilePage: React.FC = () => {
   const navigate = useNavigate();
@@ -40,12 +42,10 @@ const ProfilePage: React.FC = () => {
       ...formData,
     };
     localStorage.setItem('userInfo', JSON.stringify(updatedUserInfo));
-
     setProfile(formData);
     setIsEditing(false);
+    authApi.fixUserInfo(formData);
     toast.success('保存成功');
-    // TODO: 这里应该调用后端 API 保存
-    // await api.updateProfile(formData);
   };
 
   const handleCancel = () => {

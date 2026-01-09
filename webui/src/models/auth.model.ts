@@ -33,6 +33,13 @@ export interface UserInfoRegister {
   email?: string;
 }
 
+// 修改用户基础信息
+export interface UserInfoFix {
+  id: string;
+  nickname: string;
+  email?: string;
+}
+
 // 错误码常量
 export const AuthErrorCode = {
   TOKEN_ERROR: 'TOKEN_ERROR',

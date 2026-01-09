@@ -1,5 +1,5 @@
 import {request} from '../utils/request';
-import type {LoginRequest, Result, TokenInfo, UserInfo, UserInfoRegister} from '../models';
+import type {LoginRequest, Result, TokenInfo, UserInfo, UserInfoFix, UserInfoRegister} from '../models';
 
 // 认证API
 export const authApi = {
@@ -16,6 +16,11 @@ export const authApi = {
     // 注册
     register: (data: UserInfoRegister) => {
         return request.post<Result<string>>('/register/myself', data);
+    },
+
+    // 修改基础信息
+    fixUserInfo: (data: UserInfoFix) => {
+        return request.post<Result<UserInfo>>('/user/fixInfo', data);
     },
 
     // 获取用户信息
