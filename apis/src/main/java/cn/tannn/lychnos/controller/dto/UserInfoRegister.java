@@ -1,7 +1,6 @@
 package cn.tannn.lychnos.controller.dto;
 
 import cn.tannn.jdevelops.result.bean.SerializableBean;
-import cn.tannn.jdevelops.utils.validation.password.Password;
 import cn.tannn.lychnos.entity.UserInfo;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;

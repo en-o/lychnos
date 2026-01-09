@@ -4,7 +4,6 @@ import cn.tannn.jdevelops.annotations.web.authentication.ApiMapping;
 import cn.tannn.jdevelops.annotations.web.mapping.PathRestController;
 import cn.tannn.jdevelops.exception.built.BusinessException;
 import cn.tannn.jdevelops.result.response.ResultVO;
-import cn.tannn.jdevelops.utils.validation.account.Account;
 import cn.tannn.lychnos.common.util.UserUtil;
 import cn.tannn.lychnos.common.views.Views;
 import cn.tannn.lychnos.controller.dto.PasswordEdit;

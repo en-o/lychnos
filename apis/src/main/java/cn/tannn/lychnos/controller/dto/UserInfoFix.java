@@ -2,8 +2,6 @@ package cn.tannn.lychnos.controller.dto;
 
 import cn.tannn.jdevelops.result.bean.SerializableBean;
 import cn.tannn.lychnos.entity.UserInfo;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;

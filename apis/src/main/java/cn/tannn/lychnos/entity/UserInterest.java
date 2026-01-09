@@ -1,7 +1,6 @@
 package cn.tannn.lychnos.entity;
 
 import cn.tannn.jdevelops.jpa.generator.UuidCustomGenerator;
-import cn.tannn.lychnos.common.pojo.JpaCommonBean;
 import cn.tannn.lychnos.common.views.Views;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonView;
@@ -21,7 +20,7 @@ import org.springframework.data.annotation.CreatedDate;
 import java.time.LocalDateTime;
 
 /**
- * 用户兴趣关联表（关联用户与书籍分析，包含用户反馈）
+ * 用户跟书籍兴趣关联（关联用户与书籍分析，包含用户反馈）
  *
  * @author <a href="https://t.tannn.cn/">tan</a>
  * @version V1.0
@@ -41,14 +40,14 @@ import java.time.LocalDateTime;
 @ToString
 @DynamicUpdate
 @DynamicInsert
-@Schema(description = "用户兴趣关联表")
+@Schema(description = "用户跟书籍兴趣关联")
 @JsonView({Views.Public.class})
 public class UserInterest {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "uuidCustomGenerator")
     @GenericGenerator(name = "uuidCustomGenerator", type = UuidCustomGenerator.class)
-    @Column(columnDefinition="bigint")
+    @Column(columnDefinition = "bigint")
     @Comment("uuid")
     @JsonSerialize(using = ToStringSerializer.class)
     private Long id;

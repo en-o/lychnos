@@ -30,9 +30,7 @@ export class BookAnalysis {
   posterUrl: string;
   recommendation: string;
   createTime?: string;
-  updateTime?: string;
   createUser?: string;
-  updateUser?: string;
 
   constructor(data: Partial<BookAnalysis> = {}) {
     this.id = data.id || '';
@@ -44,9 +42,7 @@ export class BookAnalysis {
     this.posterUrl = data.posterUrl || '';
     this.recommendation = data.recommendation || '';
     this.createTime = data.createTime;
-    this.updateTime = data.updateTime;
     this.createUser = data.createUser;
-    this.updateUser = data.updateUser;
   }
 
   // 转换为 BookSummary

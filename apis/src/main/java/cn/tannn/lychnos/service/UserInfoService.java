@@ -8,6 +8,7 @@ import cn.tannn.lychnos.controller.dto.PasswordEdit;
 import cn.tannn.lychnos.controller.dto.UserInfoFix;
 import cn.tannn.lychnos.dao.UserInfoDao;
 import cn.tannn.lychnos.entity.UserInfo;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
@@ -25,6 +26,7 @@ import static cn.tannn.lychnos.entity.UserInfo.getMd5Password;
  * @date 2026/1/8 22:36
  */
 @Service
+@Slf4j
 public class UserInfoService extends J2ServiceImpl<UserInfoDao, UserInfo,Long> {
     public UserInfoService() {
         super(UserInfo.class);

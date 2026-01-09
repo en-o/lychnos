@@ -4,10 +4,15 @@ import cn.tannn.jdevelops.annotations.web.authentication.ApiMapping;
 import cn.tannn.jdevelops.annotations.web.mapping.PathRestController;
 import cn.tannn.jdevelops.result.response.ResultVO;
 import cn.tannn.lychnos.controller.vo.BookRecommend;
+import cn.tannn.lychnos.dao.BookAnalyseDao;
+import cn.tannn.lychnos.entity.BookAnalyse;
+import cn.tannn.lychnos.service.BookAnalyseService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 import java.util.List;
@@ -26,6 +31,8 @@ import java.util.List;
 @Slf4j
 public class BookController {
 
+    private final BookAnalyseService bookAnalyseService;
+
     @Operation(summary = "书籍推荐",description = "分析输入看下面的 试试:")
     @ApiMapping(checkToken = false,value = "recommend",method = RequestMethod.GET)
     public ResultVO<List<BookRecommend>> recommend(){
@@ -35,5 +42,13 @@ public class BookController {
                 new BookRecommend(3L,"解忧杂货铺"),
                 new BookRecommend(4L,"人类简史"),
                 new BookRecommend(5L,"宵待草夜情")));
+    }
+
+
+    @Operation(summary = "分析图书",description = "根据书名进行分析图书")
+    @PutMapping(value = "analyze/{bookTitle}")
+    public ResultVO<BookAnalyse> analyze(@PathVariable("bookTitle") String bookTitle){
+        // 具体分析模型后面做，现在用内置的假数据
+        return ResultVO.success(bookAnalyseService.analyse(bookTitle));
     }
 }
