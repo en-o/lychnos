@@ -58,7 +58,7 @@ const HomePage: React.FC = () => {
     }
   }, [token]);
 
-  const handleSearch = async (title = bookTitle, bookId?: string) => {
+  const handleSearch = async (title = bookTitle) => {
     if (!title.trim()) {
       toast.warning('请输入书名');
       return;
@@ -74,9 +74,8 @@ const HomePage: React.FC = () => {
     setResult(null);
 
     try {
-      // 如果没有传入 bookId，则从快速推荐列表中查找
-      const id = bookId || quickBooks.find(book => book.title === title)?.id || title;
-      const response = await bookApi.analyzeBook(id);
+      // 则从快速推荐列表中查找
+      const response = await bookApi.analyzeBook(title);
 
       if (response.success) {
         setResult(response.data);
@@ -127,9 +126,13 @@ const HomePage: React.FC = () => {
     }
   };
 
-  const handleQuickSearch = (id: string, title: string) => {
+  /**
+   * 数据库的数据快速检索
+   * @param title 书名
+   */
+  const handleQuickSearch = ( title: string) => {
     setBookTitle(title);
-    handleSearch(title, id);
+    handleSearch(title);
   };
 
   const handleLogin = () => {
@@ -422,7 +425,7 @@ const HomePage: React.FC = () => {
                 {quickBooks.map((book) => (
                   <button
                     key={book.id}
-                    onClick={() => handleQuickSearch(book.id, book.title)}
+                    onClick={() => handleQuickSearch(book.title)}
                     disabled={loading}
                     className="px-3 py-1.5 text-sm text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition disabled:opacity-50"
                   >

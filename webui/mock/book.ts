@@ -43,20 +43,18 @@ export default [
     },
   },
 
-  // 分析图书（通过ID查询或创建书籍分析）
   {
-    url: '/api/book/analyze',
-    method: 'post',
+    // 分析图书（通过 title 查询或创建书籍分析）
+    url: '/api/book/analyze/:title',   // ① 动态路由
+    method: 'put',
     timeout: 2000,
-    response: ({ body }: any): Result<BookAnalysis> => {
-      const { id } = body;
+    response: ({ params }: any): Result<BookAnalysis> => {
+      const { title } = params;          // ② 从路径里拿 title
 
-      // 先查找是否已存在分析
-      let bookAnalysis = getMockBookAnalysis(id);
-
-      // 如果不存在，创建新的分析（模拟AI分析）
+      // 这里只是演示：如果 title 是三体就返回三体，否则随机给一本
+      let bookAnalysis = mockBookAnalysisData.find(b => b.title === title);
       if (!bookAnalysis) {
-        bookAnalysis = getRandomBookForAnalysis();
+        bookAnalysis = getRandomBookForAnalysis(); // 你已有的随机函数
       }
 
       return {
