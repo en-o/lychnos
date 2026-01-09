@@ -2,6 +2,7 @@ package cn.tannn.lychnos.entity;
 
 import cn.tannn.lychnos.common.pojo.JpaCommonBean;
 import cn.tannn.lychnos.common.views.Views;
+import com.alibaba.fastjson2.JSONObject;
 import com.fasterxml.jackson.annotation.JsonView;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
@@ -11,20 +12,18 @@ import lombok.ToString;
 import org.hibernate.annotations.Comment;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 /**
- * 书籍分析
+ * 书籍分析（平台共享数据，存储书籍的AI分析结果）
  *
  * @author <a href="https://t.tannn.cn/">tan</a>
  * @version V1.0
  * @date 2026/1/9 14:10
  */
 @Entity
-@Table(name = "tb_book_analys",
-        indexes = {
-                @Index(name = "idx_loginName", columnList = "loginName", unique = true)
-        }
-)
+@Table(name = "tb_book_analyse")
 @Comment("书籍分析")
 @Getter
 @Setter
@@ -35,5 +34,63 @@ import org.hibernate.annotations.DynamicUpdate;
 @JsonView({Views.Public.class})
 public class BookAnalyse extends JpaCommonBean<BookAnalyse> {
 
+    /**
+     * 书名
+     */
+    @Column(columnDefinition = " varchar(500) not null ")
+    @Comment("书名")
+    @Schema(description = "书名")
+    private String title;
+
+    /**
+     * 类型/流派
+     */
+    @Column(columnDefinition = " varchar(200) ")
+    @Comment("类型/流派")
+    @Schema(description = "类型/流派")
+    private String genre;
+
+    /**
+     * 主题（JSON数组字符串）
+     */
+    @Column(columnDefinition = " text ")
+    @Comment("主题")
+    @Schema(description = "主题")
+    @JdbcTypeCode(SqlTypes.JSON)
+    private JSONObject themes;
+
+    /**
+     * 基调
+     */
+    @Column(columnDefinition = " varchar(200) ")
+    @Comment("基调")
+    @Schema(description = "基调")
+    private String tone;
+
+    /**
+     * 关键要素（JSON数组字符串）
+     */
+    @Column(columnDefinition = " text ")
+    @Comment("关键要素")
+    @Schema(description = "关键要素")
+    @JdbcTypeCode(SqlTypes.JSON)
+    private JSONObject keyElements;
+
+
+    /**
+     * 分析图URL
+     */
+    @Column(columnDefinition = " varchar(500) ")
+    @Comment("分析图URL")
+    @Schema(description = "分析图URL")
+    private String posterUrl;
+
+    /**
+     * AI生成的book综述
+     */
+    @Column(columnDefinition = " text ")
+    @Comment("book综述")
+    @Schema(description = "book综述")
+    private String recommendation;
 
 }
