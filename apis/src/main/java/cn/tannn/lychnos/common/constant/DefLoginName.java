@@ -30,5 +30,5 @@ public interface DefLoginName {
     /**
      * 不允许注册的用户名（这是我的独有用户名）
      */
-    List<String> SUPPER_USER = Arrays.asList(ADMINISTRATORS,ADMIN,TAN);
+    List<String> SUPPER_USER = Arrays.asList(ADMINISTRATORS,ADMIN);
 }

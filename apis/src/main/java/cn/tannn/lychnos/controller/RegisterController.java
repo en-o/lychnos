@@ -45,9 +45,9 @@ public class RegisterController {
     @ApiMapping(value = "myself", method = RequestMethod.POST, checkToken = false)
     @Transactional(rollbackFor = Exception.class)
     public ResultVO<String> myself(@RequestBody @Valid UserInfoRegister register, HttpServletRequest request) {
-//        if (DefLoginName.SUPPER_USER.contains(register.getLoginName().toLowerCase())) {
-//            return ResultVO.failMessage("非法注册用户");
-//        }
+        if (DefLoginName.SUPPER_USER.contains(register.getLoginName().toLowerCase())) {
+            return ResultVO.failMessage("非法注册用户");
+        }
         UserInfo registerAccount = register.toAccount();
         userInfoService.registerUser(registerAccount);
         return ResultVO.successMessage("账户注册成功");
