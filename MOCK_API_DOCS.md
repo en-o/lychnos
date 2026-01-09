@@ -270,12 +270,12 @@ interface PageResult<T> {
 
 ### 1.1 用户登录
 
-**接口地址:** `POST /api/auth/login`
+**接口地址:** `POST /api/login`
 
 **请求参数:**
 ```typescript
 {
-  username: string;  // 用户名
+  loginName: string;  // 用户名
   password: string;  // 密码
 }
 ```
@@ -317,7 +317,7 @@ Result<{
 
 ### 1.2 用户登出
 
-**接口地址:** `POST /api/auth/logout`
+**接口地址:** `POST /api/logout`
 
 **请求头:** `token: xxx`
 
@@ -338,7 +338,7 @@ Result<{
 
 ### 1.3 获取用户信息
 
-**接口地址:** `GET /api/auth/userInfo`
+**接口地址:** `GET /api/user/info`
 
 **请求头:** `token: xxx`
 
@@ -368,28 +368,6 @@ Result<{
   success: true
 }
 ```
-
----
-
-### 1.4 刷新 Token
-
-**接口地址:** `POST /api/auth/refresh`
-
-**请求参数:**
-```typescript
-{
-  refreshToken: string;  // 刷新Token
-}
-```
-
-**响应数据:** `Result<TokenInfo>`
-```typescript
-Result<{
-  token: string;         // 新的JWT Token
-  expireTime?: number;   // 过期时间
-}>
-```
-
 ---
 
 ## 2. 图书相关接口

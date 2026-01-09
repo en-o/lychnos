@@ -9,14 +9,14 @@ const LoginPage: React.FC = () => {
   const [searchParams] = useSearchParams();
   const redirect = searchParams.get('redirect') || '/';
 
-  const [username, setUsername] = useState('');
+  const [loginName, setLoginName] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!username || !password) {
+    if (!loginName || !password) {
       toast.warning('请输入用户名和密码');
       return;
     }
@@ -24,7 +24,7 @@ const LoginPage: React.FC = () => {
     setLoading(true);
 
     try {
-      const response = await authApi.login({ username, password });
+      const response = await authApi.login({ loginName, password });
 
       if (response.success && response.data) {
         // 保存token
@@ -69,8 +69,8 @@ const LoginPage: React.FC = () => {
             </label>
             <input
               type="text"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
+              value={loginName}
+              onChange={(e) => setLoginName(e.target.value)}
               className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               placeholder="请输入用户名"
               disabled={loading}

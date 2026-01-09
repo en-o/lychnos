@@ -9,7 +9,7 @@ const ProfilePage: React.FC = () => {
   const navigate = useNavigate();
   const [isEditing, setIsEditing] = useState(false);
   const [profile, setProfile] = useState<UserProfile>({
-    username: '',
+    loginName: '',
     nickname: '',
     email: '',
     avatar: '',
@@ -22,7 +22,7 @@ const ProfilePage: React.FC = () => {
     // 从 localStorage 加载用户信息
     const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
     const userProfile: UserProfile = {
-      username: userInfo.username || '',
+      loginName: userInfo.loginName || '',
       nickname: userInfo.nickname || '',
       email: userInfo.email || '',
       avatar: userInfo.avatar || '',
@@ -104,13 +104,13 @@ const ProfilePage: React.FC = () => {
             {/* 头像 */}
             <div className="flex items-center gap-4 mb-6 pb-6 border-b border-gray-200">
               <div className="w-20 h-20 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-white text-2xl font-medium">
-                {profile.nickname?.[0] || profile.username?.[0] || 'U'}
+                {profile.nickname?.[0] || profile.loginName?.[0] || 'U'}
               </div>
               <div>
                 <h2 className="text-xl font-semibold text-gray-900">
-                  {profile.nickname || profile.username}
+                  {profile.nickname || profile.loginName}
                 </h2>
-                <p className="text-sm text-gray-500">@{profile.username}</p>
+                <p className="text-sm text-gray-500">@{profile.loginName}</p>
               </div>
             </div>
 
@@ -122,7 +122,7 @@ const ProfilePage: React.FC = () => {
                 </label>
                 <input
                   type="text"
-                  value={profile.username}
+                  value={profile.loginName}
                   disabled
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-500 cursor-not-allowed"
                 />

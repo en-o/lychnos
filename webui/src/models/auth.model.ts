@@ -11,16 +11,16 @@ export interface TokenInfo {
 
 // 登录请求
 export interface LoginRequest {
-  username: string;
+  loginName: string;
   password: string;
 }
 
 // 用户信息
 export interface UserInfo {
-  username: string;
-  nickname?: string;
-  userId?: string;
-  [key: string]: any;
+  loginName: string;
+  nickname: string;
+  id: string;
+  email?: string;
 }
 
 // 错误码常量

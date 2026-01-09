@@ -7,7 +7,7 @@ import {toast} from '../components/ToastContainer';
 const RegisterPage: React.FC = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    username: '',
+    loginName: '',
     password: '',
     confirmPassword: '',
     email: '',
@@ -23,10 +23,10 @@ const RegisterPage: React.FC = () => {
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
 
-    if (!formData.username) {
-      newErrors.username = '请输入用户名';
-    } else if (formData.username.length < 3) {
-      newErrors.username = '用户名至少3个字符';
+    if (!formData.loginName) {
+      newErrors.loginName = '请输入用户名';
+    } else if (formData.loginName.length < 3) {
+      newErrors.loginName = '用户名至少3个字符';
     }
 
     if (!formData.password) {
@@ -95,17 +95,17 @@ const RegisterPage: React.FC = () => {
             </label>
             <input
               type="text"
-              value={formData.username}
+              value={formData.loginName}
               onChange={(e) => {
-                setFormData({ ...formData, username: e.target.value });
-                setErrors({ ...errors, username: '' });
+                setFormData({ ...formData, loginName: e.target.value });
+                setErrors({ ...errors, loginName: '' });
               }}
               className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               placeholder="请输入用户名(至少3个字符)"
               disabled={loading}
             />
-            {errors.username && (
-              <p className="text-sm text-red-600 mt-1">{errors.username}</p>
+            {errors.loginName && (
+              <p className="text-sm text-red-600 mt-1">{errors.loginName}</p>
             )}
           </div>
 

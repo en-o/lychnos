@@ -186,7 +186,7 @@ const HomePage: React.FC = () => {
                 >
                   <div className="w-7 h-7 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-white text-sm font-medium">
                     {(() => {
-                      const str = (userInfo.nickname || userInfo.username || 'tan').toString();
+                      const str = (userInfo.nickname || userInfo.loginName || 'tan').toString();
                       const firstChar = str.charAt(0);
                       // 判断首字符是否为中文（包括常用汉字）
                       const isChinese = /[\u4e00-\u9fff]/.test(firstChar);
@@ -203,8 +203,8 @@ const HomePage: React.FC = () => {
                 {showUserMenu && (
                   <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200 py-1">
                     <div className="px-4 py-2 border-b border-gray-100">
-                      <p className="font-medium text-gray-900">{userInfo.nickname || userInfo.username}</p>
-                      <p className="text-sm text-gray-500">{userInfo.email || userInfo.username}</p>
+                      <p className="font-medium text-gray-900">{userInfo.nickname || userInfo.loginName}</p>
+                      <p className="text-sm text-gray-500">{userInfo.email || userInfo.loginName}</p>
                     </div>
 
                     <button

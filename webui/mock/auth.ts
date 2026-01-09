@@ -8,12 +8,12 @@ import type {Result, TokenInfo, UserInfo} from '../src/models';
 export default [
   // 登录接口
   {
-    url: '/api/auth/login',
+    url: '/api/login',
     method: 'post',
     timeout: 1000,
     response: ({ body }: any): Result<TokenInfo> => {
-      const { username, password } = body;
-      const user = validateUser(username, password);
+      const { loginName, password } = body;
+      const user = validateUser(loginName, password);
 
       if (user) {
         const mockToken = 'mock_token_' + Date.now();
@@ -41,7 +41,7 @@ export default [
 
   // 登出接口
   {
-    url: '/api/auth/logout',
+    url: '/api/logout',
     method: 'post',
     timeout: 500,
     response: (): Result<null> => {
@@ -57,7 +57,7 @@ export default [
 
   // 获取用户信息
   {
-    url: '/api/auth/userInfo',
+    url: '/api/user/info',
     method: 'get',
     timeout: 500,
     response: ({ headers }: any): Result<UserInfo> => {
@@ -78,29 +78,10 @@ export default [
         message: 'success',
         ts: Date.now(),
         data: {
-          username: 'admin',
+          loginName: 'admin',
           nickname: '管理员',
-          userId: '1',
-        },
-        success: true,
-      };
-    },
-  },
-
-  // 刷新token
-  {
-    url: '/api/auth/refresh',
-    method: 'post',
-    timeout: 500,
-    response: (): Result<TokenInfo> => {
-      const newToken = 'mock_token_' + Date.now();
-      return {
-        code: 200,
-        message: '刷新成功',
-        ts: Date.now(),
-        data: {
-          token: newToken,
-          expireTime: Date.now() + 24 * 60 * 60 * 1000,
+          email: 'admin@admin.com',
+          id: '1',
         },
         success: true,
       };

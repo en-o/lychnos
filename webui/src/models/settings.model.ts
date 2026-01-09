@@ -48,14 +48,14 @@ export class AIImageModel {
 
 // 用户资料
 export class UserProfile {
-  username: string;
+  loginName: string;
   nickname?: string;
   email?: string;
   avatar?: string;
   createdAt?: string;
 
   constructor(data: Partial<UserProfile> = {}) {
-    this.username = data.username || '';
+    this.loginName = data.loginName || '';
     this.nickname = data.nickname;
     this.email = data.email;
     this.avatar = data.avatar;

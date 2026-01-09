@@ -5,21 +5,17 @@ import type {LoginRequest, Result, TokenInfo, UserInfo} from '../models';
 export const authApi = {
   // 登录
   login: (data: LoginRequest) => {
-    return request.post<Result<TokenInfo>>('/auth/login', data);
+    return request.post<Result<TokenInfo>>('/login', data);
   },
 
   // 登出
   logout: () => {
-    return request.post<Result<null>>('/auth/logout');
+    return request.post<Result<string>>('/logout');
   },
 
   // 获取用户信息
   getUserInfo: () => {
-    return request.get<Result<UserInfo>>('/auth/userInfo');
+    return request.get<Result<UserInfo>>('/user/info');
   },
 
-  // 刷新token
-  refreshToken: (refreshToken: string) => {
-    return request.post<Result<TokenInfo>>('/auth/refresh', { refreshToken });
-  },
 };
