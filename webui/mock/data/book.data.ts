@@ -65,7 +65,6 @@ export const mockUserInterestData: UserInterest[] = [
     reason: '非常喜欢硬核科幻，三体系列一直是我的最爱',
     interestSummary: '用户对硬核科幻题材表现出浓厚兴趣，偏好宏大叙事和深度思考',
     createTime: '2024-02-01T15:30:00Z',
-    createUser: 'user_001',
   },
   {
     id: '2002',
@@ -74,7 +73,6 @@ export const mockUserInterestData: UserInterest[] = [
     interested: false,
     reason: '太沉重了，情感上难以承受',
     createTime: '2024-02-02T16:00:00Z',
-    createUser: 'user_001',
   },
   {
     id: '2003',
@@ -84,7 +82,6 @@ export const mockUserInterestData: UserInterest[] = [
     reason: '很温暖的故事，适合放松时阅读',
     interestSummary: '用户喜欢治愈系作品，偏好温暖轻松的阅读体验',
     createTime: '2024-02-03T14:20:00Z',
-    createUser: 'user_001',
   },
 ];
 
@@ -157,9 +154,6 @@ export function addOrUpdateUserInterest(
     createTime: existingIndex >= 0
       ? mockUserInterestData[existingIndex].createTime
       : new Date().toISOString(),
-    updateTime: new Date().toISOString(),
-    createUser: userId,
-    updateUser: userId,
   };
 
   if (existingIndex >= 0) {

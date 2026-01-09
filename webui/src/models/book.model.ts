@@ -44,17 +44,6 @@ export class BookAnalysis {
     this.createTime = data.createTime;
     this.createUser = data.createUser;
   }
-
-  // 转换为 BookSummary
-  toSummary(): BookSummary {
-    return new BookSummary({
-      title: this.title,
-      genre: this.genre,
-      themes: this.themes,
-      tone: this.tone,
-      keyElements: this.keyElements,
-    });
-  }
 }
 
 // 用户兴趣关联（用户与书籍分析的关联）
@@ -66,9 +55,6 @@ export class UserInterest {
   reason?: string;
   interestSummary?: string;
   createTime?: string;
-  updateTime?: string;
-  createUser?: string;
-  updateUser?: string;
 
   constructor(data: Partial<UserInterest> = {}) {
     this.id = data.id || '';
@@ -78,9 +64,6 @@ export class UserInterest {
     this.reason = data.reason;
     this.interestSummary = data.interestSummary;
     this.createTime = data.createTime;
-    this.updateTime = data.updateTime;
-    this.createUser = data.createUser;
-    this.updateUser = data.updateUser;
   }
 }
 
