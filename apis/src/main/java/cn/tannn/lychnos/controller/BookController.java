@@ -58,7 +58,7 @@ public class BookController {
 
         Long userId = UserUtil.userId2(request);
         if(userInterestService.checkAnalyzed(userId, bookTitle).isPresent()){
-            throw new BusinessException("该书籍已经分析过，请到历史记录中查看");
+            throw new BusinessException(1001,"该书籍已经分析过，请到历史记录中查看");
         };
         // 具体分析模型后面做，现在用内置的假数据
         return ResultVO.success(bookAnalyseService.analyse(bookTitle));
@@ -66,11 +66,12 @@ public class BookController {
 
     @Operation(summary = "检查书籍是否已分析",description = "根据书名检查当前用户是否已经分析过该书籍")
     @GetMapping(value = "check/{bookTitle}")
-    public ResultVO<UserInterest> checkAnalyzed(@PathVariable("bookTitle") String bookTitle,
+    public ResultVO<String> checkAnalyzed(@PathVariable("bookTitle") String bookTitle,
                                                  HttpServletRequest request){
         Long userId = UserUtil.userId2(request);
-        return userInterestService.checkAnalyzed(userId, bookTitle)
-                .map(ResultVO::success)
-                .orElse(ResultVO.success(null));
+        if(userInterestService.checkAnalyzed(userId, bookTitle).isPresent()){
+            throw new BusinessException(1001,"该书籍已经分析过，请到历史记录中查看");
+        }
+        return ResultVO.successMessage("该书籍未分析，可以进行分析");
     }
 }
