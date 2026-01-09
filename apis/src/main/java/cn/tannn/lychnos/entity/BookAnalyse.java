@@ -53,7 +53,7 @@ public class BookAnalyse extends JpaCommonBean<BookAnalyse> {
     /**
      * 主题（JSON数组字符串）
      */
-    @Column(columnDefinition = " text ")
+    @Column(columnDefinition = " json ")
     @Comment("主题")
     @Schema(description = "主题")
     @JdbcTypeCode(SqlTypes.JSON)
@@ -70,7 +70,7 @@ public class BookAnalyse extends JpaCommonBean<BookAnalyse> {
     /**
      * 关键要素（JSON数组字符串）
      */
-    @Column(columnDefinition = " text ")
+    @Column(columnDefinition = " json ")
     @Comment("关键要素")
     @Schema(description = "关键要素")
     @JdbcTypeCode(SqlTypes.JSON)
