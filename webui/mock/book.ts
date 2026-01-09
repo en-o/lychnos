@@ -12,7 +12,7 @@ let feedbackCount = 0;
 export default [
   // 获取快速推荐书籍列表
   {
-    url: '/api/book/quick',
+    url: '/api/book/recommend',
     method: 'get',
     timeout: 300,
     response: (): Result<string[]> => {

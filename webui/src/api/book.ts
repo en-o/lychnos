@@ -5,7 +5,7 @@ import type {AnalysisHistory, BookAnalysis, FeedbackHistory, PageResult, Result,
 export const bookApi = {
   // 获取快速推荐书籍列表
   getQuickBooks: () => {
-    return request.get<Result<string[]>>('/book/quick');
+    return request.get<Result<string[]>>('/book/recommend');
   },
 
   // 分析图书

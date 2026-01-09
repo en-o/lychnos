@@ -396,7 +396,7 @@ Result<{
 
 ### 2.1 获取快速推荐书籍
 
-**接口地址:** `GET /api/book/quick`
+**接口地址:** `GET /api/book/recommend`
 
 **请求头:** `token: xxx`（需要登录）
 
