@@ -4,7 +4,6 @@ import {ArrowLeft, ChevronLeft, ChevronRight, Eye, ThumbsDown, ThumbsUp} from 'l
 import {bookApi} from '../api/book';
 import type {AnalysisHistory, PageResult} from '../models';
 import Logo from '../components/Logo';
-import {toast} from '../components/ToastContainer';
 
 const HistoryPage: React.FC = () => {
   const navigate = useNavigate();
