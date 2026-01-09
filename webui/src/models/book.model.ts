@@ -51,6 +51,7 @@ export class UserInterest {
   id: string;
   userId: string;
   bookAnalyseId: string;
+  bookTitle?: string;
   interested?: boolean;
   reason?: string;
   interestSummary?: string;
@@ -60,6 +61,7 @@ export class UserInterest {
     this.id = data.id || '';
     this.userId = data.userId || '';
     this.bookAnalyseId = data.bookAnalyseId || '';
+    this.bookTitle = data.bookTitle;
     this.interested = data.interested;
     this.reason = data.reason;
     this.interestSummary = data.interestSummary;

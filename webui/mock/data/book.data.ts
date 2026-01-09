@@ -61,6 +61,7 @@ export const mockUserInterestData: UserInterest[] = [
     id: '2001',
     userId: 'user_001',
     bookAnalyseId: '1001',
+    bookTitle: '三体',
     interested: true,
     reason: '非常喜欢硬核科幻，三体系列一直是我的最爱',
     interestSummary: '用户对硬核科幻题材表现出浓厚兴趣，偏好宏大叙事和深度思考',
@@ -70,6 +71,7 @@ export const mockUserInterestData: UserInterest[] = [
     id: '2002',
     userId: 'user_001',
     bookAnalyseId: '1002',
+    bookTitle: '活着',
     interested: false,
     reason: '太沉重了，情感上难以承受',
     createTime: '2024-02-02T16:00:00Z',
@@ -78,6 +80,7 @@ export const mockUserInterestData: UserInterest[] = [
     id: '2003',
     userId: 'user_001',
     bookAnalyseId: '1003',
+    bookTitle: '解忧杂货店',
     interested: true,
     reason: '很温暖的故事，适合放松时阅读',
     interestSummary: '用户喜欢治愈系作品，偏好温暖轻松的阅读体验',
@@ -139,7 +142,8 @@ export function addOrUpdateUserInterest(
   userId: string,
   bookAnalyseId: string,
   interested: boolean,
-  reason?: string
+  reason?: string,
+  bookTitle?: string
 ): UserInterest {
   const existingIndex = mockUserInterestData.findIndex(
     (item) => item.userId === userId && item.bookAnalyseId === bookAnalyseId
@@ -149,6 +153,7 @@ export function addOrUpdateUserInterest(
     id: existingIndex >= 0 ? mockUserInterestData[existingIndex].id : `${Date.now()}`,
     userId,
     bookAnalyseId,
+    bookTitle,
     interested,
     reason,
     createTime: existingIndex >= 0

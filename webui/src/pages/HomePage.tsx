@@ -106,6 +106,7 @@ const HomePage: React.FC = () => {
     try {
       const response = await bookApi.submitFeedback({
         bookAnalyseId: result.id,
+        bookTitle: result.title,
         interested,
         reason: ''
       });

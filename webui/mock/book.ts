@@ -102,14 +102,15 @@ export default [
     method: 'post',
     timeout: 500,
     response: ({ body }: any): Result<UserInterest> => {
-      const { bookAnalyseId, interested, reason } = body;
+      const { bookAnalyseId, bookTitle, interested, reason } = body;
       const userId = 'user_001'; // 实际项目中从token获取用户ID
 
       const userInterest = addOrUpdateUserInterest(
         userId,
         bookAnalyseId,
         interested,
-        reason
+        reason,
+        bookTitle
       );
 
       // 同时更新历史记录
@@ -219,12 +220,21 @@ export default [
     response: ({ body }: any): Result<PageResult<AnalysisHistory>> => {
       const pageIndex = body?.page?.pageIndex || 1;
       const pageSize = body?.page?.pageSize || 10;
+      const bookTitle = body?.bookTitle?.trim();
 
-      const total = analysisHistory.length;
+      // 根据书名过滤
+      let filteredHistory = analysisHistory;
+      if (bookTitle) {
+        filteredHistory = analysisHistory.filter(item =>
+          item.title.toLowerCase().includes(bookTitle.toLowerCase())
+        );
+      }
+
+      const total = filteredHistory.length;
       const totalPages = Math.ceil(total / pageSize);
       const start = (pageIndex - 1) * pageSize;
       const end = start + pageSize;
-      const items = analysisHistory.slice(start, end);
+      const items = filteredHistory.slice(start, end);
 
       const pageResult: PageResult<AnalysisHistory> = {
         rows: items,

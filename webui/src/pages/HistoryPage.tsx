@@ -1,6 +1,6 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useState, useRef, useCallback} from 'react';
 import {useNavigate} from 'react-router-dom';
-import {ArrowLeft, ChevronLeft, ChevronRight, Eye, ThumbsDown, ThumbsUp} from 'lucide-react';
+import {ArrowLeft, Eye, ThumbsDown, ThumbsUp, Search, X} from 'lucide-react';
 import {bookApi} from '../api/book';
 import type {AnalysisHistory, PageResult} from '../models';
 import Logo from '../components/Logo';
@@ -9,35 +9,80 @@ import ImagePreview from '../components/ImagePreview';
 const HistoryPage: React.FC = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
-  const [historyData, setHistoryData] = useState<PageResult<AnalysisHistory> | null>(null);
+  const [historyList, setHistoryList] = useState<AnalysisHistory[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [total, setTotal] = useState(0);
   const [selectedItem, setSelectedItem] = useState<AnalysisHistory | null>(null);
   const [imageError, setImageError] = useState<Record<string, boolean>>({});
   const [previewImage, setPreviewImage] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchInput, setSearchInput] = useState('');
   const pageSize = 10;
+  const observerTarget = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    loadHistory(currentPage);
-  }, [currentPage]);
-
-  const loadHistory = async (page: number) => {
+  // 加载历史数据
+  const loadHistory = useCallback(async (page: number, query: string, append: boolean = false) => {
     setLoading(true);
     try {
-      const response = await bookApi.getAnalysisHistory(page, pageSize);
+      const response = await bookApi.getAnalysisHistory(page, pageSize, query);
       if (response.success) {
-        setHistoryData(response.data);
+        const newItems = response.data.rows;
+        if (append) {
+          setHistoryList(prev => [...prev, ...newItems]);
+        } else {
+          setHistoryList(newItems);
+        }
+        setTotal(response.data.total);
+        setHasMore(page < response.data.totalPages);
       }
     } catch (error) {
       console.error('加载历史失败:', error);
-      // 错误提示已在request拦截器中统一处理，不需要重复提示
     } finally {
       setLoading(false);
     }
+  }, []);
+
+  // 初始加载
+  useEffect(() => {
+    loadHistory(1, searchQuery);
+    setCurrentPage(1);
+  }, [searchQuery, loadHistory]);
+
+  // 滚动加载更多
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasMore && !loading) {
+          const nextPage = currentPage + 1;
+          setCurrentPage(nextPage);
+          loadHistory(nextPage, searchQuery, true);
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    const currentTarget = observerTarget.current;
+    if (currentTarget) {
+      observer.observe(currentTarget);
+    }
+
+    return () => {
+      if (currentTarget) {
+        observer.unobserve(currentTarget);
+      }
+    };
+  }, [hasMore, loading, currentPage, searchQuery, loadHistory]);
+
+  // 处理搜索
+  const handleSearch = () => {
+    setSearchQuery(searchInput);
   };
 
-  const handlePageChange = (page: number) => {
-    if (page < 1 || (historyData && page > historyData.totalPages)) return;
-    setCurrentPage(page);
+  // 清除搜索
+  const handleClearSearch = () => {
+    setSearchInput('');
+    setSearchQuery('');
   };
 
   const formatDate = (dateStr: string) => {
@@ -72,27 +117,58 @@ const HistoryPage: React.FC = () => {
       {/* 主内容 */}
       <main className="pt-14">
         <div className="max-w-6xl mx-auto px-4 py-8">
-          {loading && currentPage === 1 ? (
+          {/* 搜索框 */}
+          <div className="mb-6 bg-white rounded-lg border border-gray-200 p-4">
+            <div className="flex items-center gap-2">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <input
+                  type="text"
+                  value={searchInput}
+                  onChange={(e) => setSearchInput(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                  placeholder="搜索书名..."
+                  className="w-full pl-10 pr-10 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                {searchInput && (
+                  <button
+                    onClick={handleClearSearch}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                )}
+              </div>
+              <button
+                onClick={handleSearch}
+                className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+              >
+                搜索
+              </button>
+            </div>
+          </div>
+
+          {loading && historyList.length === 0 ? (
             <div className="text-center py-12">
               <div className="inline-block w-8 h-8 border-4 border-gray-300 border-t-blue-600 rounded-full animate-spin"></div>
               <p className="text-gray-600 mt-4">加载中...</p>
             </div>
-          ) : historyData && historyData.rows.length > 0 ? (
+          ) : historyList.length > 0 ? (
             <>
               {/* 统计信息 */}
               <div className="mb-6 bg-white rounded-lg border border-gray-200 p-4">
                 <div className="flex items-center justify-between text-sm text-gray-600">
-                  <span>共 {historyData.total} 条分析记录</span>
+                  <span>共 {total} 条分析记录</span>
                   <span>
-                    感兴趣: {historyData.rows.filter(h => h.interested).length} / 不感兴趣:{' '}
-                    {historyData.rows.filter(h => !h.interested).length}
+                    感兴趣: {historyList.filter(h => h.interested).length} / 不感兴趣:{' '}
+                    {historyList.filter(h => !h.interested).length}
                   </span>
                 </div>
               </div>
 
               {/* 历史列表 */}
               <div className="space-y-3">
-                {historyData.rows.map((item) => (
+                {historyList.map((item) => (
                   <div
                     key={item.id}
                     className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition"
@@ -146,54 +222,29 @@ const HistoryPage: React.FC = () => {
                 ))}
               </div>
 
-              {/* 分页 */}
-              {historyData.totalPages > 1 && (
-                <div className="mt-6 flex items-center justify-center gap-2">
-                  <button
-                    onClick={() => handlePageChange(currentPage - 1)}
-                    disabled={currentPage === 1}
-                    className="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition"
-                  >
-                    <ChevronLeft className="w-5 h-5" />
-                  </button>
-
-                  <div className="flex gap-1">
-                    {Array.from({ length: historyData.totalPages }, (_, i) => i + 1).map(
-                      (page) => (
-                        <button
-                          key={page}
-                          onClick={() => handlePageChange(page)}
-                          className={`px-4 py-2 rounded-lg transition ${
-                            page === currentPage
-                              ? 'bg-blue-600 text-white'
-                              : 'border border-gray-300 hover:bg-gray-50'
-                          }`}
-                        >
-                          {page}
-                        </button>
-                      )
-                    )}
-                  </div>
-
-                  <button
-                    onClick={() => handlePageChange(currentPage + 1)}
-                    disabled={currentPage === historyData.totalPages}
-                    className="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition"
-                  >
-                    <ChevronRight className="w-5 h-5" />
-                  </button>
-                </div>
-              )}
+              {/* 加载更多指示器 */}
+              <div ref={observerTarget} className="py-8 text-center">
+                {loading && (
+                  <div className="inline-block w-6 h-6 border-4 border-gray-300 border-t-blue-600 rounded-full animate-spin"></div>
+                )}
+                {!hasMore && historyList.length > 0 && (
+                  <p className="text-gray-400 text-sm">已加载全部数据</p>
+                )}
+              </div>
             </>
           ) : (
             <div className="text-center py-12">
-              <p className="text-gray-600 mb-4">暂无分析历史</p>
-              <button
-                onClick={() => navigate('/')}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
-              >
-                开始分析
-              </button>
+              <p className="text-gray-600 mb-4">
+                {searchQuery ? '未找到相关记录' : '暂无分析历史'}
+              </p>
+              {!searchQuery && (
+                <button
+                  onClick={() => navigate('/')}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+                >
+                  开始分析
+                </button>
+              )}
             </div>
           )}
         </div>
