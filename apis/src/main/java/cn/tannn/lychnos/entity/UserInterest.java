@@ -3,6 +3,8 @@ package cn.tannn.lychnos.entity;
 import cn.tannn.lychnos.common.pojo.JpaCommonBean;
 import cn.tannn.lychnos.common.views.Views;
 import com.fasterxml.jackson.annotation.JsonView;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -43,7 +45,8 @@ public class UserInterest extends JpaCommonBean<UserInterest> {
     @Column(columnDefinition = " varchar(100) not null ")
     @Comment("用户id")
     @Schema(description = "用户id")
-    private String userId;
+    @JsonSerialize(using = ToStringSerializer.class)
+    private Long userId;
 
     /**
      * 书籍分析ID（关联tb_book_analyse表的id）
@@ -51,6 +54,7 @@ public class UserInterest extends JpaCommonBean<UserInterest> {
     @Column(columnDefinition = " bigint not null ")
     @Comment("书籍分析ID")
     @Schema(description = "书籍分析ID")
+    @JsonSerialize(using = ToStringSerializer.class)
     private Long bookAnalyseId;
 
     /**
