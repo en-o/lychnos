@@ -214,22 +214,22 @@ export default [
   // 获取分析历史（分页）
   {
     url: '/api/user/history/analysis',
-    method: 'get',
+    method: 'post',
     timeout: 500,
-    response: ({ query }: any): Result<PageResult<AnalysisHistory>> => {
-      const page = parseInt(query.page) || 1;
-      const pageSize = parseInt(query.pageSize) || 10;
+    response: ({ body }: any): Result<PageResult<AnalysisHistory>> => {
+      const pageIndex = body?.page?.pageIndex || 1;
+      const pageSize = body?.page?.pageSize || 10;
 
       const total = analysisHistory.length;
       const totalPages = Math.ceil(total / pageSize);
-      const start = (page - 1) * pageSize;
+      const start = (pageIndex - 1) * pageSize;
       const end = start + pageSize;
       const items = analysisHistory.slice(start, end);
 
       const pageResult: PageResult<AnalysisHistory> = {
         rows: items,
         total,
-        currentPage: page,
+        currentPage: pageIndex,
         pageSize,
         totalPages,
       };

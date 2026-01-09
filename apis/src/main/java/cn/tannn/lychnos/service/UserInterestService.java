@@ -91,7 +91,8 @@ public class UserInterestService extends J2ServiceImpl<UserInterestDao, UserInte
                 where,
                 page.getPage().pageable()
         );
-        return interests.map(this::convertToVO);
+        Page<AnalysisHistoryVO> voPage = interests.map(this::convertToVO);
+        return JpaPageResult.toPage(voPage);
     }
 
     /**

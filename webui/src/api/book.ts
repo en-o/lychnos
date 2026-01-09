@@ -35,8 +35,11 @@ export const bookApi = {
 
   // 获取分析历史（分页）
   getAnalysisHistory: (page: number, pageSize: number) => {
-    return request.get<Result<PageResult<AnalysisHistory>>>('/user/history/analysis', {
-      params: { page, pageSize }
+    return request.post<Result<PageResult<AnalysisHistory>>>('/user/history/analysis', {
+      page: {
+        pageIndex: page,
+        pageSize: pageSize
+      }
     });
   },
 
