@@ -39,38 +39,39 @@ public class BookController {
     private final BookAnalyseService bookAnalyseService;
     private final UserInterestService userInterestService;
 
-    @Operation(summary = "书籍推荐",description = "分析输入看下面的 试试:")
-    @ApiMapping(checkToken = false,value = "recommend",method = RequestMethod.GET)
-    public ResultVO<List<BookRecommend>> recommend(){
+    @Operation(summary = "书籍推荐", description = "分析输入看下面的 试试:")
+    @ApiMapping(checkToken = false, value = "recommend", method = RequestMethod.GET)
+    public ResultVO<List<BookRecommend>> recommend() {
         return ResultVO.success(List.of(
-                new BookRecommend(1L,"三体"),
-                new BookRecommend(2L,"活着"),
-                new BookRecommend(3L,"解忧杂货店"),
-                new BookRecommend(4L,"人类简史"),
-                new BookRecommend(5L,"宵待草夜情")));
+                new BookRecommend(1L, "三体"),
+                new BookRecommend(2L, "活着"),
+                new BookRecommend(3L, "解忧杂货店"),
+                new BookRecommend(4L, "人类简史"),
+                new BookRecommend(5L, "宵待草夜情")));
     }
 
 
-    @Operation(summary = "分析图书",description = "根据书名进行分析图书")
+    @Operation(summary = "分析图书", description = "根据书名进行分析图书")
     @PutMapping(value = "analyze/{bookTitle}")
     public ResultVO<BookAnalyse> analyze(@PathVariable("bookTitle") String bookTitle,
-                                         HttpServletRequest request){
+                                         HttpServletRequest request) {
 
         Long userId = UserUtil.userId2(request);
-        if(userInterestService.checkAnalyzed(userId, bookTitle).isPresent()){
-            throw new BusinessException(1001,"该书籍已经分析过，请到历史记录中查看");
-        };
+        if (userInterestService.checkAnalyzed(userId, bookTitle).isPresent()) {
+            throw new BusinessException(1001, "该书籍已经分析过，请到历史记录中查看");
+        }
+        ;
         // 具体分析模型后面做，现在用内置的假数据
         return ResultVO.success(bookAnalyseService.analyse(bookTitle));
     }
 
-    @Operation(summary = "检查书籍是否已分析",description = "根据书名检查当前用户是否已经分析过该书籍")
+    @Operation(summary = "检查书籍是否已分析", description = "根据书名检查当前用户是否已经分析过该书籍")
     @GetMapping(value = "check/{bookTitle}")
     public ResultVO<String> checkAnalyzed(@PathVariable("bookTitle") String bookTitle,
-                                                 HttpServletRequest request){
+                                          HttpServletRequest request) {
         Long userId = UserUtil.userId2(request);
-        if(userInterestService.checkAnalyzed(userId, bookTitle).isPresent()){
-            throw new BusinessException(1001,"该书籍已经分析过，请到历史记录中查看");
+        if (userInterestService.checkAnalyzed(userId, bookTitle).isPresent()) {
+            throw new BusinessException(1001, "该书籍已经分析过，请到历史记录中查看");
         }
         return ResultVO.successMessage("该书籍未分析，可以进行分析");
     }
