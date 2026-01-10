@@ -70,10 +70,10 @@ public class AIModelDTO extends SerializableBean<AIModelDTO> {
     public AIModel toEntity(Long userId) {
         AIModel model = new AIModel();
         model.setUserId(userId);
-        model.setName(this.name);
-        model.setModel(this.model);
-        model.setFactory(this.factory);
-        model.setApiKey(this.apiKey);
+        model.setName(this.name.trim());
+        model.setModel(this.model.trim());
+        model.setFactory(this.factory.trim());
+        model.setApiKey(this.apiKey.trim());
         model.setApiUrl(this.apiUrl);
         model.setEnabled(false);
         model.setType(this.type);
@@ -84,10 +84,10 @@ public class AIModelDTO extends SerializableBean<AIModelDTO> {
      * 更新实体
      */
     public void updateEntity(AIModel model) {
-        model.setName(this.name);
-        model.setModel(this.model);
-        model.setFactory(this.factory);
-        model.setApiKey(this.apiKey);
+        model.setName(this.name.trim());
+        model.setModel(this.model.trim());
+        model.setFactory(this.factory.trim());
+        model.setApiKey(this.apiKey.trim());
         model.setApiUrl(this.apiUrl);
         model.setType(this.type);
     }
