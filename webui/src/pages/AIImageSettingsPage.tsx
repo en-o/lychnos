@@ -245,6 +245,7 @@ const AIImageSettingsPage: React.FC = () => {
                       <option value="stable-diffusion">Stable Diffusion</option>
                       <option value="midjourney">Midjourney</option>
                       <option value="dall-e">DALL-E</option>
+                      <option value="dall-e">Nano Banana Pro</option>
                       <option value="custom">自定义</option>
                     </select>
                   </div>

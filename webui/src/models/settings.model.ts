@@ -5,7 +5,7 @@
 // 模型类型枚举
 export type ModelType = 'TEXT' | 'IMAGE';
 
-// AI 模型配置（统一 TEXT 和 IMAGE）
+// AI 模型配置
 export class AIModelConfig {
   id?: string;
   userId?: string;
@@ -27,50 +27,6 @@ export class AIModelConfig {
     this.apiUrl = data.apiUrl || '';
     this.enabled = data.enabled ?? true;
     this.type = data.type || 'TEXT';
-  }
-}
-
-// 兼容旧代码：AI 分析模型配置
-export class AIAnalysisModel {
-  id: string;
-  name: string;
-  type: 'openai' | 'ollama' | 'deepseek' | 'custom';
-  apiKey?: string;
-  apiUrl?: string;
-  model?: string;
-  enabled: boolean;
-  isActive?: boolean;
-
-  constructor(data: Partial<AIAnalysisModel> = {}) {
-    this.id = data.id || '';
-    this.name = data.name || '';
-    this.type = data.type || 'openai';
-    this.apiKey = data.apiKey;
-    this.apiUrl = data.apiUrl;
-    this.model = data.model;
-    this.enabled = data.enabled ?? true;
-    this.isActive = data.isActive;
-  }
-}
-
-// 兼容旧代码：AI 生图模型配置
-export class AIImageModel {
-  id: string;
-  name: string;
-  type: 'stable-diffusion' | 'midjourney' | 'dall-e' | 'custom';
-  apiKey?: string;
-  apiUrl?: string;
-  enabled: boolean;
-  isActive?: boolean;
-
-  constructor(data: Partial<AIImageModel> = {}) {
-    this.id = data.id || '';
-    this.name = data.name || '';
-    this.type = data.type || 'stable-diffusion';
-    this.apiKey = data.apiKey;
-    this.apiUrl = data.apiUrl;
-    this.enabled = data.enabled ?? true;
-    this.isActive = data.isActive;
   }
 }
 

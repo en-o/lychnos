@@ -8,11 +8,13 @@ import type {AIModelConfig, Result} from '../src/models';
 export default [
   // 获取模型列表
   {
-    url: '/api/ai/models',
+    url: '/api/ai/models/:type',
     method: 'get',
     timeout: 500,
-    response: ({query}: any): Result<AIModelConfig[]> => {
-      const {type} = query;
+    response: (req: any): Result<AIModelConfig[]> => {
+      // 从 URL 中提取 type 参数
+      const urlParts = req.url.split('/');
+      const type = urlParts[urlParts.length - 1].split('?')[0];
 
       if (!type || (type !== 'TEXT' && type !== 'IMAGE')) {
         return {
@@ -24,7 +26,7 @@ export default [
         };
       }
 
-      const models = getModelsByType(type);
+      const models = getModelsByType(type as 'TEXT' | 'IMAGE');
 
       return {
         code: 200,
@@ -59,9 +61,12 @@ export default [
     url: '/api/ai/models/:id',
     method: 'put',
     timeout: 800,
-    response: ({body, query}: any): Result<AIModelConfig> => {
-      const id = query.id;
-      const updated = updateModel(id, body);
+    response: (req: any): Result<AIModelConfig> => {
+      // 从 URL 中提取 id 参数
+      const urlParts = req.url.split('/');
+      const id = urlParts[urlParts.length - 1].split('?')[0];
+
+      const updated = updateModel(id, req.body);
 
       if (updated) {
         return {
@@ -88,8 +93,11 @@ export default [
     url: '/api/ai/models/:id',
     method: 'delete',
     timeout: 500,
-    response: ({query}: any): Result<null> => {
-      const id = query.id;
+    response: (req: any): Result<null> => {
+      // 从 URL 中提取 id 参数
+      const urlParts = req.url.split('/');
+      const id = urlParts[urlParts.length - 1].split('?')[0];
+
       const success = deleteModel(id);
 
       if (success) {
@@ -117,8 +125,11 @@ export default [
     url: '/api/ai/models/:id/active',
     method: 'put',
     timeout: 500,
-    response: ({query}: any): Result<null> => {
-      const id = query.id;
+    response: (req: any): Result<null> => {
+      // 从 URL 中提取 id 参数
+      const urlParts = req.url.split('/');
+      const id = urlParts[urlParts.length - 2]; // active 前面是 id
+
       const success = setActiveModel(id);
 
       if (success) {

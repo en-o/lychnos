@@ -5,7 +5,7 @@ import type {AIModelConfig, ModelType, Result} from '../models';
 export const aiModelApi = {
     // 获取模型列表
     list: (type: ModelType) => {
-        return request.get<Result<AIModelConfig[]>>(`/ai/models`, {params: {type}});
+        return request.get<Result<AIModelConfig[]>>(`/ai/models/${type}`);
     },
 
     // 添加模型

@@ -37,7 +37,7 @@ public class AiModelController {
 
     @GetMapping("/models/{type}")
     @Operation(summary = "获取模型列表")
-    public ResultVO<List<AIModel>> list(@RequestParam("type") ModelType type, HttpServletRequest request) {
+    public ResultVO<List<AIModel>> list(@PathVariable("type") ModelType type, HttpServletRequest request) {
         Long userId = UserUtil.userId2(request);
         List<AIModel> models = aiModelService.findByUserIdAndType(userId, type);
         return ResultVO.success(models);
