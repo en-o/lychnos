@@ -2,7 +2,35 @@
  * 设置相关实体类
  */
 
-// AI 分析模型配置
+// 模型类型枚举
+export type ModelType = 'TEXT' | 'IMAGE';
+
+// AI 模型配置（统一 TEXT 和 IMAGE）
+export class AIModelConfig {
+  id?: string;
+  userId?: string;
+  name: string;
+  model: string;
+  factory: string; // openai | ollama | deepseek | azure | anthropic | qwen | baidu | stable-diffusion | midjourney | dall-e | custom
+  apiKey?: string;
+  apiUrl: string;
+  enabled: boolean;
+  type: ModelType;
+
+  constructor(data: Partial<AIModelConfig> = {}) {
+    this.id = data.id;
+    this.userId = data.userId;
+    this.name = data.name || '';
+    this.model = data.model || '';
+    this.factory = data.factory || 'openai';
+    this.apiKey = data.apiKey;
+    this.apiUrl = data.apiUrl || '';
+    this.enabled = data.enabled ?? true;
+    this.type = data.type || 'TEXT';
+  }
+}
+
+// 兼容旧代码：AI 分析模型配置
 export class AIAnalysisModel {
   id: string;
   name: string;
@@ -25,7 +53,7 @@ export class AIAnalysisModel {
   }
 }
 
-// AI 生图模型配置
+// 兼容旧代码：AI 生图模型配置
 export class AIImageModel {
   id: string;
   name: string;
