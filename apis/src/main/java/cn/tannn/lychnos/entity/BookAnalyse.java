@@ -38,7 +38,6 @@ import org.hibernate.type.SqlTypes;
 @DynamicUpdate
 @DynamicInsert
 @Schema(description = "书籍分析")
-@JsonView({Views.Public.class})
 public class BookAnalyse extends JpaCommonBean<BookAnalyse> {
 
     /**

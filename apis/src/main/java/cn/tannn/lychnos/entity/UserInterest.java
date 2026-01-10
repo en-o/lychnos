@@ -41,7 +41,6 @@ import java.time.LocalDateTime;
 @DynamicUpdate
 @DynamicInsert
 @Schema(description = "用户跟书籍兴趣关联")
-@JsonView({Views.Public.class})
 public class UserInterest {
 
     @Id
