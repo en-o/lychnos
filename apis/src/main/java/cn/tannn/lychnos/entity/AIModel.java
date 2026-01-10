@@ -60,8 +60,8 @@ public class AIModel extends JpaCommonBean<AIModel> {
      * api厂家: 'openai' | 'ollama' | 'deepseek' | 'azure' | 'anthropic' | 'qwen' | 'baidu';
      */
     @Column(columnDefinition = " varchar(500)", nullable = false)
-    @Comment("api厂家: 'openai' | 'ollama' | 'deepseek' | 'azure' | 'anthropic' | 'qwen' | 'baidu' | 自定义")
-    @Schema(description = "api厂家: 'openai' | 'ollama' | 'deepseek' | 'azure' | 'anthropic' | 'qwen' | 'baidu' | 自定义")
+    @Comment("api厂家:openai|ollama|deepseek|azure|anthropic|qwen|baidu|自定义")
+    @Schema(description = "api厂家:openai|ollama|deepseek|azure|anthropic|qwen|baidu|自定义")
     private String factory;
 
     /**
