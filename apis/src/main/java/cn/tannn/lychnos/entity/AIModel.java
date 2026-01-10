@@ -95,7 +95,7 @@ public class AIModel extends JpaCommonBean<AIModel> {
      */
     @Column(columnDefinition = " varchar(20) ", nullable = false)
     @Comment("模型类型：当前就两个图片和文字")
-    @Schema(description = "是否模型类型：当前就两个图片和文字启用")
+    @Schema(description = "是否模型类型：当前就两个图片和文字")
     @Enumerated(EnumType.STRING)
     private ModelType type;
 
