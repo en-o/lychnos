@@ -1,7 +1,6 @@
 package cn.tannn.lychnos.controller;
 
 import cn.tannn.jdevelops.annotations.web.mapping.PathRestController;
-import cn.tannn.jdevelops.exception.built.BusinessException;
 import cn.tannn.jdevelops.result.response.ResultVO;
 import cn.tannn.lychnos.common.constant.ModelType;
 import cn.tannn.lychnos.common.util.UserUtil;
@@ -78,7 +77,6 @@ public class AiModelController {
 
     @PutMapping("/models/{id}/active")
     @Operation(summary = "设置激活的模型")
-    @Transactional(rollbackFor = Exception.class)
     public ResultVO<Void> setActive(@PathVariable Long id, HttpServletRequest request) {
         Long userId = UserUtil.userId2(request);
         AIModel model = aiModelService.findVerifyRole(id,userId);

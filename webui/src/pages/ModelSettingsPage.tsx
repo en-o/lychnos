@@ -37,8 +37,8 @@ const ModelSettingsPage: React.FC = () => {
     try {
       const modelType = activeTab === 'analysis' ? 'TEXT' : 'IMAGE';
       const response = await aiModelApi.list(modelType);
-      if (response.data.success) {
-        const modelList = response.data.data || [];
+      if (response.success) {
+        const modelList = response.data || [];
         setModels(modelList);
         const activeModel = modelList.find((m) => m.enabled);
         if (activeModel && activeModel.id) {

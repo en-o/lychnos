@@ -22,7 +22,8 @@ import org.hibernate.annotations.DynamicUpdate;
  */
 @Entity
 @Table(name = "tb_ai_model", indexes = {
-        @Index(name = "idx_user_type_enabled", columnList = "userId,enabled,type", unique = true)
+        @Index(name = "idx_user_type_enabled", columnList = "userId,enabled,type"),
+        @Index(name = "idx_user_enabled", columnList = "userId,type"),
 })
 @Comment("AI模型")
 @Getter
