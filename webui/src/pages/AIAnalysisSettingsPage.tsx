@@ -28,11 +28,11 @@ const AIAnalysisSettingsPage: React.FC = () => {
   const loadModels = async () => {
     try {
       const response = await aiModelApi.list('TEXT');
-      if (response.data.success) {
-        const modelList = response.data.data || [];
+      if (response.success) {
+        const modelList = response.data || [];
         setModels(modelList);
         // 找出启用的模型作为当前激活的
-        const activeModel = modelList.find((m) => m.enabled);
+        const activeModel = modelList.find((m: AIModelConfig) => m.enabled);
         if (activeModel && activeModel.id) {
           setActiveModelId(activeModel.id);
         }
