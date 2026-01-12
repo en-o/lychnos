@@ -109,6 +109,13 @@ function handleOtherError(status: number, data?: Result) {
 function handleBusinessError(data: Result) {
   console.error('业务错误:', data.message);
 
+  // 检查是否是认证相关错误 (code 401)
+  if (data.code === 401) {
+    toast.error('登录已失效，请重新登录');
+    clearAuthAndRedirect();
+    return;
+  }
+
   // 特殊处理错误码 1001 - 书籍已分析
   if (data.code === 1001) {
     // 不显示 toast，由调用方处理跳转
@@ -123,9 +130,9 @@ function clearAuthAndRedirect() {
   localStorage.removeItem('token');
   localStorage.removeItem('userInfo');
 
-  // 如果不在登录页则跳转
-  if (window.location.pathname !== '/login') {
-    window.location.href = '/login';
+  // 如果不在登录页则跳转 (使用 hash 路由模式)
+  if (!window.location.hash.includes('#/login')) {
+    window.location.hash = '#/login';
   }
 }
 
