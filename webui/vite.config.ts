@@ -1,15 +1,21 @@
-import {defineConfig} from 'vite'
+import {defineConfig, loadEnv} from 'vite'
 import react from '@vitejs/plugin-react'
 import {viteMockServe} from 'vite-plugin-mock'
 
 // https://vite.dev/config/
-export default defineConfig(() => {
-  const isMock = process.env.VITE_USE_MOCK === 'true'
-  const apiBaseUrl = process.env.VITE_API_BASE_URL || '/api'
+export default defineConfig(({mode}) => {
+  // 加载 .env 文件中的环境变量
+  const env = loadEnv(mode, process.cwd(), '')
 
-  console.log(`[Vite Config] Mock: ${isMock}, API Base: ${apiBaseUrl}`)
+  // 优先使用命令行参数，其次使用 .env 文件，最后使用默认值
+  const isMock = process.env.VITE_USE_MOCK === 'true' || env.VITE_USE_MOCK === 'true'
+  const apiBaseUrl = process.env.VITE_API_BASE_URL || env.VITE_API_BASE_URL || '/api'
+  const basePath = process.env.VITE_BASE_PATH || env.VITE_BASE_PATH || '/'
+
+  console.log(`[Vite Config] Mock: ${isMock}, API Base: ${apiBaseUrl}, Base Path: ${basePath}`)
 
   return {
+    base: basePath,
     plugins: [
       react(),
       viteMockServe({
