@@ -1,0 +1,55 @@
+# Node.js
+webui/node_modules
+webui/dist
+webui/.vite
+webui/.npm
+webui/.pnpm-store
+
+# Maven
+apis/target
+apis/.mvn
+.m2
+
+# IDE
+.idea
+.vscode
+*.iml
+.project
+.classpath
+.settings
+
+# Git
+.git
+.gitignore
+.gitattributes
+
+# OS
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# Logs
+*.log
+logs
+
+# Test
+**/test-results
+**/coverage
+
+# Docker
+Dockerfile
+.dockerignore
+docker-compose*.yml
+*.bat
+
+# Documentation
+docs
+*.md
+LICENSE
+
+# Environment
+.env
+.env.local
+.env.*.local
