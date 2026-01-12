@@ -32,7 +32,14 @@ RUN npm install
 COPY webui/ ./
 
 # 构建前端项目（生产模式，默认输出到 dist 目录）
-RUN npm run build
+# jar合并部署配置：
+# - VITE_API_BASE_URL=/ : API 基础路径为根路径（前后端同域）
+# - VITE_USE_MOCK=false : 不使用 Mock 数据
+# - VITE_BASE_PATH=/ : 前端访问路由前缀为根路径
+RUN VITE_API_BASE_URL=/ \
+    VITE_USE_MOCK=false \
+    VITE_BASE_PATH=/ \
+    npm run build
 
 # ============================================
 # 阶段 2: 后端构建
