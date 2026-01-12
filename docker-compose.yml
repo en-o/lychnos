@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  lychnos:
+    build:
+      context: .
+      dockerfile: api/Dockerfile
+    container_name: lychnos
+    image: tannnn/lychnos:latest # 0.0.1
+    ports:
+      - "1250:1250"
+    environment:
+      FILE_MAX_SIZE: ${FILE_MAX_SIZE:-500MB}
+      FILE_MAX_REQUEST: ${FILE_MAX_REQUEST:-500MB}
+      MYSQL_PWD: ${MYSQL_PWD:-root}
+      MYSQL_UNM: ${MYSQL_UNM:-root}
+      MYSQL_URL: ${MYSQL_UNM:-localhost:3306}
+      MYSQL_DB: ${MYSQL_UNM:-db_lychnos}
+      DOC_PASSWORD: ${DOC_PASSWORD:-tan}
+      DOC_USERNAME: ${DOC_USERNAME:-tan}
+      CONFIG_ENV: ${CONFIG_ENV:-prod}
+    volumes:
+      # 可选：持久化日志
+      - ./logs:/app/logs
+    restart: unless-stopped
+    networks:
+      - lychnos-network
+
+networks:
+  lychnos-network:
+    driver: bridge
