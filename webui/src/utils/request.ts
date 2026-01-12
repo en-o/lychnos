@@ -31,7 +31,7 @@ instance.interceptors.response.use(
     const data: Result = response.data;
 
     // 如果返回success为false，视为业务错误
-    if (data.success === false) {
+    if (!data.success) {
       handleBusinessError(data);
       return Promise.reject(data);
     }
