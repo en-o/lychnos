@@ -23,7 +23,7 @@ knife4j:
   enable: true
   basic:
     enable: true
-    password: tan
-    username: tan
+    password: ${DOC_PASSWORD:tan}
+    username: ${DOC_USERNAME:tan}
     include:
       - /v3;/api-docs

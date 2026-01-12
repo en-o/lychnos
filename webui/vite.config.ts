@@ -24,7 +24,7 @@ export default defineConfig(() => {
       // 代理路径必须与 request.ts 中的 baseURL 一致
       proxy: !isMock ? {
         [apiBaseUrl]: {  // 使用环境变量，确保与 request.ts 一致
-          target: 'http://localhost:6125',
+          target: 'http://localhost:1250',
           changeOrigin: true,
           rewrite: (path) => path.replace(new RegExp(`^${apiBaseUrl}`), '')
         }
