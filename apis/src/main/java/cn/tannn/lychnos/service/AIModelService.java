@@ -61,7 +61,6 @@ public class AIModelService extends J2ServiceImpl<AIModelDao, AIModel, Long> {
      */
     public AIModel findVerifyRole(Long id, Long userId) {
         AIModel aiModel = getJpaBasicsDao().findById(id).orElseThrow(() -> new BusinessException("模型不存在"));
-
         // 验证是否是当前用户的模型
         if (!Objects.equals(aiModel.getUserId(), userId)) {
             throw new IllegalArgumentException("无权限操作");
