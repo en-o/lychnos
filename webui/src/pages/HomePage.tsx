@@ -26,10 +26,47 @@ const HomePage: React.FC = () => {
   const [decorationTheme, setDecorationTheme] = useState<DecorationTheme>('daily');
   const [imageError, setImageError] = useState<Record<string, boolean>>({});
   const [previewImage, setPreviewImage] = useState<string | null>(null);
+  const [searchHistory, setSearchHistory] = useState<string[]>([]);
+  const [showHistory, setShowHistory] = useState(false);
 
   // 检查是否已登录
   const token = localStorage.getItem('token');
   const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
+
+  // 加载搜索历史
+  React.useEffect(() => {
+    const history = localStorage.getItem('searchHistory');
+    if (history) {
+      try {
+        setSearchHistory(JSON.parse(history));
+      } catch (e) {
+        console.error('加载搜索历史失败:', e);
+      }
+    }
+  }, []);
+
+  // 保存搜索历史
+  const saveSearchHistory = (title: string) => {
+    const trimmedTitle = title.trim();
+    if (!trimmedTitle) return;
+
+    setSearchHistory(prev => {
+      // 移除重复项并添加到开头
+      const newHistory = [trimmedTitle, ...prev.filter(item => item !== trimmedTitle)];
+      // 限制最多20条
+      const limitedHistory = newHistory.slice(0, 20);
+      // 保存到 localStorage
+      localStorage.setItem('searchHistory', JSON.stringify(limitedHistory));
+      return limitedHistory;
+    });
+  };
+
+  // 清除搜索历史
+  const clearSearchHistory = () => {
+    setSearchHistory([]);
+    localStorage.removeItem('searchHistory');
+    setShowHistory(false);
+  };
 
   // 加载快速推荐书籍
   React.useEffect(() => {
@@ -82,6 +119,10 @@ const HomePage: React.FC = () => {
       setShowLoginConfirm(true);
       return;
     }
+
+    // 保存到搜索历史
+    saveSearchHistory(title);
+    setShowHistory(false);
 
     setLoading(true);
     setResult(null);
@@ -196,13 +237,16 @@ const HomePage: React.FC = () => {
       if (showUserMenu && !target.closest('.user-menu-container')) {
         setShowUserMenu(false);
       }
+      if (showHistory && !target.closest('.search-container')) {
+        setShowHistory(false);
+      }
     };
 
     document.addEventListener('mousedown', handleClickOutside);
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [showUserMenu]);
+  }, [showUserMenu, showHistory]);
 
   return (
     <div className="min-h-screen bg-white">
@@ -415,12 +459,13 @@ const HomePage: React.FC = () => {
 
               {/* 搜索框 */}
               <div className="max-w-2xl mx-auto mb-6">
-                <div className="relative">
+                <div className="relative search-container">
                   <input
                     type="text"
                     value={bookTitle}
                     onChange={(e) => setBookTitle(e.target.value)}
                     onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+                    onFocus={() => searchHistory.length > 0 && setShowHistory(true)}
                     placeholder="输入书名,开始分析..."
                     className="w-full px-5 py-3.5 pr-12 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base"
                     disabled={loading}
@@ -436,6 +481,37 @@ const HomePage: React.FC = () => {
                       <Search className="w-5 h-5" />
                     )}
                   </button>
+
+                  {/* 搜索历史下拉 */}
+                  {showHistory && searchHistory.length > 0 && (
+                    <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-gray-200 rounded-xl shadow-lg z-50 max-h-80 overflow-y-auto">
+                      <div className="flex items-center justify-between px-4 py-2 border-b border-gray-100">
+                        <span className="text-sm font-medium text-gray-700">搜索历史</span>
+                        <button
+                          onClick={clearSearchHistory}
+                          className="text-xs text-red-600 hover:text-red-700"
+                        >
+                          清除历史
+                        </button>
+                      </div>
+                      <div className="py-1">
+                        {searchHistory.map((item, index) => (
+                          <button
+                            key={index}
+                            onClick={() => {
+                              setBookTitle(item);
+                              setShowHistory(false);
+                              handleSearch(item);
+                            }}
+                            className="w-full px-4 py-2.5 text-left hover:bg-gray-50 flex items-center gap-3 group"
+                          >
+                            <History className="w-4 h-4 text-gray-400 group-hover:text-gray-600" />
+                            <span className="text-gray-700 group-hover:text-gray-900">{item}</span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
 
