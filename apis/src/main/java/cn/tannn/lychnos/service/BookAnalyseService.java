@@ -62,14 +62,20 @@ public class BookAnalyseService extends J2ServiceImpl<BookAnalyseDao, BookAnalys
 
             // 生成图片流
             try (InputStream imageStream = aiService.generateImageStreamWithContent(userId, imageContentPrompt)) {
-                // 保存图片到本地，返回相对路径
-                String relativePath = imageStorageService.saveImage(imageStream, bookTitle);
-                bookAnalyse.setPosterUrl(relativePath);
-                log.info("书籍封面图片生成并保存成功，相对路径: {}", relativePath);
+                if (imageStream != null) {
+                    // 保存图片到本地，返回 posterUrl
+                    String posterUrl = imageStorageService.saveImage(imageStream, bookTitle);
+                    bookAnalyse.setPosterUrl(posterUrl);
+                    log.info("书籍封面图片生成并保存成功，posterUrl: {}", posterUrl);
+                } else {
+                    log.warn("AI 返回的图片流为 null，书名: {}", bookTitle);
+                    bookAnalyse.setPosterUrl(null);
+                }
             }
         } catch (Exception e) {
-            log.warn("书籍封面图片生成失败，书名: {}, 错误: {}", bookTitle, e.getMessage());
-            // 图片生成失败不影响整体分析，继续保存文本分析结果
+            log.warn("书籍封面图片生成失败，书名: {}, 错误: {}", bookTitle, e.getMessage(), e);
+            // 图片生成失败不影响整体分析，确保 posterUrl 为 null
+            bookAnalyse.setPosterUrl(null);
         }
 
         BookAnalyse saved = getJpaBasicsDao().save(bookAnalyse);

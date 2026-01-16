@@ -22,10 +22,13 @@ export const bookApi = {
     return request.get<Result<UserInterest | null>>(`/book/check/${encodeURIComponent(title)}`);
   },
 
-  // 分析图书
+  // 分析图书（需要较长时间：AI分析+图片生成）
   analyzeBook: (title: string) => {
-
-    return request.put<Result<BookAnalysis>>(`/book/analyze/${encodeURIComponent(title)}`);
+    return request.put<Result<BookAnalysis>>(
+      `/book/analyze/${encodeURIComponent(title)}`,
+      {},
+      { timeout: 120000 } // 2分钟超时
+    );
   },
 
   // 提交用户分析

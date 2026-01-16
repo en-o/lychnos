@@ -891,10 +891,13 @@ const HomePage: React.FC = () => {
       {/* 全屏加载提示 */}
       {loading && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[10001]">
-          <div className="bg-white rounded-xl p-8 flex flex-col items-center gap-4">
+          <div className="bg-white rounded-xl p-8 flex flex-col items-center gap-4 max-w-md">
             <div className="w-16 h-16 border-4 border-gray-300 border-t-blue-600 rounded-full animate-spin"></div>
             <p className="text-gray-700 text-lg font-medium">正在分析书籍...</p>
-            <p className="text-gray-500 text-sm">这可能需要一些时间，请耐心等待</p>
+            <div className="text-center space-y-2">
+              <p className="text-gray-500 text-sm">AI 正在深度分析书籍内容并生成封面图</p>
+              <p className="text-gray-400 text-xs">预计需要 30-120 秒，请耐心等待</p>
+            </div>
           </div>
         </div>
       )}
