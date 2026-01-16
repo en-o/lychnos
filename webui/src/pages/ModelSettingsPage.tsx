@@ -227,7 +227,7 @@ const ModelSettingsPage: React.FC = () => {
     setEditingModel(null);
     setFormData({
       name: '',
-      factory: activeTab === 'analysis' ? 'openai' : 'stable-diffusion',
+      factory: activeTab === 'analysis' ? 'openai' : 'modelscope-image',
       apiKey: '',
       apiUrl: '',
       model: '',
@@ -239,7 +239,7 @@ const ModelSettingsPage: React.FC = () => {
     setEditingModel(null);
     setFormData({
       name: '',
-      factory: activeTab === 'analysis' ? 'openai' : 'stable-diffusion',
+      factory: activeTab === 'analysis' ? 'openai' : 'modelscope-image',
       apiKey: '',
       apiUrl: '',
       model: '',
@@ -419,7 +419,7 @@ const ModelSettingsPage: React.FC = () => {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl max-w-md w-full p-6 max-h-[90vh] overflow-y-auto">
             <h3 className="text-xl font-semibold text-gray-900 mb-4">
-              {editingModel ? '编辑模型' : '添加模型'}
+              {editingModel ? '编辑模型' : `添加${activeTab === 'analysis' ? 'AI分析' : 'AI生图'}模型`}
             </h3>
 
             {/* 推荐模型提示 */}
@@ -448,16 +448,15 @@ const ModelSettingsPage: React.FC = () => {
                       </div>
                     ) : (
                       <div className="text-xs">
-                        <p className="mb-1">• <span className="font-medium">DALL-E 3</span> (OpenAI) - 高质量图片生成，稳定可靠</p>
-                        <p className="mb-1">• <span className="font-medium">Stable Diffusion WebUI</span> - 本地部署，免费使用</p>
-                        <p className="mb-1 text-amber-700">⚠️ 魔搭社区图片生成暂不支持（需异步调用）</p>
+                        <p className="mb-1">• <span className="font-medium">魔搭社区 Z-Image-Turbo</span> - 高质量图片生成（异步调用）</p>
+                        <p className="mb-1 text-gray-600">模型名称: Tongyi-MAI/Z-Image-Turbo</p>
                         <a
-                          href="https://platform.openai.com/docs/guides/images"
+                          href="https://www.modelscope.cn/models/Tongyi-MAI/Z-Image-Turbo"
                           target="_blank"
                           rel="noopener noreferrer"
                           className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-700 underline"
                         >
-                          查看 DALL-E 文档
+                          查看模型详情
                           <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                           </svg>
@@ -509,12 +508,7 @@ const ModelSettingsPage: React.FC = () => {
                   ) : (
                     <>
                       <option value="">请选择</option>
-                      <option value="stable-diffusion">Stable Diffusion</option>
-                      <option value="midjourney">Midjourney</option>
-                      <option value="dall-e">DALL-E (OpenAI)</option>
-                      <option value="nano-banana-pro">Nano Banana Pro</option>
                       <option value="modelscope-image">魔搭社区 (ModelScope)</option>
-                      <option value="huggingface-image">Hugging Face</option>
                       <option value="custom">自定义</option>
                     </>
                   )}

@@ -1,6 +1,7 @@
 package cn.tannn.lychnos.ai.factory;
 
 import cn.tannn.lychnos.ai.config.DynamicAIModelConfig;
+import cn.tannn.lychnos.ai.modelscope.ModelScopeImageModel;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.image.ImageModel;
@@ -12,6 +13,7 @@ import org.springframework.ai.openai.api.OpenAiImageApi;
 import org.springframework.ai.retry.RetryUtils;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
+import org.springframework.web.client.RestTemplate;
 
 
 /**
@@ -21,7 +23,7 @@ import org.springframework.util.StringUtils;
  * 支持的厂商：
  * <ul>
  *   <li>文本分析模型: OpenAI, Ollama, DeepSeek, Azure OpenAI, Anthropic, 通义千问, 百度文心, 魔搭社区, Hugging Face</li>
- *   <li>图片生成模型: Stable Diffusion, Midjourney, DALL-E, Nano Banana Pro, 魔搭社区, Hugging Face</li>
+ *   <li>图片生成模型: 魔搭社区（异步调用）</li>
  *   <li>任何兼容 OpenAI API 协议的厂商</li>
  * </ul>
  *
@@ -32,6 +34,8 @@ import org.springframework.util.StringUtils;
 @Slf4j
 @Component
 public class DynamicAIClientFactory {
+
+    private final RestTemplate restTemplate = new RestTemplate();
 
     /**
      * 创建文本聊天模型
@@ -60,16 +64,43 @@ public class DynamicAIClientFactory {
      * 创建图片生成模型
      *
      * @param config 动态配置
+     * @param factory 厂商标识（modelscope-image 等）
      * @return ImageModel
      */
-    public ImageModel createImageModel(DynamicAIModelConfig config) {
-        log.info("创建图片生成模型，baseUrl: {}, model: {}", config.getBaseUrl(), config.getModel());
+    public ImageModel createImageModel(DynamicAIModelConfig config, String factory) {
+        log.info("创建图片生成模型，factory: {}, baseUrl: {}, model: {}", factory, config.getBaseUrl(), config.getModel());
 
+        // 魔搭社区使用自定义异步客户端
+        if ("modelscope-image".equalsIgnoreCase(factory)) {
+            return createModelScopeImageModel(config);
+        }
+
+        // 其他厂商使用 OpenAI 兼容客户端
+        return createOpenAiImageModel(config);
+    }
+
+    /**
+     * 创建 ModelScope 图片生成模型（异步）
+     */
+    private ImageModel createModelScopeImageModel(DynamicAIModelConfig config) {
+        String apiKey = StringUtils.hasText(config.getApiKey()) ? config.getApiKey() : "dummy";
+        return new ModelScopeImageModel(
+                apiKey,
+                config.getBaseUrl(),
+                config.getModel(),
+                restTemplate
+        );
+    }
+
+    /**
+     * 创建 OpenAI 兼容的图片生成模型
+     */
+    private ImageModel createOpenAiImageModel(DynamicAIModelConfig config) {
         // 创建 OpenAI Image API 客户端
         OpenAiImageApi openAiImageApi = createOpenAiImageApi(config);
 
         // 创建图片选项
-        OpenAiImageOptions imageOptions =OpenAiImageOptions.builder()
+        OpenAiImageOptions imageOptions = OpenAiImageOptions.builder()
                 .model(config.getModel())
                 .build();
 

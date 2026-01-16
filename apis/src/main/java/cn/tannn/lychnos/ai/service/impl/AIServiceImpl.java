@@ -113,7 +113,7 @@ public class AIServiceImpl implements AIService {
                     aiModel.getId(), aiModel.getUserId(), aiModel.getModel());
 
             DynamicAIModelConfig config = buildConfig(aiModel);
-            ImageModel imageModel = clientFactory.createImageModel(config);
+            ImageModel imageModel = clientFactory.createImageModel(config, aiModel.getFactory());
             ImageResponse response = imageModel.call(new ImagePrompt(prompt));
 
             log.info("AI图片生成成功，modelId: {}", aiModel.getId());
