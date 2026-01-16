@@ -99,7 +99,7 @@ public class AITestController {
         }
     }
 
-    @Operation(summary = "书籍封面生成测试", description = "根据书籍信息生成封面图片（中国复古风黑板海报，1024x576尺寸）")
+    @Operation(summary = "书籍封面生成测试", description = "根据书籍信息生成封面图片（现代信息图解风格，1024x576尺寸）")
     @GetMapping("image/book-cover")
     public void testBookCoverImage(
             @Parameter(description = "书名") @RequestParam String title,

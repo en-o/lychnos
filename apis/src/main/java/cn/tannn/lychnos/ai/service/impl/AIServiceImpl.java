@@ -40,21 +40,22 @@ public class AIServiceImpl implements AIService {
 
     /**
      * 默认图片风格提示词
-     * 风格：中国复古风黑板海报，1024x576尺寸（16:9横向比例）
+     * 风格：现代信息图解风格，1024x576尺寸（16:9横向比例）
      */
     private static final String DEFAULT_IMAGE_STYLE_PROMPT = """
             Style Requirements:
             - Image size: 1024x576 pixels (16:9 aspect ratio, horizontal orientation)
-            - Design style: Chinese retro chalkboard poster style with vintage aesthetic
-            - Background: Dark chalkboard texture (black or dark gray)
-            - Color scheme: Chalk-like colors (white, light gray, yellow chalk tones) on dark background
-            - Layout: Information presented in traditional Chinese poster format with decorative frames and borders
-            - Typography: Mix of Chinese calligraphy style and modern clean fonts
-            - Decorative elements: Traditional Chinese ornamental patterns, corner decorations, dividing lines
-            - Composition: Well-organized sections with clear hierarchy, similar to educational or informational posters
-            - Atmosphere: Nostalgic, scholarly, cultural, with handcrafted chalk drawing aesthetics
+            - Design style: Modern infographic poster with clean and organized layout
+            - Background: Light neutral color (beige, light gray, or white) suitable for reading
+            - Color scheme: Harmonious color palette with clear contrast for readability
+            - Layout: Well-structured information sections with clear visual hierarchy
+            - Typography: Clean, modern fonts with good readability; mix of bold headers and regular body text
+            - Visual elements: Simple illustrations, icons, diagrams, flowcharts to support the content
+            - Composition: Organized in logical sections with proper spacing and alignment
+            - Decorative elements: Minimal decorative accents, focus on clarity and information delivery
+            - Atmosphere: Professional, educational, informative, easy to understand
             - Quality: High resolution, suitable for web display
-            - Character illustrations: If needed, use simple line drawings in chalk art style
+            - Information presentation: Use boxes, arrows, bullet points, and visual connectors to show relationships
 
             """;
 
