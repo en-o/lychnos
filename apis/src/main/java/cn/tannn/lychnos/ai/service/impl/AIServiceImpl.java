@@ -66,9 +66,17 @@ public class AIServiceImpl implements AIService {
             ChatResponse response = chatModel.call(new Prompt(prompt));
 
             // 返回结果
-            String result = response.getResult().getOutput().getContent();
-            log.info("AI文本生成成功，modelId: {}, 响应长度: {}", modelId, result.length());
-            return result;
+            if (!response.getResults().isEmpty()) {
+                String result = response.getResults().get(0).getOutput().getText();
+                int length = 0;
+                if(result != null){
+                    length  = result.length();
+                }
+                log.info("AI文本生成成功，modelId: {}, 响应长度: {}", modelId, length);
+                return result;
+            } else {
+                throw new AIException.ModelCallFailedException("AI返回空响应", null);
+            }
         } catch (Exception e) {
             log.error("AI文本生成失败，modelId: {}, userId: {}, prompt: {}",
                     modelId, userId, prompt, e);
