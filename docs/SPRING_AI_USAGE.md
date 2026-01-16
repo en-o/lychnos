@@ -104,6 +104,56 @@ INSERT INTO tb_ai_model (user_id, name, model, factory, api_key, api_url, enable
 VALUES (1, 'SD WebUI', 'sd-xl-turbo', 'stable-diffusion', NULL, 'http://localhost:7860', 1, 'IMAGE');
 ```
 
+## API 响应结构
+
+### 图片生成响应结构
+
+图片生成接口返回的完整 JSON 结构如下：
+
+```json
+{
+  "code": 200,
+  "message": "成功",
+  "ts": 1768575885795,
+  "data": {
+    "result": {
+      "metadata": null,
+      "output": {
+        "url": "https://muse-ai.oss-cn-hangzhou.aliyuncs.com/img/55b3a121e4f947d0bd2d883a93ee67a5.png",
+        "b64Json": null
+      }
+    },
+    "metadata": {
+      "created": 1768575885785,
+      "empty": true,
+      "rawMap": {}
+    },
+    "results": [
+      {
+        "metadata": null,
+        "output": {
+          "url": "https://muse-ai.oss-cn-hangzhou.aliyuncs.com/img/55b3a121e4f947d0bd2d883a93ee67a5.png",
+          "b64Json": null
+        }
+      }
+    ]
+  },
+  "success": true
+}
+```
+
+**字段说明：**
+- `code`: 业务状态码
+- `message`: 响应消息
+- `ts`: 时间戳
+- `data.result.output.url`: 生成的图片URL
+- `data.result.output.b64Json`: Base64编码的图片（如果有）
+- `data.results`: 结果列表（支持批量生成）
+
+**图片流返回：**
+
+系统还提供了直接返回图片流的接口，不返回JSON结构，而是直接返回图片的二进制流，`Content-Type` 为 `image/png`。这种方式更适合直接在前端展示或下载图片。
+
 ## 异常处理
 
 系统提供了以下异常类型：
