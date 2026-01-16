@@ -68,6 +68,12 @@ public class AIModelDTO extends SerializableBean<AIModelDTO> {
     private ModelType type;
 
     /**
+     * 是否启用
+     */
+    @Schema(description = "是否启用")
+    private Boolean enabled;
+
+    /**
      * 转换为实体
      */
     public AIModel toEntity(Long userId) {
@@ -78,7 +84,7 @@ public class AIModelDTO extends SerializableBean<AIModelDTO> {
         model.setFactory(this.factory.trim());
         model.setApiKey(this.apiKey.trim());
         model.setApiUrl(this.apiUrl);
-        model.setEnabled(false);
+        model.setEnabled(this.enabled != null ? this.enabled : false);
         model.setType(this.type);
         return model;
     }
@@ -93,5 +99,9 @@ public class AIModelDTO extends SerializableBean<AIModelDTO> {
         model.setApiKey(this.apiKey.trim());
         model.setApiUrl(this.apiUrl);
         model.setType(this.type);
+        // 如果 DTO 中指定了 enabled 状态，则更新
+        if (this.enabled != null) {
+            model.setEnabled(this.enabled);
+        }
     }
 }
