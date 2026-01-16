@@ -124,35 +124,27 @@ public class AITestController {
 
     /**
      * 构建书籍封面内容提示词（不包含风格，风格由AIService默认提供）
+     * 精简版，控制字数防止提示词溢出
      */
     private String buildBookCoverContentPrompt(String title, String genre, String tone, String themes, String keyElements) {
         return String.format("""
-                Create a book poster for "%s"
+                Book: "%s"
+                Genre: %s | Tone: %s
+                Themes: %s
+                Key Elements: %s
 
-                Book Information:
-                - Title: %s
-                - Genre: %s
-                - Tone: %s
-                - Key Themes: %s
-                - Key Elements: %s
-
-                Content Requirements:
-                - Display the book title prominently in Chinese characters
-                - Include genre and tone information in organized sections
-                - Incorporate symbolic imagery representing the themes: %s
-                - Add relevant icons or illustrations related to: %s
-                - Create a harmonious composition that reflects the %s atmosphere
-                - Text should be readable and well-organized in poster format
+                Create an infographic poster featuring:
+                - Book title in Chinese (prominent display)
+                - Genre and tone in organized sections
+                - Visual symbols for themes
+                - Icons/illustrations for key elements
+                - Clean, educational layout
                 """,
-                title,
                 title,
                 genre,
                 tone,
                 themes,
-                keyElements,
-                themes,
-                keyElements,
-                tone
+                keyElements
         );
     }
 }

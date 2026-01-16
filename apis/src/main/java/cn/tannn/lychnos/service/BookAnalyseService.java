@@ -89,60 +89,79 @@ public class BookAnalyseService extends J2ServiceImpl<BookAnalyseDao, BookAnalys
      */
     private String buildAnalysisPrompt(String bookTitle) {
         return String.format("""
-                请对书籍《%s》进行全面分析，并以JSON格式返回结果，格式如下：
+                你是一位资深的图书评论专家和文学研究者。请对书籍《%s》进行全面而精准的分析。
+
+                重要说明：
+                1. 请基于你的知识库中关于这本书的信息进行分析
+                2. 如果这本书在你的知识库中，请提供准确详实的分析
+                3. 如果不确定或不了解这本书，请明确说明，不要编造内容
+
+                请以JSON格式返回分析结果，格式如下：
                 {
-                  "genre": "类型/流派，如：科幻、小说、历史、哲学等",
-                  "themes": ["主题1", "主题2", "主题3"],
-                  "tone": "基调，如：严肃、轻松、幽默、深刻等",
-                  "keyElements": ["关键要素1", "关键要素2", "关键要素3"],
-                  "recommendation": "200-300字的书籍综述和推荐理由"
+                  "genre": "类型/流派（10字以内），如：科幻小说、历史传记、哲学著作、经济学、心理学等",
+                  "themes": ["主题1（5字以内）", "主题2（5字以内）", "主题3（5字以内）"],
+                  "tone": "基调（8字以内），如：严肃深刻、轻松幽默、感人至深、理性客观等",
+                  "keyElements": ["关键要素1（8字以内）", "关键要素2（8字以内）", "关键要素3（8字以内）"],
+                  "recommendation": "书籍综述和推荐理由，200-300字"
                 }
 
-                请确保：
-                1. themes 和 keyElements 都是字符串数组
-                2. recommendation 要包含书籍的核心内容、特色和推荐理由
-                3. 只返回JSON，不要包含其他文字
+                字数控制要求（严格遵守）：
+                - genre: 最多10个中文字符
+                - themes: 每个主题最多5个中文字符，共3个主题
+                - tone: 最多8个中文字符
+                - keyElements: 每个要素最多8个中文字符，共3个要素
+                - recommendation: 200-300个中文字符
+
+                内容要求：
+                1. genre：准确描述书籍的类型和流派
+                2. themes：提炼核心主题，言简意赅
+                3. tone：概括书籍的整体基调和氛围
+                4. keyElements：提取最具代表性的3个关键元素（人物、事件、概念、场景等）
+                5. recommendation：包含以下内容：
+                   - 书籍的核心内容和主要观点（2-3句话）
+                   - 书籍的独特价值和特色（1-2句话）
+                   - 适合的读者群体和阅读收获（1-2句话）
+
+                注意事项：
+                - 只返回JSON格式，不要包含任何其他文字
+                - 所有字段都必须填写，不能为空
+                - 严格控制每个字段的字数，避免超出限制
+                - themes和keyElements必须是字符串数组
+                - 确保内容准确、精炼、有价值
                 """, bookTitle);
     }
 
     /**
      * 构建图片内容提示词（仅描述内容，不包含风格）
      * 书籍信息会被转换为内容描述，风格由AIService的默认提示词提供
+     * 严格控制字数，避免提示词溢出
      */
     private String buildImageContentPrompt(BookAnalyse analysis) {
         // 将JSONArray转换为字符串列表
         String themesStr = analysis.getThemes() != null ?
-            String.join(", ", analysis.getThemes().toJavaList(String.class)) : "";
+            String.join("、", analysis.getThemes().toJavaList(String.class)) : "";
         String keyElementsStr = analysis.getKeyElements() != null ?
-            String.join(", ", analysis.getKeyElements().toJavaList(String.class)) : "";
+            String.join("、", analysis.getKeyElements().toJavaList(String.class)) : "";
 
+        // 精简版提示词，控制总长度在300字符以内
         return String.format("""
-                Create a book poster for "%s"
+                Book: "%s"
+                Genre: %s | Tone: %s
+                Themes: %s
+                Key Elements: %s
 
-                Book Information:
-                - Title: %s
-                - Genre: %s
-                - Tone: %s
-                - Key Themes: %s
-                - Key Elements: %s
-
-                Content Requirements:
-                - Display the book title prominently in Chinese characters
-                - Include genre and tone information in organized sections
-                - Incorporate symbolic imagery representing the themes: %s
-                - Add relevant icons or illustrations related to: %s
-                - Create a harmonious composition that reflects the %s atmosphere
-                - Text should be readable and well-organized in poster format
+                Create an infographic poster featuring:
+                - Book title in Chinese (prominent display)
+                - Genre and tone in organized sections
+                - Visual symbols for themes
+                - Icons/illustrations for key elements
+                - Clean, educational layout
                 """,
-                analysis.getTitle(),
                 analysis.getTitle(),
                 analysis.getGenre(),
                 analysis.getTone(),
                 themesStr,
-                keyElementsStr,
-                themesStr,
-                keyElementsStr,
-                analysis.getTone()
+                keyElementsStr
         );
     }
 
