@@ -144,11 +144,11 @@ public class AIServiceImpl implements AIService {
                             expectedType, aiModel.getType()));
         }
 
-        // 验证模型是否启用
-        if (!Boolean.TRUE.equals(aiModel.getEnabled())) {
-            throw new AIException.ModelNotEnabledException(
-                    String.format("模型已禁用，modelId: %s", modelId));
-        }
+        // 验证模型是否启用 - id方式不验证启用·
+//        if (!Boolean.TRUE.equals(aiModel.getEnabled())) {
+//            throw new AIException.ModelNotEnabledException(
+//                    String.format("模型已禁用，modelId: %s", modelId));
+//        }
 
         return aiModel;
     }
