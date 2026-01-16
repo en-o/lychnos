@@ -10,23 +10,24 @@ import {aiModelApi} from '../api/aiModel';
 type TabType = 'analysis' | 'image';
 
 // AI 厂商默认 API URL 配置
+// 注意：Spring AI 会自动在 baseUrl 后添加 /v1，所以这里的 URL 不应包含 /v1
 const AI_FACTORY_DEFAULTS: Record<string, { apiUrl: string; description?: string }> = {
   // 文本分析模型
-  openai: { apiUrl: 'https://api.openai.com/v1', description: 'OpenAI 官方 API' },
+  openai: { apiUrl: 'https://api.openai.com', description: 'OpenAI 官方 API' },
   ollama: { apiUrl: 'http://localhost:11434', description: 'Ollama 本地服务' },
-  deepseek: { apiUrl: 'https://api.deepseek.com/v1', description: 'DeepSeek API' },
+  deepseek: { apiUrl: 'https://api.deepseek.com', description: 'DeepSeek API' },
   azure: { apiUrl: 'https://your-resource.openai.azure.com', description: 'Azure OpenAI Service' },
-  anthropic: { apiUrl: 'https://api.anthropic.com/v1', description: 'Anthropic Claude API' },
-  qwen: { apiUrl: 'https://dashscope.aliyuncs.com/compatible-mode/v1', description: '阿里云通义千问' },
-  baidu: { apiUrl: 'https://aip.baidubce.com/rpc/2.0/ai_custom/v1', description: '百度文心一言' },
-  modelscope: { apiUrl: 'https://api-inference.modelscope.cn/v1', description: '魔搭社区' },
-  huggingface: { apiUrl: 'https://api-inference.huggingface.co/v1', description: 'Hugging Face' },
+  anthropic: { apiUrl: 'https://api.anthropic.com', description: 'Anthropic Claude API' },
+  qwen: { apiUrl: 'https://dashscope.aliyuncs.com/compatible-mode', description: '阿里云通义千问' },
+  baidu: { apiUrl: 'https://aip.baidubce.com/rpc/2.0/ai_custom', description: '百度文心一言' },
+  modelscope: { apiUrl: 'https://api-inference.modelscope.cn', description: '魔搭社区' },
+  huggingface: { apiUrl: 'https://api-inference.huggingface.co', description: 'Hugging Face' },
   // 图片生成模型
   'stable-diffusion': { apiUrl: 'http://localhost:7860', description: 'Stable Diffusion WebUI' },
-  midjourney: { apiUrl: 'https://api.midjourney.com/v1', description: 'Midjourney API' },
-  'dall-e': { apiUrl: 'https://api.openai.com/v1', description: 'DALL-E by OpenAI' },
-  'nano-banana-pro': { apiUrl: 'https://api.nano-banana.com/v1', description: 'Nano Banana Pro' },
-  'modelscope-image': { apiUrl: 'https://api-inference.modelscope.cn/v1', description: '魔搭社区图片生成' },
+  midjourney: { apiUrl: 'https://api.midjourney.com', description: 'Midjourney API' },
+  'dall-e': { apiUrl: 'https://api.openai.com', description: 'DALL-E by OpenAI' },
+  'nano-banana-pro': { apiUrl: 'https://api.nano-banana.com', description: 'Nano Banana Pro' },
+  'modelscope-image': { apiUrl: 'https://api-inference.modelscope.cn', description: '魔搭社区图片生成' },
   'huggingface-image': { apiUrl: 'https://api-inference.huggingface.co/models', description: 'Hugging Face 图片生成' },
 };
 
@@ -429,15 +430,24 @@ const ModelSettingsPage: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">
                   API URL *
+                  <span className="group relative inline-flex">
+                    <svg className="w-4 h-4 text-gray-400 hover:text-gray-600 cursor-help" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span className="invisible group-hover:visible absolute left-5 top-0 w-64 bg-gray-800 text-white text-xs rounded-lg p-2 shadow-lg z-10 whitespace-normal">
+                      注意：Spring AI 会自动在 URL 后添加 /v1，因此使用 OpenAI 兼容接口时无需在 URL 末尾包含 /v1。
+                      <br />例如：阿里云通义千问应填写 https://dashscope.aliyuncs.com/compatible-mode
+                    </span>
+                  </span>
                 </label>
                 <input
                   type="text"
                   value={formData.apiUrl}
                   onChange={(e) => setFormData({ ...formData, apiUrl: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder={activeTab === 'analysis' ? 'https://api.openai.com/v1' : 'https://api.stability.ai/v1'}
+                  placeholder={activeTab === 'analysis' ? 'https://api.openai.com' : 'https://api.stability.ai'}
                 />
                 <p className="mt-1 text-xs text-gray-500">
                   已自动填充厂商默认 URL，可根据需要修改
