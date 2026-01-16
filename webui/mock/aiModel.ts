@@ -1,5 +1,8 @@
 /**
  * Mock接口 - AI模型相关
+ *
+ * ⚠️ 注意：Mock接口已停止维护，存在数据不一致问题
+ * 请使用真实后端接口进行开发和测试
  */
 import {MockMethod} from 'vite-plugin-mock';
 import {addModel, deleteModel, getModelsByType, setActiveModel, updateModel} from './data/aiModel.data';
