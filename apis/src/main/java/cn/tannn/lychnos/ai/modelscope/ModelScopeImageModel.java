@@ -29,6 +29,11 @@ public class ModelScopeImageModel implements ImageModel {
     private final RestTemplate restTemplate;
 
     /**
+     * ModelScope 提示词最大长度限制
+     */
+    private static final int MAX_PROMPT_LENGTH = 2000;
+
+    /**
      * 最大轮询次数
      */
     private static final int MAX_POLL_ATTEMPTS = 60;
@@ -65,6 +70,13 @@ public class ModelScopeImageModel implements ImageModel {
      * 提交异步任务
      */
     private String submitAsyncTask(String prompt) {
+        // ModelScope 限制提示词长度不超过2000字符
+        String finalPrompt = prompt;
+        if (prompt.length() > MAX_PROMPT_LENGTH) {
+            log.warn("提示词长度 {} 超过 ModelScope 限制 {}，进行截断", prompt.length(), MAX_PROMPT_LENGTH);
+            finalPrompt = prompt.substring(0, MAX_PROMPT_LENGTH);
+        }
+
         String url = baseUrl + "/v1/images/generations";
 
         HttpHeaders headers = new HttpHeaders();
@@ -74,11 +86,11 @@ public class ModelScopeImageModel implements ImageModel {
 
         Map<String, Object> requestBody = new HashMap<>();
         requestBody.put("model", model);
-        requestBody.put("prompt", prompt);
+        requestBody.put("prompt", finalPrompt);
 
         HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestBody, headers);
 
-        log.debug("提交异步任务到 ModelScope: {}", url);
+        log.debug("提交异步任务到 ModelScope，提示词长度: {}", finalPrompt.length());
         ResponseEntity<Map> response = restTemplate.exchange(
                 url,
                 HttpMethod.POST,
