@@ -42,8 +42,18 @@ public class BookAnalyseService extends J2ServiceImpl<BookAnalyseDao, BookAnalys
         // 先查询是否已经分析过
         Optional<BookAnalyse> existingAnalyse = getJpaBasicsDao().findByTitle(bookTitle);
         if (existingAnalyse.isPresent()) {
-            log.info("书籍已分析过，直接返回，书名: {}", bookTitle);
-            return existingAnalyse.get();
+            BookAnalyse existing = existingAnalyse.get();
+
+            // 如果已有图片，直接返回
+            if (existing.getPosterUrl() != null && !existing.getPosterUrl().isEmpty()) {
+                log.info("书籍已分析过且有图片，直接返回，书名: {}", bookTitle);
+                return existing;
+            }
+
+            // 如果没有图片，尝试生成图片
+            log.info("书籍已分析过但缺少图片，尝试生成图片，书名: {}", bookTitle);
+            generateAndSavePoster(existing, userId, bookTitle);
+            return getJpaBasicsDao().save(existing);
         }
 
         // 使用AI进行分析
@@ -55,26 +65,9 @@ public class BookAnalyseService extends J2ServiceImpl<BookAnalyseDao, BookAnalys
         // 解析AI响应并保存
         BookAnalyse bookAnalyse = parseAIResponse(bookTitle, aiResponse);
 
-        // 生成书籍分析信息图（必须成功）
+        // 生成书籍分析信息图
         log.info("开始生成书籍分析信息图，书名: {}", bookTitle);
-        String imageContentPrompt = buildImageContentPrompt(bookAnalyse);
-
-        // 生成图片流
-        try (InputStream imageStream = aiService.generateImageStreamWithContent(userId, imageContentPrompt)) {
-            if (imageStream == null) {
-                log.error("AI 返回的图片流为 null，书名: {}", bookTitle);
-                throw new RuntimeException("图览信息生成失败，请检查生图模型的配置和网络环境");
-            }
-
-            // 保存图片到本地，返回 posterUrl
-            String posterUrl = imageStorageService.saveImage(imageStream, bookTitle);
-            bookAnalyse.setPosterUrl(posterUrl);
-            log.info("书籍分析信息图生成并保存成功，posterUrl: {}", posterUrl);
-        } catch (Exception e) {
-            log.error("书籍分析信息图生成失败，书名: {}, 错误: {}", bookTitle, e.getMessage(), e);
-            // 图片生成是必须的，失败则抛出异常
-            throw new RuntimeException("图览信息生成失败，请检查生图模型的配置和网络环境。详细错误: " + e.getMessage(), e);
-        }
+        generateAndSavePoster(bookAnalyse, userId, bookTitle);
 
         BookAnalyse saved = getJpaBasicsDao().save(bookAnalyse);
 
@@ -89,6 +82,30 @@ public class BookAnalyseService extends J2ServiceImpl<BookAnalyseDao, BookAnalys
      */
     public Optional<BookAnalyse> findById(Long bookAnalyseId) {
         return getJpaBasicsDao().findById(bookAnalyseId);
+    }
+
+    /**
+     * 为书籍分析生成并保存海报图片
+     * @param bookAnalyse 书籍分析对象
+     * @param userId 用户ID
+     * @param bookTitle 书名
+     */
+    private void generateAndSavePoster(BookAnalyse bookAnalyse, Long userId, String bookTitle) {
+        try {
+            String imageContentPrompt = buildImageContentPrompt(bookAnalyse);
+            try (InputStream imageStream = aiService.generateImageStreamWithContent(userId, imageContentPrompt)) {
+                if (imageStream == null) {
+                    log.warn("AI 返回的图片流为 null，书名: {}", bookTitle);
+                    return;
+                }
+                String posterUrl = imageStorageService.saveImage(imageStream, bookTitle);
+                bookAnalyse.setPosterUrl(posterUrl);
+                log.info("书籍分析信息图生成并保存成功，posterUrl: {}", posterUrl);
+            }
+        } catch (Exception e) {
+            log.warn("书籍分析信息图生成失败，书名: {}, 错误: {}", bookTitle, e.getMessage());
+            // 图片生成失败不影响业务流程，posterUrl 保持为 null，后续可以补充生成
+        }
     }
 
     /**

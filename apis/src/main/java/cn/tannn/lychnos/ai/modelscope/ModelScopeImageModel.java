@@ -87,11 +87,11 @@ public class ModelScopeImageModel implements ImageModel {
         Map<String, Object> requestBody = new HashMap<>();
         requestBody.put("model", model);
         requestBody.put("prompt", finalPrompt);
-        requestBody.put("size", "1920*1080");  // 设置图片尺寸为 1920x1080 (Full HD, 16:9横向)
+        requestBody.put("size", "1920x1080");  // 设置图片尺寸为 1920x1080 (Full HD, 16:9横向)
 
         HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestBody, headers);
 
-        log.debug("提交异步任务到 ModelScope，提示词长度: {}, 尺寸: 1920*1080", finalPrompt.length());
+        log.debug("提交异步任务到 ModelScope，提示词长度: {}, 尺寸: 1920x1080", finalPrompt.length());
         ResponseEntity<Map> response = restTemplate.exchange(
                 url,
                 HttpMethod.POST,
