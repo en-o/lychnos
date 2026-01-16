@@ -55,9 +55,9 @@ public class BookAnalyseService extends J2ServiceImpl<BookAnalyseDao, BookAnalys
         // 解析AI响应并保存
         BookAnalyse bookAnalyse = parseAIResponse(bookTitle, aiResponse);
 
-        // 生成书籍封面图片
+        // 生成书籍分析信息图
         try {
-            log.info("开始生成书籍封面图片，书名: {}", bookTitle);
+            log.info("开始生成书籍分析信息图，书名: {}", bookTitle);
             String imageContentPrompt = buildImageContentPrompt(bookAnalyse);
 
             // 生成图片流
@@ -66,16 +66,16 @@ public class BookAnalyseService extends J2ServiceImpl<BookAnalyseDao, BookAnalys
                     // 保存图片到本地，返回 posterUrl
                     String posterUrl = imageStorageService.saveImage(imageStream, bookTitle);
                     bookAnalyse.setPosterUrl(posterUrl);
-                    log.info("书籍封面图片生成并保存成功，posterUrl: {}", posterUrl);
+                    log.info("书籍分析信息图生成并保存成功，posterUrl: {}", posterUrl);
                 } else {
                     log.warn("AI 返回的图片流为 null，书名: {}", bookTitle);
-                    bookAnalyse.setPosterUrl(null);
+                    bookAnalyse.setPosterUrl("图览信息生成失败，请检查生图模型的配置和网络环境");
                 }
             }
         } catch (Exception e) {
-            log.warn("书籍封面图片生成失败，书名: {}, 错误: {}", bookTitle, e.getMessage(), e);
-            // 图片生成失败不影响整体分析，确保 posterUrl 为 null
-            bookAnalyse.setPosterUrl(null);
+            log.error("书籍分析信息图生成失败，书名: {}, 错误: {}", bookTitle, e.getMessage(), e);
+            // 图片生成失败不影响整体分析，设置错误提示
+            bookAnalyse.setPosterUrl("图览信息生成失败，请检查生图模型的配置和网络环境");
         }
 
         BookAnalyse saved = getJpaBasicsDao().save(bookAnalyse);
