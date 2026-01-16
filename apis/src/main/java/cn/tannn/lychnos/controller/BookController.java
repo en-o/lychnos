@@ -56,10 +56,23 @@ public class BookController {
                                          HttpServletRequest request) {
 
         Long userId = UserUtil.userId2(request);
-        if (userInterestService.checkAnalyzed(userId, bookTitle).isPresent()) {
-            throw new BusinessException(1001, "该书籍已经分析过，请到历史记录中查看");
+
+        // 检查是否已分析过，且图片是否完整
+        var existingInterest = userInterestService.checkAnalyzed(userId, bookTitle);
+        if (existingInterest.isPresent()) {
+            // 查询书籍分析记录，检查图片是否存在
+            var bookAnalyse = bookAnalyseService.findById(existingInterest.get().getBookAnalyseId());
+            if (bookAnalyse.isPresent() &&
+                bookAnalyse.get().getPosterUrl() != null &&
+                !bookAnalyse.get().getPosterUrl().isEmpty()) {
+                // 已分析过且图片完整，不允许重复分析
+                throw new BusinessException(1001, "该书籍已经分析过，请到历史记录中查看");
+            }
+            // 如果图片不存在，允许重新分析以补充生成图片
+            log.info("书籍已分析但缺少图片，允许重新分析，书名: {}", bookTitle);
         }
-        // 使用 AI 进行书籍分析
+
+        // 使用 AI 进行书籍分析（首次分析或补充图片）
         return ResultVO.success(bookAnalyseService.analyse(bookTitle, userId));
     }
 
@@ -68,9 +81,23 @@ public class BookController {
     public ResultVO<String> checkAnalyzed(@PathVariable("bookTitle") String bookTitle,
                                           HttpServletRequest request) {
         Long userId = UserUtil.userId2(request);
-        if (userInterestService.checkAnalyzed(userId, bookTitle).isPresent()) {
-            throw new BusinessException(1001, "该书籍已经分析过，请到历史记录中查看");
+
+        // 检查是否已分析过，且图片是否完整
+        var existingInterest = userInterestService.checkAnalyzed(userId, bookTitle);
+        if (existingInterest.isPresent()) {
+            // 查询书籍分析记录，检查图片是否存在
+            var bookAnalyse = bookAnalyseService.findById(existingInterest.get().getBookAnalyseId());
+            if (bookAnalyse.isPresent() &&
+                bookAnalyse.get().getPosterUrl() != null &&
+                !bookAnalyse.get().getPosterUrl().isEmpty()) {
+                // 已分析过且图片完整，不允许重复分析
+                throw new BusinessException(1001, "该书籍已经分析过，请到历史记录中查看");
+            }
+            // 如果图片不存在，返回可以分析（用于补充生成图片）
+            log.info("书籍已分析但缺少图片，返回可以分析，书名: {}", bookTitle);
+            return ResultVO.successMessage("该书籍图片缺失，可以重新分析补充图片");
         }
+
         return ResultVO.successMessage("该书籍未分析，可以进行分析");
     }
 }
