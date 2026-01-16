@@ -7,7 +7,6 @@ import cn.tannn.jdevelops.result.response.ResultVO;
 import cn.tannn.lychnos.common.util.UserUtil;
 import cn.tannn.lychnos.controller.vo.BookRecommend;
 import cn.tannn.lychnos.entity.BookAnalyse;
-import cn.tannn.lychnos.entity.UserInterest;
 import cn.tannn.lychnos.service.BookAnalyseService;
 import cn.tannn.lychnos.service.UserInterestService;
 import io.swagger.v3.oas.annotations.Operation;

@@ -1,6 +1,5 @@
 package cn.tannn.lychnos.service;
 
-import cn.tannn.jdevelops.exception.built.BusinessException;
 import cn.tannn.jdevelops.jpa.service.J2ServiceImpl;
 import cn.tannn.lychnos.ai.service.AIService;
 import cn.tannn.lychnos.dao.BookAnalyseDao;
@@ -8,7 +7,6 @@ import cn.tannn.lychnos.entity.BookAnalyse;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;

@@ -1,6 +1,5 @@
 package cn.tannn.lychnos.ai.service;
 
-import cn.tannn.lychnos.common.constant.ModelType;
 import org.springframework.ai.image.ImageResponse;
 
 /**

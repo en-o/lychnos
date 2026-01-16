@@ -1,9 +1,7 @@
 package cn.tannn.lychnos.entity;
 
 import cn.tannn.lychnos.common.pojo.JpaCommonBean;
-import cn.tannn.lychnos.common.views.Views;
 import com.alibaba.fastjson2.JSONArray;
-import com.fasterxml.jackson.annotation.JsonView;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

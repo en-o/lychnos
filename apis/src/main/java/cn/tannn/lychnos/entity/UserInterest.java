@@ -1,9 +1,7 @@
 package cn.tannn.lychnos.entity;
 
 import cn.tannn.jdevelops.jpa.generator.UuidCustomGenerator;
-import cn.tannn.lychnos.common.views.Views;
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import io.swagger.v3.oas.annotations.media.Schema;
