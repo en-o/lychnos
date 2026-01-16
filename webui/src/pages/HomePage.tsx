@@ -7,6 +7,7 @@ import Logo from '../components/Logo';
 import {toast} from '../components/ToastContainer';
 import ConfirmDialog from '../components/ConfirmDialog';
 import ImagePreview from '../components/ImagePreview';
+import {getImageUrl} from '../utils/imageUrl';
 
 // 装饰主题类型
 type DecorationTheme = 'daily' | 'christmas' | 'spring-festival';
@@ -472,11 +473,11 @@ const HomePage: React.FC = () => {
                   <div className="mb-6">
                     {!imageError[result.id] ? (
                       <img
-                        src={result.posterUrl}
+                        src={getImageUrl(result.posterUrl)}
                         alt={result.title}
                         className="w-full h-64 object-fill rounded-lg cursor-pointer hover:opacity-90 transition"
                         onError={() => setImageError(prev => ({ ...prev, [result.id]: true }))}
-                        onClick={() => setPreviewImage(result.posterUrl)}
+                        onClick={() => setPreviewImage(getImageUrl(result.posterUrl))}
                       />
                     ) : (
                       <div className="w-full h-64 bg-gray-100 rounded-lg flex items-center justify-center">
@@ -804,11 +805,11 @@ const HomePage: React.FC = () => {
                 <div>
                   {!imageError[selectedHistoryItem.id] ? (
                     <img
-                      src={selectedHistoryItem.analysisData.posterUrl}
+                      src={getImageUrl(selectedHistoryItem.analysisData.posterUrl)}
                       alt={selectedHistoryItem.title}
                       className="w-full h-48 object-fill rounded-lg cursor-pointer hover:opacity-90 transition"
                       onError={() => setImageError(prev => ({ ...prev, [selectedHistoryItem.id]: true }))}
-                      onClick={() => setPreviewImage(selectedHistoryItem.analysisData.posterUrl || null)}
+                      onClick={() => setPreviewImage(getImageUrl(selectedHistoryItem.analysisData.posterUrl))}
                     />
                   ) : (
                     <div className="w-full h-48 bg-gray-100 rounded-lg flex items-center justify-center">
@@ -871,6 +872,17 @@ const HomePage: React.FC = () => {
           alt="图片预览"
           onClose={() => setPreviewImage(null)}
         />
+      )}
+
+      {/* 全屏加载提示 */}
+      {loading && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[10001]">
+          <div className="bg-white rounded-xl p-8 flex flex-col items-center gap-4">
+            <div className="w-16 h-16 border-4 border-gray-300 border-t-blue-600 rounded-full animate-spin"></div>
+            <p className="text-gray-700 text-lg font-medium">正在分析书籍...</p>
+            <p className="text-gray-500 text-sm">这可能需要一些时间，请耐心等待</p>
+          </div>
+        </div>
       )}
     </div>
   );

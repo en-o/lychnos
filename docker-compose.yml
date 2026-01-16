@@ -19,9 +19,12 @@ services:
       DOC_PASSWORD: ${DOC_PASSWORD:-tan}
       DOC_USERNAME: ${DOC_USERNAME:-tan}
       CONFIG_ENV: ${CONFIG_ENV:-prod}
+      IMAGE_STORAGE_PATH: ${IMAGE_STORAGE_PATH:-./data/images}
     volumes:
       # 可选：持久化日志
       - ./logs:/app/logs
+      # 图片地址
+      - ./data/images:/app/data/images
     restart: unless-stopped
     networks:
       - lychnos-network

@@ -5,6 +5,7 @@ import {bookApi} from '../api/book';
 import type {AnalysisHistory} from '../models';
 import Logo from '../components/Logo';
 import ImagePreview from '../components/ImagePreview';
+import {getImageUrl} from '../utils/imageUrl';
 
 const HistoryPage: React.FC = () => {
   const navigate = useNavigate();
@@ -322,11 +323,11 @@ const HistoryPage: React.FC = () => {
                 <div>
                   {!imageError[selectedItem.id] ? (
                     <img
-                      src={selectedItem.analysisData.posterUrl}
+                      src={getImageUrl(selectedItem.analysisData.posterUrl)}
                       alt={selectedItem.title}
                       className="w-full h-48 object-fill rounded-lg cursor-pointer hover:opacity-90 transition"
                       onError={() => setImageError(prev => ({ ...prev, [selectedItem.id]: true }))}
-                      onClick={() => setPreviewImage(selectedItem.analysisData.posterUrl || null)}
+                      onClick={() => setPreviewImage(getImageUrl(selectedItem.analysisData.posterUrl))}
                     />
                   ) : (
                     <div className="w-full h-48 bg-gray-100 rounded-lg flex items-center justify-center">

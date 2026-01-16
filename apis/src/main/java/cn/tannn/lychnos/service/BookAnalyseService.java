@@ -9,6 +9,7 @@ import com.alibaba.fastjson2.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.io.InputStream;
 import java.util.Optional;
 
 /**
@@ -23,10 +24,12 @@ import java.util.Optional;
 public class BookAnalyseService extends J2ServiceImpl<BookAnalyseDao, BookAnalyse, Long> {
 
     private final AIService aiService;
+    private final ImageStorageService imageStorageService;
 
-    public BookAnalyseService(AIService aiService) {
+    public BookAnalyseService(AIService aiService, ImageStorageService imageStorageService) {
         super(BookAnalyse.class);
         this.aiService = aiService;
+        this.imageStorageService = imageStorageService;
     }
 
     /**
@@ -56,13 +59,13 @@ public class BookAnalyseService extends J2ServiceImpl<BookAnalyseDao, BookAnalys
         try {
             log.info("开始生成书籍封面图片，书名: {}", bookTitle);
             String imageContentPrompt = buildImageContentPrompt(bookAnalyse);
-            org.springframework.ai.image.ImageResponse imageResponse = aiService.generateImageWithContent(userId, imageContentPrompt);
 
-            // 从响应中提取图片URL
-            if (imageResponse != null && imageResponse.getResult() != null) {
-                String posterUrl = imageResponse.getResult().getOutput().getUrl();
-                bookAnalyse.setPosterUrl(posterUrl);
-                log.info("书籍封面图片生成成功，URL: {}", posterUrl);
+            // 生成图片流
+            try (InputStream imageStream = aiService.generateImageStreamWithContent(userId, imageContentPrompt)) {
+                // 保存图片到本地，返回相对路径
+                String relativePath = imageStorageService.saveImage(imageStream, bookTitle);
+                bookAnalyse.setPosterUrl(relativePath);
+                log.info("书籍封面图片生成并保存成功，相对路径: {}", relativePath);
             }
         } catch (Exception e) {
             log.warn("书籍封面图片生成失败，书名: {}, 错误: {}", bookTitle, e.getMessage());

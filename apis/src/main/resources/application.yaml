@@ -11,6 +11,12 @@ spring:
       max-file-size:  ${FILE_MAX_SIZE:100MB}
       max-request-size: ${FILE_MAX_SIZE:100MB}
 
+# 应用自定义配置
+app:
+  image:
+    # 图片存储根目录
+    storage-path: ${IMAGE_STORAGE_PATH:./data/images}
+
 jdevelops:
   swagger:
     base-package:
