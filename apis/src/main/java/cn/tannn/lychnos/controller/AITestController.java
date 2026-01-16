@@ -10,15 +10,20 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.image.ImageResponse;
 import org.springframework.context.annotation.Profile;
+import org.springframework.http.MediaType;
+import org.springframework.util.StreamUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
+
+import java.io.InputStream;
 
 /**
  * AI 测试接口
@@ -64,27 +69,33 @@ public class AITestController {
 
     @Operation(summary = "图片生成测试", description = "使用用户配置的默认图片模型生成图片")
     @PostMapping("image")
-    public ResultVO<ImageResponse> testImage(
+    public void testImage(
             @Valid @RequestBody AIPromptDTO dto,
-            HttpServletRequest request) {
+            HttpServletRequest request,
+            HttpServletResponse response) throws Exception {
 
         Long userId = UserUtil.userId2(request);
         log.info("AI图片生成测试，userId: {}, prompt: {}", userId, dto.getPrompt());
 
-        ImageResponse result = aiService.generateImage(userId, dto.getPrompt());
-        return ResultVO.success(result);
+        try (InputStream inputStream = aiService.generateImageStream(userId, dto.getPrompt())) {
+            response.setContentType(MediaType.IMAGE_PNG_VALUE);
+            StreamUtils.copy(inputStream, response.getOutputStream());
+        }
     }
 
     @Operation(summary = "图片生成测试（指定模型）", description = "使用指定的模型ID生成图片")
     @PostMapping("image/model")
-    public ResultVO<ImageResponse> testImageWithModel(
+    public void testImageWithModel(
             @Valid @RequestBody AIPromptWithModelDTO dto,
-            HttpServletRequest request) {
+            HttpServletRequest request,
+            HttpServletResponse response) throws Exception {
 
         Long userId = UserUtil.userId2(request);
         log.info("AI图片生成测试（指定模型），userId: {}, modelId: {}, prompt: {}", userId, dto.getModelId(), dto.getPrompt());
 
-        ImageResponse result = aiService.generateImageWithModel(dto.getModelId(), userId, dto.getPrompt());
-        return ResultVO.success(result);
+        try (InputStream inputStream = aiService.generateImageStreamWithModel(dto.getModelId(), userId, dto.getPrompt())) {
+            response.setContentType(MediaType.IMAGE_PNG_VALUE);
+            StreamUtils.copy(inputStream, response.getOutputStream());
+        }
     }
 }

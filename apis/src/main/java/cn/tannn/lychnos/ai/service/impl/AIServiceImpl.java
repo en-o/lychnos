@@ -18,6 +18,8 @@ import org.springframework.ai.image.ImagePrompt;
 import org.springframework.ai.image.ImageResponse;
 import org.springframework.stereotype.Service;
 
+import java.io.InputStream;
+import java.net.URL;
 import java.util.List;
 import java.util.Objects;
 
@@ -84,6 +86,31 @@ public class AIServiceImpl implements AIService {
         return doGenerateImage(aiModel, prompt);
     }
 
+    @Override
+    public InputStream generateImageStream(Long userId, String prompt) {
+        validateUserId(userId);
+        validatePrompt(prompt);
+
+        // 获取用户启用的默认模型
+        AIModel aiModel = getEnabledModel(userId, ModelType.IMAGE);
+
+        // 生成图片并返回流
+        return doGenerateImageStream(aiModel, prompt);
+    }
+
+    @Override
+    public InputStream generateImageStreamWithModel(Long modelId, Long userId, String prompt) {
+        validateModelId(modelId);
+        validateUserId(userId);
+        validatePrompt(prompt);
+
+        // 查询并验证模型
+        AIModel aiModel = findAndVerifyModel(modelId, userId, ModelType.IMAGE);
+
+        // 使用指定模型生成图片并返回流
+        return doGenerateImageStream(aiModel, prompt);
+    }
+
     /**
      * 执行文本生成（内部方法，避免重复查询）
      */
@@ -122,6 +149,38 @@ public class AIServiceImpl implements AIService {
             log.error("AI图片生成失败，modelId: {}, userId: {}, error: {}",
                     aiModel.getId(), aiModel.getUserId(), e.getMessage(), e);
             throw new AIException.ModelCallFailedException("图片生成失败: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * 执行图片生成并返回流（内部方法，避免重复查询）
+     */
+    private InputStream doGenerateImageStream(AIModel aiModel, String prompt) {
+        try {
+            log.info("调用AI图片生成（流），modelId: {}, userId: {}, model: {}",
+                    aiModel.getId(), aiModel.getUserId(), aiModel.getModel());
+
+            // 先生成图片获取URL
+            ImageResponse response = doGenerateImage(aiModel, prompt);
+
+            // 从响应中提取图片URL
+            String imageUrl = response.getResult().getOutput().getUrl();
+            if (imageUrl == null || imageUrl.isEmpty()) {
+                throw new AIException.ModelCallFailedException("图片URL为空", null);
+            }
+
+            log.info("从URL下载图片流，url: {}", imageUrl);
+
+            // 从URL下载图片并返回流
+            URL url = new URL(imageUrl);
+            InputStream inputStream = url.openStream();
+
+            log.info("AI图片流生成成功，modelId: {}", aiModel.getId());
+            return inputStream;
+        } catch (Exception e) {
+            log.error("AI图片流生成失败，modelId: {}, userId: {}, error: {}",
+                    aiModel.getId(), aiModel.getUserId(), e.getMessage(), e);
+            throw new AIException.ModelCallFailedException("图片流生成失败: " + e.getMessage(), e);
         }
     }
 
