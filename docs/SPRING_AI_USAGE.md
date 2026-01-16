@@ -87,14 +87,21 @@ VALUES (1, 'Qwen Turbo', 'qwen-turbo', 'qwen', 'sk-xxxxx', 'https://dashscope.al
 
 #### 魔搭社区图片生成
 
-```sql
--- Z-Image-Turbo 图片生成模型（推荐）
-INSERT INTO tb_ai_model (user_id, name, model, factory, api_key, api_url, enabled, type)
-VALUES (1, 'Z-Image-Turbo', 'Tongyi-MAI/Z-Image-Turbo', 'modelscope', 'your-sdk-token', 'https://api-inference.modelscope.cn', 1, 'IMAGE');
+**注意：魔搭社区的图片生成 API 不支持 OpenAI 的同步调用模式，需要异步调用（设置 header `X-ModelScope-Async-Mode=true`），目前本系统暂不支持。**
 
--- 其他魔搭图片生成模型
+建议使用以下替代方案：
+- OpenAI DALL-E 3（收费但稳定）
+- Azure OpenAI DALL-E 3 或 GPT-Image-1
+- Stable Diffusion WebUI（本地部署，免费）
+
+```sql
+-- DALL-E 3（OpenAI 官方）
 INSERT INTO tb_ai_model (user_id, name, model, factory, api_key, api_url, enabled, type)
-VALUES (1, 'MYkawaii4MJ', 'ChaosMY/MYkawaii4MJ', 'modelscope', 'your-sdk-token', 'https://api-inference.modelscope.cn', 1, 'IMAGE');
+VALUES (1, 'DALL-E 3', 'dall-e-3', 'openai', 'sk-xxxxx', 'https://api.openai.com', 1, 'IMAGE');
+
+-- Stable Diffusion WebUI（本地部署）
+INSERT INTO tb_ai_model (user_id, name, model, factory, api_key, api_url, enabled, type)
+VALUES (1, 'SD WebUI', 'sd-xl-turbo', 'stable-diffusion', NULL, 'http://localhost:7860', 1, 'IMAGE');
 ```
 
 ## 异常处理

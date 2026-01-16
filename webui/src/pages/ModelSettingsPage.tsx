@@ -448,15 +448,16 @@ const ModelSettingsPage: React.FC = () => {
                       </div>
                     ) : (
                       <div className="text-xs">
-                        <p className="mb-1">• <span className="font-medium">Z-Image-Turbo</span> (魔搭社区) - 高质量图片生成</p>
-                        <p className="mb-1 text-gray-600">模型名称: Tongyi-MAI/Z-Image-Turbo</p>
+                        <p className="mb-1">• <span className="font-medium">DALL-E 3</span> (OpenAI) - 高质量图片生成，稳定可靠</p>
+                        <p className="mb-1">• <span className="font-medium">Stable Diffusion WebUI</span> - 本地部署，免费使用</p>
+                        <p className="mb-1 text-amber-700">⚠️ 魔搭社区图片生成暂不支持（需异步调用）</p>
                         <a
-                          href="https://www.modelscope.cn/models/Tongyi-MAI/Z-Image-Turbo"
+                          href="https://platform.openai.com/docs/guides/images"
                           target="_blank"
                           rel="noopener noreferrer"
                           className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-700 underline"
                         >
-                          查看模型详情
+                          查看 DALL-E 文档
                           <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                           </svg>
