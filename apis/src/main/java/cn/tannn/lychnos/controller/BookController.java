@@ -60,8 +60,8 @@ public class BookController {
         if (userInterestService.checkAnalyzed(userId, bookTitle).isPresent()) {
             throw new BusinessException(1001, "该书籍已经分析过，请到历史记录中查看");
         }
-        // 具体分析模型后面做，现在用内置的假数据
-        return ResultVO.success(bookAnalyseService.analyse(bookTitle));
+        // 使用 AI 进行书籍分析
+        return ResultVO.success(bookAnalyseService.analyse(bookTitle, userId));
     }
 
     @Operation(summary = "检查书籍是否已分析", description = "根据书名检查当前用户是否已经分析过该书籍")
