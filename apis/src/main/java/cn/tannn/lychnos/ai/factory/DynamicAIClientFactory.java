@@ -6,12 +6,13 @@ import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.image.ImageModel;
 import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.ai.openai.OpenAiImageModel;
+import org.springframework.ai.openai.OpenAiImageOptions;
 import org.springframework.ai.openai.api.OpenAiApi;
 import org.springframework.ai.openai.api.OpenAiImageApi;
+import org.springframework.ai.retry.RetryUtils;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
-import java.time.Duration;
 
 /**
  * 动态 AI 客户端工厂
@@ -60,13 +61,13 @@ public class DynamicAIClientFactory {
         // 创建 OpenAI Image API 客户端
         OpenAiImageApi openAiImageApi = createOpenAiImageApi(config);
 
-        // 创建 OpenAI 图片模型
-        return OpenAiImageModel.builder()
-                .openAiImageApi(openAiImageApi)
-                .defaultOptions(org.springframework.ai.openai.OpenAiImageOptions.builder()
-                        .model(config.getModel())
-                        .build())
+        // 创建图片选项
+        OpenAiImageOptions imageOptions =OpenAiImageOptions.builder()
+                .model(config.getModel())
                 .build();
+
+        // 创建 OpenAI 图片模型（在构造函数中传入选项）
+        return new OpenAiImageModel(openAiImageApi, imageOptions, RetryUtils.DEFAULT_RETRY_TEMPLATE);
     }
 
     /**
@@ -76,7 +77,10 @@ public class DynamicAIClientFactory {
         String apiKey = StringUtils.hasText(config.getApiKey()) ? config.getApiKey() : "dummy";
         String baseUrl = config.getBaseUrl();
 
-        return new OpenAiApi(baseUrl, apiKey, null, null);
+        return OpenAiApi.builder()
+                .baseUrl(baseUrl)
+                .apiKey(apiKey)
+                .build();
     }
 
     /**
@@ -86,6 +90,9 @@ public class DynamicAIClientFactory {
         String apiKey = StringUtils.hasText(config.getApiKey()) ? config.getApiKey() : "dummy";
         String baseUrl = config.getBaseUrl();
 
-        return new OpenAiImageApi(baseUrl, apiKey, null);
+        return OpenAiImageApi.builder()
+                .baseUrl(baseUrl)
+                .apiKey(apiKey)
+                .build();
     }
 }
