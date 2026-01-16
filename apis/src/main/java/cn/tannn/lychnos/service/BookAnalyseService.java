@@ -158,8 +158,6 @@ public class BookAnalyseService extends J2ServiceImpl<BookAnalyseDao, BookAnalys
     /**
      * 构建图片内容提示词（仅描述内容，不包含风格）
      * 书籍信息会被转换为详细的内容描述，风格由AIService的默认提示词提供
-     *
-     * 注意：会对提示词进行压缩（去除多余空格、换行），适配不同模型的长度限制
      */
     private String buildImageContentPrompt(BookAnalyse analysis) {
         // 将JSONArray转换为字符串列表
@@ -234,13 +232,7 @@ public class BookAnalyseService extends J2ServiceImpl<BookAnalyseDao, BookAnalys
                 keyElementsStr
         );
 
-        // 压缩提示词：去除多余空格、换行、制表符
-        String compressedPrompt = prompt
-                .replaceAll("\\s+", " ")  // 将所有连续空白字符（空格、换行、制表符等）替换为单个空格
-                .trim();                   // 去除首尾空格
-
-        log.debug("原始提示词长度: {}, 压缩后长度: {}", prompt.length(), compressedPrompt.length());
-        return compressedPrompt;
+        return prompt;
     }
 
     /**

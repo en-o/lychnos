@@ -234,9 +234,13 @@ public class AIServiceImpl implements AIService {
             log.info("调用AI图片生成，modelId: {}, userId: {}, model: {}",
                     aiModel.getId(), aiModel.getUserId(), aiModel.getModel());
 
+            // 压缩提示词：去除多余空格、换行、制表符（减少token消耗）
+            String compressedPrompt = compressPrompt(prompt);
+            log.debug("提示词压缩，原始长度: {}, 压缩后长度: {}", prompt.length(), compressedPrompt.length());
+
             DynamicAIModelConfig config = buildConfig(aiModel);
             ImageModel imageModel = clientFactory.createImageModel(config, aiModel.getFactory());
-            ImageResponse response = imageModel.call(new ImagePrompt(prompt));
+            ImageResponse response = imageModel.call(new ImagePrompt(compressedPrompt));
 
             log.info("AI图片生成成功，modelId: {}", aiModel.getId());
             return response;
@@ -356,6 +360,20 @@ public class AIServiceImpl implements AIService {
      */
     private String buildFullImagePrompt(String contentPrompt) {
         return DEFAULT_IMAGE_STYLE_PROMPT + "\nContent Description:\n" + contentPrompt;
+    }
+
+    /**
+     * 压缩提示词：去除多余空格、换行、制表符
+     *
+     * @param prompt 原始提示词
+     * @return 压缩后的提示词
+     */
+    private String compressPrompt(String prompt) {
+        if (prompt == null || prompt.isEmpty()) {
+            return prompt;
+        }
+        // 将所有连续空白字符（空格、换行、制表符等）替换为单个空格，并去除首尾空格
+        return prompt.replaceAll("\\s+", " ").trim();
     }
 
     /**
