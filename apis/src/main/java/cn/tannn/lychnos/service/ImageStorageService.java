@@ -16,6 +16,10 @@ import java.time.format.DateTimeFormatter;
 
 /**
  * 图片存储服务
+ * <p>
+ * 支持统一格式：协议:鉴权:路径
+ * - 协议: h(HTTP/HTTPS) / ali(阿里云OSS) / qiniu(七牛云) / s3(AWS S3) / f(FTP) / l(本地)
+ * - 鉴权: 0(无需鉴权) / 1(需要鉴权)
  *
  * @author <a href="https://t.tannn.cn/">tan</a>
  * @version V1.0
@@ -34,7 +38,7 @@ public class ImageStorageService {
      *
      * @param inputStream 图片输入流
      * @param bookTitle   书籍名称
-     * @return 相对路径（不含前缀），格式：年月日/书籍名.png
+     * @return poster_url 格式（l:1:/年月日/书籍名.png）
      */
     public String saveImage(InputStream inputStream, String bookTitle) {
         try {
@@ -63,11 +67,11 @@ public class ImageStorageService {
                 }
             }
 
-            // 返回相对路径：年月日/书籍名.png
-            String relativePath = dateDir + "/" + fileName;
-            log.info("图片保存成功，相对路径: {}", relativePath);
+            // 返回统一格式：l:1:/年月日/书籍名.png
+            String posterUrl = "l:1:/" + dateDir + "/" + fileName;
+            log.info("图片保存成功，posterUrl: {}", posterUrl);
 
-            return relativePath;
+            return posterUrl;
         } catch (Exception e) {
             log.error("保存图片失败，书籍: {}", bookTitle, e);
             throw new RuntimeException("保存图片失败: " + e.getMessage(), e);
@@ -75,13 +79,59 @@ public class ImageStorageService {
     }
 
     /**
-     * 根据相对路径读取图片
+     * 根据 posterUrl 读取图片
+     * <p>
+     * 格式：协议:鉴权:路径
+     * 示例：
+     * - h:0:https://example.com/image.png (无鉴权HTTP，不应通过此方法访问)
+     * - l:1:/20240115/三体.png (本地存储)
+     * - ali:1:/bucket/path/image.png (阿里云OSS，待实现)
      *
-     * @param relativePath 相对路径（年月日/书籍名.png）
+     * @param posterUrl poster_url 格式字符串
      * @return 图片输入流
      */
-    public InputStream getImage(String relativePath) {
+    public InputStream getImage(String posterUrl) {
         try {
+            // 解析格式：协议:鉴权:路径
+            String[] parts = posterUrl.split(":", 3);
+
+            // 兼容旧格式（直接是路径）
+            if (parts.length < 3) {
+                return getLocalImageByPath(posterUrl);
+            }
+
+            String protocol = parts[0];
+            String auth = parts[1];
+            String path = parts[2];
+
+            // 根据协议类型处理
+            return switch (protocol) {
+                case "l" -> getLocalImageByPath(path);
+                case "h" -> getHttpImage(auth, path);
+                case "ali" -> getAliOssImage(auth, path);
+                case "qiniu" -> getQiniuImage(auth, path);
+                case "s3" -> getS3Image(auth, path);
+                case "f" -> getFtpImage(auth, path);
+                default -> throw new IllegalArgumentException("不支持的协议: " + protocol);
+            };
+
+        } catch (Exception e) {
+            log.error("读取图片失败，posterUrl: {}", posterUrl, e);
+            throw new RuntimeException("读取图片失败: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * 读取本地图片
+     *
+     * @param path 本地路径（/年月日/书籍名.png）
+     * @return 图片输入流
+     */
+    private InputStream getLocalImageByPath(String path) {
+        try {
+            // 移除开头的斜杠
+            String relativePath = path.startsWith("/") ? path.substring(1) : path;
+
             Path filePath = Paths.get(storagePath, relativePath);
             File file = filePath.toFile();
 
@@ -92,9 +142,44 @@ public class ImageStorageService {
 
             return Files.newInputStream(filePath);
         } catch (Exception e) {
-            log.error("读取图片失败，路径: {}", relativePath, e);
-            throw new RuntimeException("读取图片失败: " + e.getMessage(), e);
+            log.error("读取本地图片失败，路径: {}", path, e);
+            throw new RuntimeException("读取本地图片失败: " + e.getMessage(), e);
         }
+    }
+
+    /**
+     * 读取 HTTP/HTTPS 图片（待实现）
+     */
+    private InputStream getHttpImage(String auth, String path) {
+        throw new UnsupportedOperationException("HTTP/HTTPS 图片读取功能待实现");
+    }
+
+    /**
+     * 读取阿里云 OSS 图片（待实现）
+     */
+    private InputStream getAliOssImage(String auth, String path) {
+        throw new UnsupportedOperationException("阿里云 OSS 图片读取功能待实现");
+    }
+
+    /**
+     * 读取七牛云图片（待实现）
+     */
+    private InputStream getQiniuImage(String auth, String path) {
+        throw new UnsupportedOperationException("七牛云图片读取功能待实现");
+    }
+
+    /**
+     * 读取 AWS S3 图片（待实现）
+     */
+    private InputStream getS3Image(String auth, String path) {
+        throw new UnsupportedOperationException("AWS S3 图片读取功能待实现");
+    }
+
+    /**
+     * 读取 FTP 图片（待实现）
+     */
+    private InputStream getFtpImage(String auth, String path) {
+        throw new UnsupportedOperationException("FTP 图片读取功能待实现");
     }
 
     /**

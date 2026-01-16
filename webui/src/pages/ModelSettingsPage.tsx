@@ -109,7 +109,7 @@ const ModelSettingsPage: React.FC = () => {
         apiKey: formData.apiKey,
         apiUrl: formData.apiUrl,
         enabled: false, // 新增/复制的模型默认不启用
-        type: formData.type,
+        type: formData.type as 'TEXT' | 'IMAGE',
       };
 
       if (editingModel && editingModel.id) {
