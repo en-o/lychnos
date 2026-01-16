@@ -99,11 +99,11 @@ public class DynamicAIClientFactory {
         // 创建 OpenAI Image API 客户端
         OpenAiImageApi openAiImageApi = createOpenAiImageApi(config);
 
-        // 创建图片选项 - 1024x576 横向16:9布局
+        // 创建图片选项 - 1920x1080 Full HD 横向16:9布局（高分辨率，放大不模糊）
         OpenAiImageOptions imageOptions = OpenAiImageOptions.builder()
                 .model(config.getModel())
-                .width(1024)
-                .height(576)
+                .width(1920)
+                .height(1080)
                 .build();
 
         // 创建 OpenAI 图片模型（在构造函数中传入选项）
