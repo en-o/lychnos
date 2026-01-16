@@ -12,6 +12,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -131,16 +132,40 @@ public class ModelScopeImageModel implements ImageModel {
 
                     if ("SUCCEEDED".equals(status) || "SUCCEED".equals(status)) {
                         // 任务成功，提取图片 URL
-                        Map<String, Object> output = (Map<String, Object>) result.get("output");
-                        if (output != null && output.containsKey("image_url")) {
-                            String imageUrl = (String) output.get("image_url");
-                            log.info("图片生成成功，imageUrl: {}", imageUrl);
-                            return imageUrl;
-                        } else if (output != null && output.containsKey("url")) {
-                            String imageUrl = (String) output.get("url");
-                            log.info("图片生成成功，imageUrl: {}", imageUrl);
+
+                        // 1. 尝试从 output_images 数组获取（魔搭社区实际返回格式）
+                        if (result.containsKey("output_images")) {
+                            Object outputImagesObj = result.get("output_images");
+                            if (outputImagesObj instanceof List<?> outputImages) {
+                                if (!outputImages.isEmpty() && outputImages.get(0) instanceof String imageUrl) {
+                                    log.info("图片生成成功，从output_images获取URL: {}", imageUrl);
+                                    return imageUrl;
+                                }
+                            }
+                        }
+
+                        // 2. 尝试从 output 对象获取（备用）
+                        Object outputObj = result.get("output");
+                        if (outputObj instanceof Map) {
+                            Map<String, Object> output = (Map<String, Object>) outputObj;
+                            if (output.containsKey("image_url")) {
+                                String imageUrl = (String) output.get("image_url");
+                                log.info("图片生成成功，从output.image_url获取URL: {}", imageUrl);
+                                return imageUrl;
+                            } else if (output.containsKey("url")) {
+                                String imageUrl = (String) output.get("url");
+                                log.info("图片生成成功，从output.url获取URL: {}", imageUrl);
+                                return imageUrl;
+                            }
+                        } else if (outputObj instanceof String imageUrl) {
+                            // output可能直接是URL字符串
+                            log.info("图片生成成功，从output获取URL: {}", imageUrl);
                             return imageUrl;
                         }
+
+                        log.error("无法从响应中提取图片URL，完整响应: {}", result);
+                        throw new RuntimeException("无法从响应中提取图片URL");
+
                     } else if ("FAILED".equals(status)) {
                         String error = result.getOrDefault("error", "Unknown error").toString();
                         throw new RuntimeException("任务失败: " + error);
