@@ -17,6 +17,13 @@ import org.springframework.util.StringUtils;
 /**
  * 动态 AI 客户端工厂
  * 根据配置动态创建 OpenAI 兼容的 AI 客户端
+ * <p>
+ * 支持的厂商：
+ * <ul>
+ *   <li>文本分析模型: OpenAI, Ollama, DeepSeek, Azure OpenAI, Anthropic, 通义千问, 百度文心, 魔搭社区, Hugging Face</li>
+ *   <li>图片生成模型: Stable Diffusion, Midjourney, DALL-E, Nano Banana Pro, 魔搭社区, Hugging Face</li>
+ *   <li>任何兼容 OpenAI API 协议的厂商</li>
+ * </ul>
  *
  * @author <a href="https://t.tannn.cn/">tan</a>
  * @version V1.0

@@ -9,6 +9,27 @@ import {aiModelApi} from '../api/aiModel';
 
 type TabType = 'analysis' | 'image';
 
+// AI 厂商默认 API URL 配置
+const AI_FACTORY_DEFAULTS: Record<string, { apiUrl: string; description?: string }> = {
+  // 文本分析模型
+  openai: { apiUrl: 'https://api.openai.com/v1', description: 'OpenAI 官方 API' },
+  ollama: { apiUrl: 'http://localhost:11434', description: 'Ollama 本地服务' },
+  deepseek: { apiUrl: 'https://api.deepseek.com/v1', description: 'DeepSeek API' },
+  azure: { apiUrl: 'https://your-resource.openai.azure.com', description: 'Azure OpenAI Service' },
+  anthropic: { apiUrl: 'https://api.anthropic.com/v1', description: 'Anthropic Claude API' },
+  qwen: { apiUrl: 'https://dashscope.aliyuncs.com/compatible-mode/v1', description: '阿里云通义千问' },
+  baidu: { apiUrl: 'https://aip.baidubce.com/rpc/2.0/ai_custom/v1', description: '百度文心一言' },
+  modelscope: { apiUrl: 'https://api-inference.modelscope.cn/v1', description: '魔搭社区' },
+  huggingface: { apiUrl: 'https://api-inference.huggingface.co/v1', description: 'Hugging Face' },
+  // 图片生成模型
+  'stable-diffusion': { apiUrl: 'http://localhost:7860', description: 'Stable Diffusion WebUI' },
+  midjourney: { apiUrl: 'https://api.midjourney.com/v1', description: 'Midjourney API' },
+  'dall-e': { apiUrl: 'https://api.openai.com/v1', description: 'DALL-E by OpenAI' },
+  'nano-banana-pro': { apiUrl: 'https://api.nano-banana.com/v1', description: 'Nano Banana Pro' },
+  'modelscope-image': { apiUrl: 'https://api-inference.modelscope.cn/v1', description: '魔搭社区图片生成' },
+  'huggingface-image': { apiUrl: 'https://api-inference.huggingface.co/models', description: 'Hugging Face 图片生成' },
+};
+
 const ModelSettingsPage: React.FC = () => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -57,6 +78,17 @@ const ModelSettingsPage: React.FC = () => {
     setSearchParams({ tab });
     setShowAddForm(false);
     setEditingModel(null);
+  };
+
+  // 处理厂商选择变化，自动填充默认 API URL
+  const handleFactoryChange = (factory: string) => {
+    const defaultConfig = AI_FACTORY_DEFAULTS[factory];
+    setFormData({
+      ...formData,
+      factory,
+      // 自动填充默认 URL，用户可以手动修改
+      apiUrl: defaultConfig?.apiUrl || '',
+    });
   };
 
   // 保存模型
@@ -338,7 +370,7 @@ const ModelSettingsPage: React.FC = () => {
                 </label>
                 <select
                   value={formData.factory}
-                  onChange={(e) => setFormData({ ...formData, factory: e.target.value })}
+                  onChange={(e) => handleFactoryChange(e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   {activeTab === 'analysis' ? (
@@ -347,10 +379,12 @@ const ModelSettingsPage: React.FC = () => {
                       <option value="openai">OpenAI</option>
                       <option value="ollama">Ollama</option>
                       <option value="deepseek">DeepSeek</option>
-                      <option value="azure">Azure</option>
-                      <option value="anthropic">Anthropic</option>
-                      <option value="qwen">通义千问</option>
-                      <option value="baidu">百度</option>
+                      <option value="azure">Azure OpenAI</option>
+                      <option value="anthropic">Anthropic (Claude)</option>
+                      <option value="qwen">通义千问 (阿里云)</option>
+                      <option value="baidu">百度文心一言</option>
+                      <option value="modelscope">魔搭社区 (ModelScope)</option>
+                      <option value="huggingface">Hugging Face</option>
                       <option value="custom">自定义</option>
                     </>
                   ) : (
@@ -358,8 +392,10 @@ const ModelSettingsPage: React.FC = () => {
                       <option value="">请选择</option>
                       <option value="stable-diffusion">Stable Diffusion</option>
                       <option value="midjourney">Midjourney</option>
-                      <option value="dall-e">DALL-E</option>
-                      <option value="dall-e">Nano Banana Pro</option>
+                      <option value="dall-e">DALL-E (OpenAI)</option>
+                      <option value="nano-banana-pro">Nano Banana Pro</option>
+                      <option value="modelscope-image">魔搭社区 (ModelScope)</option>
+                      <option value="huggingface-image">Hugging Face</option>
                       <option value="custom">自定义</option>
                     </>
                   )}
@@ -403,6 +439,9 @@ const ModelSettingsPage: React.FC = () => {
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder={activeTab === 'analysis' ? 'https://api.openai.com/v1' : 'https://api.stability.ai/v1'}
                 />
+                <p className="mt-1 text-xs text-gray-500">
+                  已自动填充厂商默认 URL，可根据需要修改
+                </p>
               </div>
             </div>
 

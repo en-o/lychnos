@@ -60,11 +60,14 @@ public class AIModel extends JpaCommonBean<AIModel> {
     private String model;
 
     /**
-     * api厂家: 'openai' | 'ollama' | 'deepseek' | 'azure' | 'anthropic' | 'qwen' | 'baidu';
+     * api厂家
+     * 文本分析模型: openai | ollama | deepseek | azure | anthropic | qwen | baidu | modelscope | huggingface
+     * 图片生成模型: stable-diffusion | midjourney | dall-e | nano-banana-pro | modelscope-image | huggingface-image
+     * 通用: custom (自定义)
      */
     @Column(columnDefinition = " varchar(500)", nullable = false)
-    @Comment("api厂家:openai|ollama|deepseek|azure|anthropic|qwen|baidu|自定义")
-    @Schema(description = "api厂家:openai|ollama|deepseek|azure|anthropic|qwen|baidu|自定义")
+    @Comment("api厂家:openai|ollama|deepseek|azure|anthropic|qwen|baidu|modelscope|huggingface|stable-diffusion|midjourney|dall-e|nano-banana-pro|modelscope-image|huggingface-image|custom")
+    @Schema(description = "api厂家:openai|ollama|deepseek|azure|anthropic|qwen|baidu|modelscope|huggingface|stable-diffusion|midjourney|dall-e|nano-banana-pro|modelscope-image|huggingface-image|custom")
     private String factory;
 
     /**
