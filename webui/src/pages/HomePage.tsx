@@ -469,7 +469,7 @@ const HomePage: React.FC = () => {
 
               {/* 书籍信息卡片 */}
               <div className="bg-white border border-gray-200 rounded-xl p-6 mb-4">
-                {result.posterUrl && (
+                {result.posterUrl && result.posterUrl !== '' ? (
                   <div className="mb-6">
                     {!imageError[result.id] ? (
                       <img
@@ -489,6 +489,24 @@ const HomePage: React.FC = () => {
                         </div>
                       </div>
                     )}
+                  </div>
+                ) : (
+                  <div className="mb-6 p-6 bg-amber-50 border border-amber-200 rounded-lg">
+                    <div className="flex items-start gap-3">
+                      <svg className="w-6 h-6 text-amber-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      <div className="flex-1">
+                        <h4 className="text-sm font-medium text-amber-900 mb-1">图览信息生成失败</h4>
+                        <p className="text-sm text-amber-700 mb-2">
+                          该书籍分析暂无配图，可能是生图模型配置或网络问题导致。您可以：
+                        </p>
+                        <ul className="text-sm text-amber-600 space-y-1 list-disc list-inside">
+                          <li>重新搜索该书名，系统将尝试重新生成图片</li>
+                          <li>或直接查看下方的文字分析内容</li>
+                        </ul>
+                      </div>
+                    </div>
                   </div>
                 )}
 
