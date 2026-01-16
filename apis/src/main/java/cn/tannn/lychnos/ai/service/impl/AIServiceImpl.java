@@ -8,6 +8,7 @@ import cn.tannn.lychnos.ai.service.AIService;
 import cn.tannn.lychnos.common.constant.ModelType;
 import cn.tannn.lychnos.dao.AIModelDao;
 import cn.tannn.lychnos.entity.AIModel;
+import cn.tannn.lychnos.util.ZipUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.model.ChatModel;
@@ -235,8 +236,12 @@ public class AIServiceImpl implements AIService {
                     aiModel.getId(), aiModel.getUserId(), aiModel.getModel());
 
             // 压缩提示词：去除多余空格、换行、制表符（减少token消耗）
-            String compressedPrompt = compressPrompt(prompt);
-            log.debug("提示词压缩，原始长度: {}, 压缩后长度: {}", prompt.length(), compressedPrompt.length());
+            String compressedPrompt = ZipUtil.smartCompressPrompt(prompt, 1999);
+            if (compressedPrompt.length() != prompt.length()) {
+                log.info("提示词已压缩，原始: {} -> 压缩: {} (节省 {} 字符)",
+                        prompt.length(), compressedPrompt.length(),
+                        prompt.length() - compressedPrompt.length());
+            }
 
             DynamicAIModelConfig config = buildConfig(aiModel);
             ImageModel imageModel = clientFactory.createImageModel(config, aiModel.getFactory());
@@ -362,19 +367,6 @@ public class AIServiceImpl implements AIService {
         return DEFAULT_IMAGE_STYLE_PROMPT + "\nContent Description:\n" + contentPrompt;
     }
 
-    /**
-     * 压缩提示词：去除多余空格、换行、制表符
-     *
-     * @param prompt 原始提示词
-     * @return 压缩后的提示词
-     */
-    private String compressPrompt(String prompt) {
-        if (prompt == null || prompt.isEmpty()) {
-            return prompt;
-        }
-        // 将所有连续空白字符（空格、换行、制表符等）替换为单个空格，并去除首尾空格
-        return prompt.replaceAll("\\s+", " ").trim();
-    }
 
     /**
      * 参数验证方法
