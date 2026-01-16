@@ -17,20 +17,21 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
 export function getImageUrl(posterUrl: string | undefined | null): string {
   if (!posterUrl) return '';
 
-  // 解析格式: 协议:鉴权:路径
-  const parts = posterUrl.split(':', 3);
-
   // 兼容旧格式（直接是完整 URL）
-  if (parts.length < 3) {
-    // 如果是旧的完整 URL，直接返回
-    if (posterUrl.startsWith('http://') || posterUrl.startsWith('https://')) {
-      return posterUrl;
-    }
-    // 如果是旧的相对路径，通过后端代理
+  if (posterUrl.startsWith('http://') || posterUrl.startsWith('https://')) {
+    return posterUrl;
+  }
+
+  // 解析格式: 协议:鉴权:路径
+  // 使用正则匹配前两个字段，避免路径中的冒号被分割
+  const match = posterUrl.match(/^([^:]+):([^:]+):(.+)$/);
+
+  if (!match) {
+    // 无法解析，可能是旧的相对路径格式，通过后端代理
     return `${API_BASE_URL}/image?path=${encodeURIComponent(posterUrl)}`;
   }
 
-  const [, auth, path] = parts;
+  const [, protocol, auth, path] = match;
 
   // 无鉴权（0）- 直接访问完整 URL
   if (auth === '0') {
