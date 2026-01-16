@@ -38,6 +38,26 @@ public class AIServiceImpl implements AIService {
     private final AIModelDao aiModelDao;
     private final DynamicAIClientFactory clientFactory;
 
+    /**
+     * 默认图片风格提示词
+     * 风格：中国复古风黑板海报，1024x576尺寸（16:9横向比例）
+     */
+    private static final String DEFAULT_IMAGE_STYLE_PROMPT = """
+            Style Requirements:
+            - Image size: 1024x576 pixels (16:9 aspect ratio, horizontal orientation)
+            - Design style: Chinese retro chalkboard poster style with vintage aesthetic
+            - Background: Dark chalkboard texture (black or dark gray)
+            - Color scheme: Chalk-like colors (white, light gray, yellow chalk tones) on dark background
+            - Layout: Information presented in traditional Chinese poster format with decorative frames and borders
+            - Typography: Mix of Chinese calligraphy style and modern clean fonts
+            - Decorative elements: Traditional Chinese ornamental patterns, corner decorations, dividing lines
+            - Composition: Well-organized sections with clear hierarchy, similar to educational or informational posters
+            - Atmosphere: Nostalgic, scholarly, cultural, with handcrafted chalk drawing aesthetics
+            - Quality: High resolution, suitable for web display
+            - Character illustrations: If needed, use simple line drawings in chalk art style
+
+            """;
+
     @Override
     public String generateText(Long userId, String prompt) {
         validateUserId(userId);
@@ -87,6 +107,37 @@ public class AIServiceImpl implements AIService {
     }
 
     @Override
+    public ImageResponse generateImageWithContent(Long userId, String contentPrompt) {
+        validateUserId(userId);
+        validatePrompt(contentPrompt);
+
+        // 获取用户启用的默认模型
+        AIModel aiModel = getEnabledModel(userId, ModelType.IMAGE);
+
+        // 拼接默认风格提示词和内容提示词
+        String fullPrompt = buildFullImagePrompt(contentPrompt);
+
+        // 生成图片
+        return doGenerateImage(aiModel, fullPrompt);
+    }
+
+    @Override
+    public ImageResponse generateImageWithContentAndModel(Long modelId, Long userId, String contentPrompt) {
+        validateModelId(modelId);
+        validateUserId(userId);
+        validatePrompt(contentPrompt);
+
+        // 查询并验证模型
+        AIModel aiModel = findAndVerifyModel(modelId, userId, ModelType.IMAGE);
+
+        // 拼接默认风格提示词和内容提示词
+        String fullPrompt = buildFullImagePrompt(contentPrompt);
+
+        // 使用指定模型进行生成
+        return doGenerateImage(aiModel, fullPrompt);
+    }
+
+    @Override
     public InputStream generateImageStream(Long userId, String prompt) {
         validateUserId(userId);
         validatePrompt(prompt);
@@ -109,6 +160,37 @@ public class AIServiceImpl implements AIService {
 
         // 使用指定模型生成图片并返回流
         return doGenerateImageStream(aiModel, prompt);
+    }
+
+    @Override
+    public InputStream generateImageStreamWithContent(Long userId, String contentPrompt) {
+        validateUserId(userId);
+        validatePrompt(contentPrompt);
+
+        // 获取用户启用的默认模型
+        AIModel aiModel = getEnabledModel(userId, ModelType.IMAGE);
+
+        // 拼接默认风格提示词和内容提示词
+        String fullPrompt = buildFullImagePrompt(contentPrompt);
+
+        // 生成图片并返回流
+        return doGenerateImageStream(aiModel, fullPrompt);
+    }
+
+    @Override
+    public InputStream generateImageStreamWithContentAndModel(Long modelId, Long userId, String contentPrompt) {
+        validateModelId(modelId);
+        validateUserId(userId);
+        validatePrompt(contentPrompt);
+
+        // 查询并验证模型
+        AIModel aiModel = findAndVerifyModel(modelId, userId, ModelType.IMAGE);
+
+        // 拼接默认风格提示词和内容提示词
+        String fullPrompt = buildFullImagePrompt(contentPrompt);
+
+        // 使用指定模型生成图片并返回流
+        return doGenerateImageStream(aiModel, fullPrompt);
     }
 
     /**
@@ -251,6 +333,16 @@ public class AIServiceImpl implements AIService {
                 .baseUrl(aiModel.getApiUrl())
                 .model(aiModel.getModel())
                 .build();
+    }
+
+    /**
+     * 构建完整的图片提示词（默认风格 + 内容描述）
+     *
+     * @param contentPrompt 内容提示词
+     * @return 完整提示词
+     */
+    private String buildFullImagePrompt(String contentPrompt) {
+        return DEFAULT_IMAGE_STYLE_PROMPT + "\nContent Description:\n" + contentPrompt;
     }
 
     /**

@@ -51,6 +51,24 @@ public class BookAnalyseService extends J2ServiceImpl<BookAnalyseDao, BookAnalys
 
         // 解析AI响应并保存
         BookAnalyse bookAnalyse = parseAIResponse(bookTitle, aiResponse);
+
+        // 生成书籍封面图片
+        try {
+            log.info("开始生成书籍封面图片，书名: {}", bookTitle);
+            String imageContentPrompt = buildImageContentPrompt(bookAnalyse);
+            org.springframework.ai.image.ImageResponse imageResponse = aiService.generateImageWithContent(userId, imageContentPrompt);
+
+            // 从响应中提取图片URL
+            if (imageResponse != null && imageResponse.getResult() != null) {
+                String posterUrl = imageResponse.getResult().getOutput().getUrl();
+                bookAnalyse.setPosterUrl(posterUrl);
+                log.info("书籍封面图片生成成功，URL: {}", posterUrl);
+            }
+        } catch (Exception e) {
+            log.warn("书籍封面图片生成失败，书名: {}, 错误: {}", bookTitle, e.getMessage());
+            // 图片生成失败不影响整体分析，继续保存文本分析结果
+        }
+
         BookAnalyse saved = getJpaBasicsDao().save(bookAnalyse);
 
         log.info("书籍分析完成并保存，书名: {}", bookTitle);
@@ -85,6 +103,47 @@ public class BookAnalyseService extends J2ServiceImpl<BookAnalyseDao, BookAnalys
                 2. recommendation 要包含书籍的核心内容、特色和推荐理由
                 3. 只返回JSON，不要包含其他文字
                 """, bookTitle);
+    }
+
+    /**
+     * 构建图片内容提示词（仅描述内容，不包含风格）
+     * 书籍信息会被转换为内容描述，风格由AIService的默认提示词提供
+     */
+    private String buildImageContentPrompt(BookAnalyse analysis) {
+        // 将JSONArray转换为字符串列表
+        String themesStr = analysis.getThemes() != null ?
+            String.join(", ", analysis.getThemes().toJavaList(String.class)) : "";
+        String keyElementsStr = analysis.getKeyElements() != null ?
+            String.join(", ", analysis.getKeyElements().toJavaList(String.class)) : "";
+
+        return String.format("""
+                Create a book poster for "%s"
+
+                Book Information:
+                - Title: %s
+                - Genre: %s
+                - Tone: %s
+                - Key Themes: %s
+                - Key Elements: %s
+
+                Content Requirements:
+                - Display the book title prominently in Chinese characters
+                - Include genre and tone information in organized sections
+                - Incorporate symbolic imagery representing the themes: %s
+                - Add relevant icons or illustrations related to: %s
+                - Create a harmonious composition that reflects the %s atmosphere
+                - Text should be readable and well-organized in poster format
+                """,
+                analysis.getTitle(),
+                analysis.getTitle(),
+                analysis.getGenre(),
+                analysis.getTone(),
+                themesStr,
+                keyElementsStr,
+                themesStr,
+                keyElementsStr,
+                analysis.getTone()
+        );
     }
 
     /**

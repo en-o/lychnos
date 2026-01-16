@@ -67,7 +67,7 @@ public class AITestController {
         return ResultVO.success(result);
     }
 
-    @Operation(summary = "图片生成测试", description = "使用用户配置的默认图片模型生成图片")
+    @Operation(summary = "图片生成测试（流）", description = "使用用户配置的默认图片模型生成图片，返回图片流")
     @PostMapping("image")
     public void testImage(
             @Valid @RequestBody AIPromptDTO dto,
@@ -83,7 +83,7 @@ public class AITestController {
         }
     }
 
-    @Operation(summary = "图片生成测试（指定模型）", description = "使用指定的模型ID生成图片")
+    @Operation(summary = "图片生成测试（指定模型，流）", description = "使用指定的模型ID生成图片，返回图片流")
     @PostMapping("image/model")
     public void testImageWithModel(
             @Valid @RequestBody AIPromptWithModelDTO dto,
@@ -97,5 +97,62 @@ public class AITestController {
             response.setContentType(MediaType.IMAGE_PNG_VALUE);
             StreamUtils.copy(inputStream, response.getOutputStream());
         }
+    }
+
+    @Operation(summary = "书籍封面生成测试", description = "根据书籍信息生成封面图片（中国复古风黑板海报，1024x576尺寸）")
+    @GetMapping("image/book-cover")
+    public void testBookCoverImage(
+            @Parameter(description = "书名") @RequestParam String title,
+            @Parameter(description = "类型/流派") @RequestParam String genre,
+            @Parameter(description = "基调") @RequestParam String tone,
+            @Parameter(description = "主题（逗号分隔）") @RequestParam String themes,
+            @Parameter(description = "关键要素（逗号分隔）") @RequestParam String keyElements,
+            HttpServletRequest request,
+            HttpServletResponse response) throws Exception {
+
+        Long userId = UserUtil.userId2(request);
+        log.info("书籍封面生成测试，userId: {}, title: {}", userId, title);
+
+        String contentPrompt = buildBookCoverContentPrompt(title, genre, tone, themes, keyElements);
+        log.info("生成的内容提示词: {}", contentPrompt);
+
+        try (InputStream inputStream = aiService.generateImageStreamWithContent(userId, contentPrompt)) {
+            response.setContentType(MediaType.IMAGE_PNG_VALUE);
+            StreamUtils.copy(inputStream, response.getOutputStream());
+        }
+    }
+
+    /**
+     * 构建书籍封面内容提示词（不包含风格，风格由AIService默认提供）
+     */
+    private String buildBookCoverContentPrompt(String title, String genre, String tone, String themes, String keyElements) {
+        return String.format("""
+                Create a book poster for "%s"
+
+                Book Information:
+                - Title: %s
+                - Genre: %s
+                - Tone: %s
+                - Key Themes: %s
+                - Key Elements: %s
+
+                Content Requirements:
+                - Display the book title prominently in Chinese characters
+                - Include genre and tone information in organized sections
+                - Incorporate symbolic imagery representing the themes: %s
+                - Add relevant icons or illustrations related to: %s
+                - Create a harmonious composition that reflects the %s atmosphere
+                - Text should be readable and well-organized in poster format
+                """,
+                title,
+                title,
+                genre,
+                tone,
+                themes,
+                keyElements,
+                themes,
+                keyElements,
+                tone
+        );
     }
 }
