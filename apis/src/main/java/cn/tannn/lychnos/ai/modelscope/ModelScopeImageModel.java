@@ -2,6 +2,7 @@ package cn.tannn.lychnos.ai.modelscope;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.ai.image.Image;
 import org.springframework.ai.image.ImageGeneration;
 import org.springframework.ai.image.ImageModel;
 import org.springframework.ai.image.ImagePrompt;
@@ -53,7 +54,8 @@ public class ModelScopeImageModel implements ImageModel {
             String imageUrl = pollTaskResult(taskId);
 
             // 3. 构建响应
-            ImageGeneration imageGeneration = new ImageGeneration(imageUrl);
+            Image image = new Image(imageUrl, null);
+            ImageGeneration imageGeneration = new ImageGeneration(image);
             return new ImageResponse(Collections.singletonList(imageGeneration));
 
         } catch (Exception e) {
@@ -92,11 +94,11 @@ public class ModelScopeImageModel implements ImageModel {
         }
 
         Map<String, Object> responseBody = response.getBody();
-        if (responseBody == null || !responseBody.containsKey("request_id")) {
-            throw new RuntimeException("响应中缺少 request_id");
+        if (responseBody == null || !responseBody.containsKey("task_id")) {
+            throw new RuntimeException("响应中缺少 task_id");
         }
 
-        String taskId = (String) responseBody.get("request_id");
+        String taskId = (String) responseBody.get("task_id");
         log.info("异步任务已提交，taskId: {}", taskId);
         return taskId;
     }
@@ -105,10 +107,11 @@ public class ModelScopeImageModel implements ImageModel {
      * 轮询任务结果
      */
     private String pollTaskResult(String taskId) throws InterruptedException {
-        String url = baseUrl + "/v1/async-result/" + taskId;
+        String url = baseUrl + "/v1/tasks/" + taskId;
 
         HttpHeaders headers = new HttpHeaders();
         headers.setBearerAuth(apiKey);
+        headers.set("X-ModelScope-Task-Type", "image_generation");
         HttpEntity<Void> request = new HttpEntity<>(headers);
 
         for (int i = 0; i < MAX_POLL_ATTEMPTS; i++) {
@@ -124,13 +127,17 @@ public class ModelScopeImageModel implements ImageModel {
 
                 if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
                     Map<String, Object> result = response.getBody();
-                    String status = (String) result.get("status");
+                    String status = (String) result.get("task_status");
 
-                    if ("SUCCEEDED".equals(status)) {
+                    if ("SUCCEEDED".equals(status) || "SUCCEED".equals(status)) {
                         // 任务成功，提取图片 URL
                         Map<String, Object> output = (Map<String, Object>) result.get("output");
                         if (output != null && output.containsKey("image_url")) {
                             String imageUrl = (String) output.get("image_url");
+                            log.info("图片生成成功，imageUrl: {}", imageUrl);
+                            return imageUrl;
+                        } else if (output != null && output.containsKey("url")) {
+                            String imageUrl = (String) output.get("url");
                             log.info("图片生成成功，imageUrl: {}", imageUrl);
                             return imageUrl;
                         }
@@ -139,6 +146,7 @@ public class ModelScopeImageModel implements ImageModel {
                         throw new RuntimeException("任务失败: " + error);
                     }
                     // PENDING 或 RUNNING 状态，继续轮询
+                    log.debug("任务状态: {}, 继续轮询", status);
                 }
             } catch (Exception e) {
                 log.warn("轮询任务结果异常: {}", e.getMessage());
