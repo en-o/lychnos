@@ -41,6 +41,7 @@ const ModelSettingsPage: React.FC = () => {
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingModel, setEditingModel] = useState<AIModelConfig | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<{show: boolean; id: string} | null>(null);
+  const [convertConfirm, setConvertConfirm] = useState<{show: boolean; model: AIModelConfig | null}>({show: false, model: null});
 
   const [formData, setFormData] = useState({
     name: '',
@@ -190,8 +191,13 @@ const ModelSettingsPage: React.FC = () => {
     toast.success('已复制模型配置，请修改后保存');
   };
 
-  const handleConvertModelType = async (model: AIModelConfig) => {
-    if (!model.id) return;
+  const handleConvertModelType = (model: AIModelConfig) => {
+    setConvertConfirm({ show: true, model });
+  };
+
+  const confirmConvert = async () => {
+    const model = convertConfirm.model;
+    if (!model || !model.id) return;
 
     const newType = model.type === 'TEXT' ? 'IMAGE' : 'TEXT';
     const targetTab = newType === 'TEXT' ? 'analysis' : 'image';
@@ -200,15 +206,16 @@ const ModelSettingsPage: React.FC = () => {
       const modelData: AIModelConfig = {
         ...model,
         type: newType,
-        enabled: false, // 转换后默认不启用
+        enabled: false, // 转换后强制设为禁用
       };
 
       await aiModelApi.update(model.id, modelData);
-      toast.success(`已转换为${newType === 'TEXT' ? 'AI分析' : 'AI生图'}模型`);
+      toast.success(`已转换为${newType === 'TEXT' ? 'AI分析' : 'AI生图'}模型，当前状态为禁用`);
 
       // 切换到目标标签页
       setSearchParams({ tab: targetTab });
       await loadModels();
+      setConvertConfirm({ show: false, model: null });
     } catch (error) {
       console.error('转换模型类型失败:', error);
       toast.error('转换失败，请重试');
@@ -589,6 +596,15 @@ const ModelSettingsPage: React.FC = () => {
           message="确定要删除这个模型配置吗？"
           onConfirm={confirmDelete}
           onCancel={() => setDeleteConfirm(null)}
+        />
+      )}
+
+      {/* 转换类型确认对话框 */}
+      {convertConfirm?.show && convertConfirm.model && (
+        <ConfirmDialog
+          message={`确定要将 "${convertConfirm.model.name}" 从 ${convertConfirm.model.type === 'TEXT' ? 'AI分析模型' : 'AI生图模型'} 转换为 ${convertConfirm.model.type === 'TEXT' ? 'AI生图模型' : 'AI分析模型'} 吗？\n\n注意：转换后模型将被禁用，需要重新设置为当前模型才能使用。`}
+          onConfirm={confirmConvert}
+          onCancel={() => setConvertConfirm({ show: false, model: null })}
         />
       )}
     </div>
