@@ -2,11 +2,7 @@ package cn.tannn.lychnos.ai.modelscope;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.ai.image.Image;
-import org.springframework.ai.image.ImageGeneration;
-import org.springframework.ai.image.ImageModel;
-import org.springframework.ai.image.ImagePrompt;
-import org.springframework.ai.image.ImageResponse;
+import org.springframework.ai.image.*;
 import org.springframework.http.*;
 import org.springframework.web.client.RestTemplate;
 
