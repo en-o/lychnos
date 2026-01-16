@@ -80,6 +80,8 @@ mvn clean package -DskipTests
 > 运行：` .\docker-build.bat 0.0.2 `
 
 ## docker
+> https://hub.docker.com/r/tannnn/lychnos
+
 `docker run -d -p 1250:1250 -e MYSQL_URL=192.168.1.71:3306 --name lychnos tannnn/lychnos:0.0.1`
 
 ## docker compose
