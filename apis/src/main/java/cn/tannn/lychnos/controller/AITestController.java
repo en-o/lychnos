@@ -12,7 +12,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.image.ImageResponse;
 import org.springframework.context.annotation.Profile;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 /**
@@ -32,9 +32,9 @@ public class AITestController {
     private final AIService aiService;
 
     @Operation(summary = "文本生成测试", description = "使用用户配置的默认文本模型生成内容")
-    @PostMapping("text")
+    @GetMapping("text")
     public ResultVO<String> testText(
-            @Parameter(description = "提示词") @RequestParam String prompt,
+            @Parameter(description = "提示词") @RequestParam("prompt") String prompt,
             HttpServletRequest request) {
 
         Long userId = UserUtil.userId2(request);
@@ -45,10 +45,10 @@ public class AITestController {
     }
 
     @Operation(summary = "文本生成测试（指定模型）", description = "使用指定的模型ID生成文本内容")
-    @PostMapping("text/model")
+    @GetMapping("text/model")
     public ResultVO<String> testTextWithModel(
-            @Parameter(description = "模型ID") @RequestParam Long modelId,
-            @Parameter(description = "提示词") @RequestParam String prompt,
+            @Parameter(description = "模型ID") @RequestParam("modelId") Long modelId,
+            @Parameter(description = "提示词") @RequestParam("prompt") String prompt,
             HttpServletRequest request) {
 
         Long userId = UserUtil.userId2(request);
@@ -59,9 +59,9 @@ public class AITestController {
     }
 
     @Operation(summary = "图片生成测试", description = "使用用户配置的默认图片模型生成图片")
-    @PostMapping("image")
+    @GetMapping("image")
     public ResultVO<ImageResponse> testImage(
-            @Parameter(description = "提示词") @RequestParam String prompt,
+            @Parameter(description = "提示词") @RequestParam("prompt") String prompt,
             HttpServletRequest request) {
 
         Long userId = UserUtil.userId2(request);
@@ -72,10 +72,10 @@ public class AITestController {
     }
 
     @Operation(summary = "图片生成测试（指定模型）", description = "使用指定的模型ID生成图片")
-    @PostMapping("image/model")
+    @GetMapping("image/model")
     public ResultVO<ImageResponse> testImageWithModel(
-            @Parameter(description = "模型ID") @RequestParam Long modelId,
-            @Parameter(description = "提示词") @RequestParam String prompt,
+            @Parameter(description = "模型ID") @RequestParam("modelId") Long modelId,
+            @Parameter(description = "提示词") @RequestParam("prompt") String prompt,
             HttpServletRequest request) {
 
         Long userId = UserUtil.userId2(request);
