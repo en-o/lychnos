@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import {useNavigate, useSearchParams} from 'react-router-dom';
-import {ArrowLeft, Brain, Check, Image as ImageIcon, Plus, Trash2} from 'lucide-react';
+import {ArrowLeft, Brain, Check, Copy, Image as ImageIcon, Plus, Repeat, Trash2} from 'lucide-react';
 import type {AIModelConfig} from '../models';
 import Logo from '../components/Logo';
 import {toast} from '../components/ToastContainer';
@@ -48,6 +48,7 @@ const ModelSettingsPage: React.FC = () => {
     apiKey: '',
     apiUrl: '',
     model: '',
+    type: activeTab === 'analysis' ? 'TEXT' : 'IMAGE',
   });
 
   // 加载模型数据
@@ -100,15 +101,14 @@ const ModelSettingsPage: React.FC = () => {
     }
 
     try {
-      const modelType = activeTab === 'analysis' ? 'TEXT' : 'IMAGE';
       const modelData: AIModelConfig = {
         name: formData.name,
         factory: formData.factory,
         model: formData.model,
         apiKey: formData.apiKey,
         apiUrl: formData.apiUrl,
-        enabled: false,
-        type: modelType,
+        enabled: false, // 新增/复制的模型默认不启用
+        type: formData.type,
       };
 
       if (editingModel && editingModel.id) {
@@ -117,6 +117,12 @@ const ModelSettingsPage: React.FC = () => {
       } else {
         await aiModelApi.add(modelData);
         toast.success('添加成功');
+      }
+
+      // 如果保存的模型类型与当前标签页不一致，切换到对应标签页
+      const targetTab = formData.type === 'TEXT' ? 'analysis' : 'image';
+      if (targetTab !== activeTab) {
+        setSearchParams({ tab: targetTab });
       }
 
       await loadModels();
@@ -165,8 +171,48 @@ const ModelSettingsPage: React.FC = () => {
       model: model.model,
       apiKey: model.apiKey || '',
       apiUrl: model.apiUrl,
+      type: model.type,
     });
     setShowAddForm(true);
+  };
+
+  const handleCopyModel = (model: AIModelConfig) => {
+    setEditingModel(null);
+    setFormData({
+      name: `${model.name} (副本)`,
+      factory: model.factory,
+      model: model.model,
+      apiKey: model.apiKey || '',
+      apiUrl: model.apiUrl,
+      type: model.type,
+    });
+    setShowAddForm(true);
+    toast.success('已复制模型配置，请修改后保存');
+  };
+
+  const handleConvertModelType = async (model: AIModelConfig) => {
+    if (!model.id) return;
+
+    const newType = model.type === 'TEXT' ? 'IMAGE' : 'TEXT';
+    const targetTab = newType === 'TEXT' ? 'analysis' : 'image';
+
+    try {
+      const modelData: AIModelConfig = {
+        ...model,
+        type: newType,
+        enabled: false, // 转换后默认不启用
+      };
+
+      await aiModelApi.update(model.id, modelData);
+      toast.success(`已转换为${newType === 'TEXT' ? 'AI分析' : 'AI生图'}模型`);
+
+      // 切换到目标标签页
+      setSearchParams({ tab: targetTab });
+      await loadModels();
+    } catch (error) {
+      console.error('转换模型类型失败:', error);
+      toast.error('转换失败，请重试');
+    }
   };
 
   const resetForm = () => {
@@ -178,6 +224,7 @@ const ModelSettingsPage: React.FC = () => {
       apiKey: '',
       apiUrl: '',
       model: '',
+      type: activeTab === 'analysis' ? 'TEXT' : 'IMAGE',
     });
   };
 
@@ -189,6 +236,7 @@ const ModelSettingsPage: React.FC = () => {
       apiKey: '',
       apiUrl: '',
       model: '',
+      type: activeTab === 'analysis' ? 'TEXT' : 'IMAGE',
     });
     setShowAddForm(true);
   };
@@ -318,6 +366,22 @@ const ModelSettingsPage: React.FC = () => {
                           )}
 
                           <button
+                            onClick={() => handleCopyModel(model)}
+                            className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition"
+                            title="复制配置"
+                          >
+                            <Copy className="w-4 h-4" />
+                          </button>
+
+                          <button
+                            onClick={() => handleConvertModelType(model)}
+                            className="p-2 text-purple-600 hover:bg-purple-50 rounded-lg transition"
+                            title={`转换为${model.type === 'TEXT' ? '生图' : '分析'}模型`}
+                          >
+                            <Repeat className="w-4 h-4" />
+                          </button>
+
+                          <button
                             onClick={() => handleEditModel(model)}
                             className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition"
                             title="编辑"
@@ -350,6 +414,52 @@ const ModelSettingsPage: React.FC = () => {
             <h3 className="text-xl font-semibold text-gray-900 mb-4">
               {editingModel ? '编辑模型' : '添加模型'}
             </h3>
+
+            {/* 推荐模型提示 */}
+            {!editingModel && (
+              <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                <div className="flex items-start gap-2">
+                  <svg className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <div className="text-sm text-blue-800 flex-1">
+                    <p className="font-medium mb-1">推荐模型配置</p>
+                    {activeTab === 'analysis' ? (
+                      <div className="text-xs">
+                        <p className="mb-1">• <span className="font-medium">DeepSeek</span> - 性价比高，适合大量文本分析任务</p>
+                        <a
+                          href="https://platform.deepseek.com/"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-700 underline"
+                        >
+                          前往 DeepSeek 官网
+                          <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                          </svg>
+                        </a>
+                      </div>
+                    ) : (
+                      <div className="text-xs">
+                        <p className="mb-1">• <span className="font-medium">Z-Image-Turbo</span> (魔搭社区) - 高质量图片生成</p>
+                        <p className="mb-1 text-gray-600">模型名称: Tongyi-MAI/Z-Image-Turbo</p>
+                        <a
+                          href="https://www.modelscope.cn/models/Tongyi-MAI/Z-Image-Turbo"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-700 underline"
+                        >
+                          查看模型详情
+                          <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                          </svg>
+                        </a>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
 
             <div className="space-y-4">
               <div>
