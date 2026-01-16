@@ -37,29 +37,28 @@ public class AITestController {
     private final AIService aiService;
 
     @Operation(summary = "文本生成测试", description = "使用用户配置的默认文本模型生成内容")
-    @GetMapping("text")
+    @PostMapping("text")
     public ResultVO<String> testText(
-            @Parameter(description = "提示词") @RequestParam("prompt") String prompt,
+            @Valid @RequestBody AIPromptDTO dto,
             HttpServletRequest request) {
 
         Long userId = UserUtil.userId2(request);
-        log.info("AI文本生成测试，userId: {}, prompt: {}", userId, prompt);
+        log.info("AI文本生成测试，userId: {}, prompt: {}", userId, dto.getPrompt());
 
-        String result = aiService.generateText(userId, prompt);
+        String result = aiService.generateText(userId, dto.getPrompt());
         return ResultVO.success(result);
     }
 
     @Operation(summary = "文本生成测试（指定模型）", description = "使用指定的模型ID生成文本内容")
-    @GetMapping("text/model")
+    @PostMapping("text/model")
     public ResultVO<String> testTextWithModel(
-            @Parameter(description = "模型ID") @RequestParam("modelId") Long modelId,
-            @Parameter(description = "提示词") @RequestParam("prompt") String prompt,
+            @Valid @RequestBody AIPromptWithModelDTO dto,
             HttpServletRequest request) {
 
         Long userId = UserUtil.userId2(request);
-        log.info("AI文本生成测试（指定模型），userId: {}, modelId: {}, prompt: {}", userId, modelId, prompt);
+        log.info("AI文本生成测试（指定模型），userId: {}, modelId: {}, prompt: {}", userId, dto.getModelId(), dto.getPrompt());
 
-        String result = aiService.generateTextWithModel(modelId, userId, prompt);
+        String result = aiService.generateTextWithModel(dto.getModelId(), userId, dto.getPrompt());
         return ResultVO.success(result);
     }
 
