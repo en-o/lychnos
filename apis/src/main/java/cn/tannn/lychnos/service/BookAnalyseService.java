@@ -55,27 +55,25 @@ public class BookAnalyseService extends J2ServiceImpl<BookAnalyseDao, BookAnalys
         // 解析AI响应并保存
         BookAnalyse bookAnalyse = parseAIResponse(bookTitle, aiResponse);
 
-        // 生成书籍分析信息图
-        try {
-            log.info("开始生成书籍分析信息图，书名: {}", bookTitle);
-            String imageContentPrompt = buildImageContentPrompt(bookAnalyse);
+        // 生成书籍分析信息图（必须成功）
+        log.info("开始生成书籍分析信息图，书名: {}", bookTitle);
+        String imageContentPrompt = buildImageContentPrompt(bookAnalyse);
 
-            // 生成图片流
-            try (InputStream imageStream = aiService.generateImageStreamWithContent(userId, imageContentPrompt)) {
-                if (imageStream != null) {
-                    // 保存图片到本地，返回 posterUrl
-                    String posterUrl = imageStorageService.saveImage(imageStream, bookTitle);
-                    bookAnalyse.setPosterUrl(posterUrl);
-                    log.info("书籍分析信息图生成并保存成功，posterUrl: {}", posterUrl);
-                } else {
-                    log.warn("AI 返回的图片流为 null，书名: {}", bookTitle);
-                    bookAnalyse.setPosterUrl("图览信息生成失败，请检查生图模型的配置和网络环境");
-                }
+        // 生成图片流
+        try (InputStream imageStream = aiService.generateImageStreamWithContent(userId, imageContentPrompt)) {
+            if (imageStream == null) {
+                log.error("AI 返回的图片流为 null，书名: {}", bookTitle);
+                throw new RuntimeException("图览信息生成失败，请检查生图模型的配置和网络环境");
             }
+
+            // 保存图片到本地，返回 posterUrl
+            String posterUrl = imageStorageService.saveImage(imageStream, bookTitle);
+            bookAnalyse.setPosterUrl(posterUrl);
+            log.info("书籍分析信息图生成并保存成功，posterUrl: {}", posterUrl);
         } catch (Exception e) {
             log.error("书籍分析信息图生成失败，书名: {}, 错误: {}", bookTitle, e.getMessage(), e);
-            // 图片生成失败不影响整体分析，设置错误提示
-            bookAnalyse.setPosterUrl("图览信息生成失败，请检查生图模型的配置和网络环境");
+            // 图片生成是必须的，失败则抛出异常
+            throw new RuntimeException("图览信息生成失败，请检查生图模型的配置和网络环境。详细错误: " + e.getMessage(), e);
         }
 
         BookAnalyse saved = getJpaBasicsDao().save(bookAnalyse);

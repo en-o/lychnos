@@ -896,7 +896,7 @@ const HomePage: React.FC = () => {
             <p className="text-gray-700 text-lg font-medium">正在分析书籍...</p>
             <div className="text-center space-y-2">
               <p className="text-gray-500 text-sm">AI 正在深度分析书籍内容并生成封面图</p>
-              <p className="text-gray-400 text-xs">预计需要 30-120 秒，请耐心等待</p>
+              <p className="text-gray-400 text-xs">预计需要 1-10 分钟[具体看模型处理能力]，请耐心等待</p>
             </div>
           </div>
         </div>
