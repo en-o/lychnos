@@ -142,8 +142,8 @@ public class BookAnalyseService extends J2ServiceImpl<BookAnalyseDao, BookAnalys
 
     /**
      * 构建图片内容提示词（仅描述内容，不包含风格）
-     * 书籍信息会被转换为内容描述，风格由AIService的默认提示词提供
-     * 严格控制字数，避免提示词溢出
+     * 书籍信息会被转换为详细的内容描述，风格由AIService的默认提示词提供
+     * 生成更丰富的描述以便AI更好地理解和创作
      */
     private String buildImageContentPrompt(BookAnalyse analysis) {
         // 将JSONArray转换为字符串列表
@@ -152,20 +152,56 @@ public class BookAnalyseService extends J2ServiceImpl<BookAnalyseDao, BookAnalys
         String keyElementsStr = analysis.getKeyElements() != null ?
             String.join("、", analysis.getKeyElements().toJavaList(String.class)) : "";
 
-        // 精简版提示词，控制总长度在300字符以内
-        return String.format("""
-                Book: "%s"
-                Genre: %s | Tone: %s
-                Themes: %s
-                Key Elements: %s
+        // 提取推荐语的核心内容（前80字）作为补充描述
+        String shortRecommendation = "";
+        if (analysis.getRecommendation() != null && analysis.getRecommendation().length() > 0) {
+            shortRecommendation = analysis.getRecommendation().length() > 80 ?
+                    analysis.getRecommendation().substring(0, 80) + "..." :
+                    analysis.getRecommendation();
+        }
 
-                Create an infographic poster featuring:
-                - Book title in Chinese (prominent display)
-                - Genre and tone in organized sections
-                - Visual symbols for themes
-                - Icons/illustrations for key elements
-                - Clean, educational layout
+        // 详细版提示词，提供更丰富的上下文信息
+        return String.format("""
+                【书籍信息】
+                书名：《%s》
+                类型：%s
+                基调：%s
+                核心主题：%s
+                关键元素：%s
+
+                【内容简介】
+                %s
+
+                【设计要求】
+                请创建一张现代信息图风格的书籍推荐海报，要求：
+                1. 主标题：书名《%s》使用醒目的中文字体，居中或靠上位置
+                2. 信息分区：
+                   - 类型标签：【%s】用彩色标签展示
+                   - 基调说明：%s，用副标题或图标展示
+                   - 主题展示：%s，用图标或色块分区展示
+                   - 关键元素：%s，用插图或符号可视化
+                3. 视觉风格：
+                   - 根据书籍类型选择合适的配色方案（科幻：蓝紫色系；文学：暖色系；历史：典雅色系等）
+                   - 使用扁平化设计，信息层次清晰
+                   - 添加相关的图标、符号或简笔插画
+                   - 保持横向16:9布局，信息密度高但不拥挤
+                4. 内容布局：
+                   - 将整个画面分为2-3个水平区域
+                   - 每个区域展示不同维度的信息
+                   - 使用分隔线、色块或留白区分各区域
+
+                【注意事项】
+                - 所有文字必须清晰可读
+                - 色彩搭配和谐，符合书籍主题
+                - 信息完整但不凌乱
+                - 整体风格现代、专业、吸引人
                 """,
+                analysis.getTitle(),
+                analysis.getGenre(),
+                analysis.getTone(),
+                themesStr,
+                keyElementsStr,
+                shortRecommendation,
                 analysis.getTitle(),
                 analysis.getGenre(),
                 analysis.getTone(),
