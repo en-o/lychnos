@@ -28,7 +28,7 @@ export function getImageUrl(posterUrl: string | undefined | null): string {
 
   if (!match) {
     // 无法解析，可能是旧的相对路径格式，通过后端代理
-    return `${API_BASE_URL}/image?path=${encodeURIComponent(posterUrl)}`;
+    return buildImageUrlWithToken(`${API_BASE_URL}/image?path=${encodeURIComponent(posterUrl)}`);
   }
 
   const [, protocol, auth, path] = match;
@@ -38,6 +38,23 @@ export function getImageUrl(posterUrl: string | undefined | null): string {
     return path;
   }
 
-  // 有鉴权（1）- 通过后端代理访问
-  return `${API_BASE_URL}/image?path=${encodeURIComponent(posterUrl)}`;
+  // 有鉴权（1）- 通过后端代理访问，并附加 token
+  const imageUrl = `${API_BASE_URL}/image?path=${encodeURIComponent(posterUrl)}`;
+  return buildImageUrlWithToken(imageUrl);
+}
+
+/**
+ * 为图片 URL 添加 token 参数
+ * @param url 基础 URL
+ * @returns 带 token 的 URL
+ */
+function buildImageUrlWithToken(url: string): string {
+  const token = localStorage.getItem('token');
+  if (!token) {
+    return url;
+  }
+
+  // 判断 URL 是否已有参数
+  const separator = url.includes('?') ? '&' : '?';
+  return `${url}${separator}token=${encodeURIComponent(token)}`;
 }
