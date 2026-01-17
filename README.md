@@ -87,6 +87,13 @@ mvn clean package -DskipTests
 ## docker compose
 [docker-compose.yml](docker-compose.yml)
 
+## sql初始化
+> 项目启动会自己创建仓库和表结构，你只需要初始化点数据就好了用来预置的分析
+
+1. 执行 [init_book_analyse.sql](docs/init_book_analyse.sql)
+2. 将 [images](data/images) 目录下的书籍相关文件上传到你的文件服务器，上传路径为你设置的`app.image.storage-path`路径
+
+
 
 ## nginx配置
 ```nginx configuration
