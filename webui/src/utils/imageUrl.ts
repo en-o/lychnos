@@ -31,7 +31,7 @@ export function getImageUrl(posterUrl: string | undefined | null): string {
     return buildImageUrlWithToken(`${API_BASE_URL}/image?path=${encodeURIComponent(posterUrl)}`);
   }
 
-  const [, protocol, auth, path] = match;
+  const [, , auth, path] = match;
 
   // 无鉴权（0）- 直接访问完整 URL
   if (auth === '0') {
