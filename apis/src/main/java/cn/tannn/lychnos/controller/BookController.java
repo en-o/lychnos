@@ -105,6 +105,6 @@ public class BookController {
             return ResultVO.successMessage("该书籍图片缺失，可以重新分析补充图片");
         }
 
-        return ResultVO.successMessage("该书籍未分析，可以进行分析");
+        return ResultVO.successMessage("当前用户为未分析该书籍，可以进行分析");
     }
 }
