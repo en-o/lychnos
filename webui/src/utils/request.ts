@@ -122,6 +122,16 @@ function handleBusinessError(data: Result) {
     return;
   }
 
+  // 特殊处理错误码 1002 - 用户未配置 AI 模型
+  if (data.code === 1002) {
+    toast.error(data.message || '未配置 AI 模型，即将跳转到设置页面');
+    // 延迟跳转，让用户看到提示信息
+    setTimeout(() => {
+      window.location.hash = '#/settings/model';
+    }, 1500);
+    return;
+  }
+
   toast.error(data.message || '操作失败');
 }
 

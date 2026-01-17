@@ -323,8 +323,9 @@ public class AIServiceImpl implements AIService {
         List<AIModel> models = aiModelDao.findByUserIdAndTypeAndEnabled(userId, type, true);
 
         if (models.isEmpty()) {
-            throw new AIException.ModelNotConfiguredException(
-                    String.format("用户未配置可用的 %s 类型模型", type.name()));
+            // 错误码 1002: 用户未配置可用的模型
+            throw new BusinessException(1002,
+                    String.format("用户未配置可用的 %s 类型模型，请先配置", type.name()));
         }
 
         // 返回第一个启用的模型（按创建时间倒序）
