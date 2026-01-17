@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -56,38 +57,15 @@ public class BookController {
     @Operation(summary = "书籍推荐", description = "基于用户兴趣推荐书籍")
     @ApiMapping(checkToken = false, value = "recommend", method = RequestMethod.GET)
     public ResultVO<List<BookRecommend>> recommend() {
-        // 查询用户感兴趣的书籍（按感兴趣次数最多的前5本书）
-        List<String> recommendBookTitles = userInterestService.getJpaBasicsDao()
-                .findTop5BookTitlesByInterested(true);
-
-        // 如果查询不到任何数据，返回模拟数据
-        if (recommendBookTitles.isEmpty()) {
-            log.info("未找到用户感兴趣的书籍，返回模拟推荐数据");
-            return ResultVO.success(MOCK_RECOMMENDATIONS);
-        }
+        // 获取推荐书籍列表（真实数据 + 模拟数据补充）
+        List<String> recommendBookTitles = getRecommendBookTitles();
 
         // 将书名转换为推荐对象（ID 按顺序生成）
         List<BookRecommend> resultRecommend = IntStream.range(0, recommendBookTitles.size())
                 .mapToObj(i -> new BookRecommend((long) (i + 1), recommendBookTitles.get(i)))
                 .collect(Collectors.toList());
 
-        // 如果真实数据少于5条，用模拟数据补充（去重）
-        if (resultRecommend.size() < 5) {
-            log.info("真实推荐数据不足5条（当前{}条），使用模拟数据补充", resultRecommend.size());
-
-            // 从模拟数据中筛选不重复的数据进行补充
-            List<BookRecommend> supplemental = MOCK_RECOMMENDATIONS.stream()
-                    .filter(mock -> !recommendBookTitles.contains(mock.getTitle()))
-                    .limit(5L - resultRecommend.size())
-                    .toList();
-
-            // 合并真实数据和补充数据
-            resultRecommend.addAll(supplemental);
-
-            return ResultVO.success(resultRecommend);
-        }
-
-        log.info("返回{}条真实推荐数据", resultRecommend.size());
+        log.info("返回{}条推荐数据", resultRecommend.size());
         return ResultVO.success(resultRecommend);
     }
 
@@ -170,7 +148,7 @@ public class BookController {
 
 
     /**
-     * 获取推荐书籍列表（真实数据 + 模拟数据）
+     * 获取推荐书籍列表（真实数据 + 模拟数据补充）
      *
      * @return 推荐书籍标题列表
      */
@@ -184,6 +162,20 @@ public class BookController {
             return MOCK_RECOMMENDATIONS.stream()
                     .map(BookRecommend::getTitle)
                     .collect(Collectors.toList());
+        }
+
+        // 如果真实数据少于5条，用模拟数据补充（去重）
+        if (recommendBookTitles.size() < 5) {
+            log.info("真实推荐数据不足5条（当前{}条），使用模拟数据补充", recommendBookTitles.size());
+            List<String> supplementalTitles = MOCK_RECOMMENDATIONS.stream()
+                    .map(BookRecommend::getTitle)
+                    .filter(title -> !recommendBookTitles.contains(title))
+                    .limit(5L - recommendBookTitles.size())
+                    .toList();
+
+            List<String> allTitles = new ArrayList<>(recommendBookTitles);
+            allTitles.addAll(supplementalTitles);
+            return allTitles;
         }
 
         return recommendBookTitles;
