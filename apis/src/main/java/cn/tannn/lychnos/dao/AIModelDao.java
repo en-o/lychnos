@@ -62,4 +62,15 @@ public interface AIModelDao extends JpaBasicsRepository<AIModel, Long> {
      * @return 是否存在
      */
     boolean existsByIdAndUserId(Long id, Long userId);
+
+    /**
+     * 查询官方启用的模型（用于用户未配置模型时的回退）
+     * 按创建时间倒序排列，返回最新的官方模型
+     *
+     * @param share 分享状态（0-官方）
+     * @param type 模型类型
+     * @param enabled 是否启用
+     * @return 官方模型列表
+     */
+    List<AIModel> findByShareAndTypeAndEnabledOrderByCreateTimeDesc(Integer share, ModelType type, Boolean enabled);
 }

@@ -1,6 +1,7 @@
 package cn.tannn.lychnos.entity;
 
 import cn.tannn.lychnos.common.constant.ModelType;
+import cn.tannn.lychnos.common.constant.ShareType;
 import cn.tannn.lychnos.common.pojo.JpaCommonBean;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
@@ -9,6 +10,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.Comment;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
@@ -24,6 +26,7 @@ import org.hibernate.annotations.DynamicUpdate;
 @Table(name = "tb_ai_model", indexes = {
         @Index(name = "idx_user_type_enabled", columnList = "userId,enabled,type"),
         @Index(name = "idx_user_enabled", columnList = "userId,type"),
+        @Index(name = "idx_share_type_enabled", columnList = "share,type,enabled"),
 })
 @Comment("AI模型")
 @Getter
@@ -105,4 +108,51 @@ public class AIModel extends JpaCommonBean<AIModel> {
     @Enumerated(EnumType.STRING)
     private ModelType type;
 
+
+    /**
+     * 分享状态：0官方，1私人，2公开
+     * 对应 ShareType 枚举：OFFICIAL(0) / PRIVATE(1) / PUBLIC(2)
+     * @see ShareType
+     */
+    @Column(columnDefinition = "int", nullable = false)
+    @Comment("分享状态：0官方，1私人，2公开")
+    @ColumnDefault("1")
+    @Schema(description = "分享状态：0官方，1私人，2公开")
+    private Integer share;
+
+    /**
+     * 获取分享状态枚举
+     *
+     * @return ShareType 枚举，如果值无效则返回 null
+     */
+    public ShareType getShareType() {
+        return ShareType.fromCode(this.share);
+    }
+
+    /**
+     * 设置分享状态枚举
+     *
+     * @param shareType 分享状态枚举
+     */
+    public void setShareType(ShareType shareType) {
+        this.share = shareType != null ? shareType.getCode() : ShareType.PRIVATE.getCode();
+    }
+
+    /**
+     * 判断是否为官方模型
+     *
+     * @return true-官方模型，false-非官方模型
+     */
+    public boolean isOfficial() {
+        return ShareType.OFFICIAL.getCode().equals(this.share);
+    }
+
+    /**
+     * 判断是否为私人模型
+     *
+     * @return true-私人模型，false-非私人模型
+     */
+    public boolean isPrivate() {
+        return ShareType.PRIVATE.getCode().equals(this.share);
+    }
 }
