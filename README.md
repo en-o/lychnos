@@ -144,6 +144,14 @@ server {
         add_header Cache-Control no-cache;
         proxy_ssl_server_name off;
         proxy_ssl_name $proxy_host;
+         # ========== 超时配置（AI 生图模型需要 1-10 分钟） ==========
+        # 与后端建立连接的超时时间
+        proxy_connect_timeout 900s;
+        # 向后端传输请求的超时时间
+        proxy_send_timeout 900s;
+        # 等待后端响应的超时时间（AI 生图可能需要长达 10 分钟）
+        proxy_read_timeout 900s;
+        # ==========================================================
      }
 }
 ```
