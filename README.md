@@ -88,6 +88,65 @@ mvn clean package -DskipTests
 [docker-compose.yml](docker-compose.yml)
 
 
+## nginx配置
+```nginx configuration
+
+server {
+        listen       80;
+        server_name  lychnos.xx.cn;
+
+        #charset koi8-r;
+        #access_log  logs/host.access.log  main;
+        
+		#rewrite ^(.*) https://$server_name$1 permanent;
+	 # ✅ ACME 验证路径（使用 ^~ 优先匹配，必须在 rewrite 之前）
+    location ^~ /.well-known/acme-challenge/ {
+        root /var/www/html;
+        try_files $uri =404;
+    }
+
+    # ✅ 其他请求重定向到 HTTPS（放在 location / 中）
+    location / {
+        rewrite ^(.*) https://$server_name$1 permanent;
+    }
+      
+}
+
+
+server {
+    listen   443 ssl;
+    server_name  lychnos.tannn.cn;
+    ssl_certificate      /home/nginxconfig/https/lychnos.xx.cn_nginx/lychnos.xx.cn.pem;
+    ssl_certificate_key  /home/nginxconfig/https/lychnos.xx.cn_nginx/lychnos.xx.cn.key;
+    ssl_session_cache    shared:SSL:1m;
+    ssl_session_timeout  5m;
+    client_max_body_size 500M;
+    # SSL Settings
+    ssl_ciphers  HIGH:!aNULL:!MD5;
+    ssl_protocols TLSv1 TLSv1.1 TLSv1.2;
+    ssl_prefer_server_ciphers   on;
+	error_page 404 /404.html;
+    #  Gzip Settings
+    gzip on;
+    gzip_disable "msie6";
+
+     location / {
+        proxy_pass http://localhost:1250/;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header REMOTE-HOST $remote_addr;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection $http_connection;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_http_version 1.1;
+        add_header X-Cache $upstream_cache_status;
+        add_header Cache-Control no-cache;
+        proxy_ssl_server_name off;
+        proxy_ssl_name $proxy_host;
+     }
+}
+```
 
 
 # 备注
