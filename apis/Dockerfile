@@ -106,9 +106,9 @@ RUN mkdir -p /app/db
 # 暴露应用端口
 EXPOSE 1250
 
-# 健康检查
-HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
-    CMD wget --quiet --tries=1 --spider http://localhost:1250/actuator/health || exit 1
+# 健康检查 (当前还没有使用 actuator
+#HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+#    CMD wget --quiet --tries=1 --spider http://localhost:1250/actuator/health || exit 1
 
 # 启动应用
 ENTRYPOINT ["java", "-jar", "/app/api.jar"]
