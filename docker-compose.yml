@@ -20,6 +20,9 @@ services:
       DOC_USERNAME: ${DOC_USERNAME:-tan}
       CONFIG_ENV: ${CONFIG_ENV:-prod}
       IMAGE_STORAGE_PATH: ${IMAGE_STORAGE_PATH:-./data/images}
+      # 生成方式：AESUtil.generateSecretKey("Lychnos2026SecretKey")
+      # 注意：生产环境请务必修改此密钥，并妥善保管
+      # 16位字符
       AES_SECRET_KEY: ${AES_SECRET_KEY:-kZXQiOjE3MzczOTY3}
     volumes:
       # 可选：持久化日志
