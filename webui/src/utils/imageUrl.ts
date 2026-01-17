@@ -28,7 +28,9 @@ export function getImageUrl(posterUrl: string | undefined | null): string {
 
   if (!match) {
     // 无法解析，可能是旧的相对路径格式，通过后端代理
-    return buildImageUrlWithToken(`${API_BASE_URL}/image?path=${encodeURIComponent(posterUrl)}`);
+    // 确保路径拼接正确，避免出现 //image 的情况
+    const baseUrl = API_BASE_URL.endsWith('/') ? API_BASE_URL.slice(0, -1) : API_BASE_URL;
+    return buildImageUrlWithToken(`${baseUrl}/image?path=${encodeURIComponent(posterUrl)}`);
   }
 
   const [, , auth, path] = match;
@@ -39,7 +41,9 @@ export function getImageUrl(posterUrl: string | undefined | null): string {
   }
 
   // 有鉴权（1）- 通过后端代理访问，并附加 token
-  const imageUrl = `${API_BASE_URL}/image?path=${encodeURIComponent(posterUrl)}`;
+  // 确保路径拼接正确，避免出现 //image 的情况
+  const baseUrl = API_BASE_URL.endsWith('/') ? API_BASE_URL.slice(0, -1) : API_BASE_URL;
+  const imageUrl = `${baseUrl}/image?path=${encodeURIComponent(posterUrl)}`;
   return buildImageUrlWithToken(imageUrl);
 }
 
