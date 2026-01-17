@@ -478,7 +478,7 @@ const HomePage: React.FC = () => {
                     onChange={(e) => setBookTitle(e.target.value)}
                     onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
                     onFocus={() => searchHistory.length > 0 && setShowHistory(true)}
-                    placeholder="输入书名,开始分析..."
+                    placeholder={token ? "输入书名,开始分析..." : "输入书名搜索，或点击下方推荐书籍查看分析"}
                     className="w-full px-5 py-3.5 pr-12 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base"
                     disabled={loading}
                   />
@@ -529,20 +529,39 @@ const HomePage: React.FC = () => {
 
               {/* 隐私协议说明 */}
               <div className="max-w-2xl mx-auto mb-6">
-                <div className="px-4 py-2.5 bg-blue-50 border border-blue-100 rounded-lg">
-                  <p className="text-xs text-blue-700 text-center leading-relaxed">
-                    <span className="font-medium">隐私说明：</span>
-                    使用 AI 分析功能时，您的书籍分析结果（非个人信息）将用于改进服务质量。
-                    我们承诺：<span className="font-medium">① 绝不使用您的 API Key</span>；
-                    <span className="font-medium">② 仅共享书籍分析内容</span>；
-                    <span className="font-medium">③ 您也将受益于其他用户的分析成果</span>，加快相同书籍的分析速度。
-                  </p>
-                </div>
+                {token ? (
+                  <div className="px-4 py-2.5 bg-blue-50 border border-blue-100 rounded-lg">
+                    <p className="text-xs text-blue-700 text-center leading-relaxed">
+                      <span className="font-medium">隐私说明：</span>
+                      使用 AI 分析功能时，您的书籍分析结果（非个人信息）将用于改进服务质量。
+                      我们承诺：<span className="font-medium">① 绝不使用您的 API Key</span>；
+                      <span className="font-medium">② 仅共享书籍分析内容</span>；
+                      <span className="font-medium">③ 您也将受益于其他用户的分析成果</span>，加快相同书籍的分析速度。
+                    </p>
+                  </div>
+                ) : (
+                  <div className="px-4 py-2.5 bg-amber-50 border border-amber-100 rounded-lg">
+                    <p className="text-xs text-amber-700 text-center leading-relaxed">
+                      <span className="font-medium">未登录提示：</span>
+                      当前未登录，您可以<span className="font-medium">点击下方推荐书籍查看分析结果</span>，无需登录。
+                      若想<span className="font-medium">分析更多书籍并保存偏好</span>，请先
+                      <button
+                        onClick={handleLogin}
+                        className="text-blue-600 hover:text-blue-700 underline font-medium mx-1"
+                      >
+                        登录
+                      </button>
+                      使用完整功能。
+                    </p>
+                  </div>
+                )}
               </div>
 
               {/* 快速选择 */}
               <div className="flex items-center justify-center gap-2 flex-wrap">
-                <span className="text-sm text-gray-500">试试:</span>
+                <span className="text-sm text-gray-500">
+                  {token ? '试试:' : '推荐（点击即可查看）:'}
+                </span>
                 {quickBooks.map((book) => (
                   <button
                     key={book.id}
