@@ -31,7 +31,8 @@ import static cn.tannn.jdevelops.utils.jwt.exception.UserCode.USER_PASSWORD_ERRO
 @Entity
 @Table(name = "tb_user_info",
         indexes = {
-                @Index(name = "idx_loginName", columnList = "loginName", unique = true)
+                @Index(name = "idx_loginName", columnList = "loginName", unique = true),
+                @Index(name = "idx_email", columnList = "email", unique = true)
         }
 )
 @Comment("账户基础信息表")
