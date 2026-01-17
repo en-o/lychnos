@@ -83,10 +83,11 @@ public class AIModelDTO extends SerializableBean<AIModelDTO> {
         model.setName(this.name.trim());
         model.setModel(this.model.trim());
         model.setFactory(this.factory.trim());
-        // 加密 API Key
-        if (this.apiKey != null && !this.apiKey.isEmpty()) {
+        // 加密 API Key（如果不为空）
+        if (this.apiKey != null && !this.apiKey.trim().isEmpty()) {
             model.setApiKey(AESUtil.encrypt(this.apiKey.trim()));
         }
+        // 如果 API Key 为空，则不设置（数据库中为 null）
         model.setApiUrl(this.apiUrl);
         model.setEnabled(this.enabled != null ? this.enabled : false);
         model.setType(this.type);
@@ -100,14 +101,18 @@ public class AIModelDTO extends SerializableBean<AIModelDTO> {
         model.setName(this.name.trim());
         model.setModel(this.model.trim());
         model.setFactory(this.factory.trim());
-        // 加密 API Key（如果提供了新的 API Key）
-        if (this.apiKey != null && !this.apiKey.isEmpty()) {
-            // 如果 API Key 不是掩码形式（前端可能返回掩码），才进行加密
-            if (!this.apiKey.contains("***")) {
-                model.setApiKey(AESUtil.encrypt(this.apiKey.trim()));
+
+        // 处理 API Key 更新
+        if (this.apiKey != null) {
+            String trimmedKey = this.apiKey.trim();
+            if (!trimmedKey.isEmpty()) {
+                // 如果提供了新的 API Key，加密并更新
+                model.setApiKey(AESUtil.encrypt(trimmedKey));
             }
-            // 如果是掩码形式，保持原有的加密值不变
+            // 如果是空字符串，不更新（保持原有值）
         }
+        // 如果 apiKey 为 null，也不更新（保持原有值）
+
         model.setApiUrl(this.apiUrl);
         model.setType(this.type);
         // 如果 DTO 中指定了 enabled 状态，则更新

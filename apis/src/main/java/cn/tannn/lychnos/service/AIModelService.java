@@ -89,28 +89,46 @@ public class AIModelService extends J2ServiceImpl<AIModelDao, AIModel, Long> {
 
     /**
      * 将 API Key 掩码显示（用于返回给前端）
+     * 不修改原对象，返回掩码后的字符串
+     *
+     * @param apiKey 加密的 API Key
+     * @return 掩码后的字符串
+     */
+    public String getMaskedApiKey(String apiKey) {
+        if (apiKey == null || apiKey.isEmpty()) {
+            return ""; // 返回空字符串，前端会显示提示
+        }
+        try {
+            // 先解密，再掩码
+            String decrypted = AESUtil.decrypt(apiKey);
+            return AESUtil.maskText(decrypted);
+        } catch (Exception e) {
+            log.error("API Key 处理失败", e);
+            // 处理失败时显示为掩码
+            return "****";
+        }
+    }
+
+    /**
+     * 将 API Key 掩码显示（用于返回给前端）
+     * ⚠️ 注意：此方法会修改 model 对象，不要在事务内使用
      *
      * @param model AI 模型
      */
+    @Deprecated
     public void maskApiKey(AIModel model) {
         if (model.getApiKey() != null && !model.getApiKey().isEmpty()) {
-            try {
-                // 先解密，再掩码
-                String decrypted = AESUtil.decrypt(model.getApiKey());
-                model.setApiKey(AESUtil.maskText(decrypted));
-            } catch (Exception e) {
-                log.error("API Key 处理失败", e);
-                // 处理失败时显示为掩码
-                model.setApiKey("****");
-            }
+            model.setApiKey(getMaskedApiKey(model.getApiKey()));
         }
     }
 
     /**
      * 批量掩码 API Key
+     * ⚠️ 注意：此方法会修改 model 对象，不要在事务内使用
      *
      * @param models AI 模型列表
      */
+    @Deprecated
     public void maskApiKeys(List<AIModel> models) {
         models.forEach(this::maskApiKey);
     }

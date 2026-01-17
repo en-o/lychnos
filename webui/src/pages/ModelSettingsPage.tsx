@@ -308,11 +308,26 @@ const ModelSettingsPage: React.FC = () => {
             </div>
 
             {/* 隐私协议说明 */}
-            <div className="px-6 py-3 bg-blue-50 border-b border-blue-100">
-              <p className="text-sm text-blue-800">
-                <span className="font-medium">隐私说明：</span>
-                使用 AI 分析功能时，您的书籍分析结果将默认用于改进服务质量和推荐系统。我们承诺不会泄露您的个人隐私信息。
-              </p>
+            <div className="px-6 py-4 bg-blue-50 border-b border-blue-100">
+              <h3 className="text-sm font-medium text-blue-900 mb-2">隐私与数据共享说明</h3>
+              <ul className="text-xs text-blue-800 space-y-1.5">
+                <li className="flex items-start gap-2">
+                  <span className="text-blue-600 mt-0.5">🔐</span>
+                  <span><strong>API 密钥安全：</strong>您的 API Key 已加密存储，仅用于您自己的分析请求，绝不会被共享或用于其他目的。</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-blue-600 mt-0.5">📊</span>
+                  <span><strong>分析结果共享：</strong>书籍分析结果（如内容摘要、推荐理由等）将用于改进服务质量和推荐系统。</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-blue-600 mt-0.5">🤝</span>
+                  <span><strong>互惠共享机制：</strong>当您分析过的书籍被他人搜索时，可直接使用您的分析结果，节省 AI 调用成本；同样，您也可以使用其他用户已分析的书籍结果。</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-blue-600 mt-0.5">🛡️</span>
+                  <span><strong>隐私保护：</strong>我们不会关联您的个人信息（如用户名、邮箱）与分析结果，仅保留匿名的分析内容。</span>
+                </li>
+              </ul>
             </div>
 
             {/* 模型列表 */}
@@ -368,6 +383,14 @@ const ModelSettingsPage: React.FC = () => {
                           {model.apiUrl && (
                             <p className="text-xs text-gray-500 truncate">{model.apiUrl}</p>
                           )}
+                          {/* API Key 显示 */}
+                          <div className="mt-1">
+                            {model.apiKey && model.apiKey.trim() !== '' ? (
+                              <span className="text-xs text-green-600">🔒 {model.apiKey}</span>
+                            ) : (
+                              <span className="text-xs text-gray-400">密钥为空（当前连接可能不需要，如 Ollama）</span>
+                            )}
+                          </div>
                         </div>
 
                         <div className="flex items-center gap-2 ml-4 flex-shrink-0">
