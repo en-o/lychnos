@@ -128,7 +128,7 @@ function handleBusinessError(data: Result) {
     toast.error(data.message || '未配置 AI 模型，即将跳转到设置页面');
     // 延迟跳转，让用户看到提示信息
     setTimeout(() => {
-      window.location.hash = '#/settings/model';
+      window.location.hash = '#/settings/models';
     }, 1500);
     return;
   }
