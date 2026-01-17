@@ -1,0 +1,17 @@
+# 允许主流搜索引擎收录
+User-agent: Googlebot
+User-agent: Bingbot
+User-agent: Baiduspider
+User-agent: Sogou web spider
+User-agent: 360Spider
+Disallow: /api/
+Disallow: /profile
+Disallow: /settings
+Disallow: /preference
+Disallow: /history
+Disallow: /change-password
+Crawl-delay: 10
+
+# 禁止其他所有爬虫
+User-agent: *
+Disallow: /
