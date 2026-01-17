@@ -4,6 +4,7 @@ REM ============================================
 REM lychnos Docker 镜像构建脚本
 REM 如果build有镜像拉取问题，使用下面的先拉一次试试
 REM docker pull node:20-alpine && docker pull eclipse-temurin:17-jre-alpine && docker pull maven:3.9-eclipse-temurin-17
+REM 确保 npm run build 和 mvn package 能够正确的执行（即项目能正确编译）
 REM ============================================
 
 REM 设置默认版本号
@@ -29,7 +30,7 @@ if %ERRORLEVEL% EQU 0 (
     echo 镜像: tannnn/lychnos:%VERSION%
     echo ============================================
     echo.
-    echo 运行命令: docker run -d -p 1250:1250 -e MYSQL_URL=192.168.1.71:3306 --name lychnos tannnn/lychnos:%VERSION%
+    echo 运行命令: docker run -d -p 1250:1250 -e MYSQL_URL=127.0.0.1:3306 --name lychnos tannnn/lychnos:%VERSION%
 ) else (
     echo.
     echo ============================================
