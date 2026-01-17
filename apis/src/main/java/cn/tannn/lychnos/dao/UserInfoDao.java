@@ -21,4 +21,12 @@ public interface UserInfoDao extends JpaBasicsRepository<UserInfo,Long> {
      * @return 用户信息
      */
     Optional<UserInfo> findByLoginName(@NotBlank String loginName);
+
+
+    /**
+     * 根据登录名邮件用户 - 一个邮件只能绑定一个人
+     * @param email 邮件地址
+     * @return 用户信息
+     */
+    Optional<UserInfo> findByEmail(@NotBlank String email);
 }

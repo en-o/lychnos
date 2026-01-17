@@ -64,6 +64,9 @@ public class UserInfoService extends J2ServiceImpl<UserInfoDao, UserInfo,Long> {
         if (userExist(register.getLoginName())) {
             throw new BusinessException("用户已存在，请重新注册");
         }
+        if (userExistForEmail(register.getEmail())) {
+            throw new BusinessException("邮件已被使用，请更换邮件地址");
+        }
         if (StringUtils.isNotBlank(register.getPassword())) {
             register.setPassword(getMd5Password(register.getLoginName(), register.getPassword()));
         } else {
@@ -81,6 +84,19 @@ public class UserInfoService extends J2ServiceImpl<UserInfoDao, UserInfo,Long> {
     public boolean userExist(String loginName) {
         Optional<UserInfo> byLoginName = getJpaBasicsDao().findByLoginName(loginName);
         return byLoginName.isPresent();
+    }
+
+    /**
+     * EMAIL用户是否存在
+     * @param email 邮件地址
+     * @return true 存在 false 不存在
+     */
+    public boolean userExistForEmail(String email) {
+        if(email == null || email.trim().isEmpty()){
+            return false;
+        }
+        Optional<UserInfo> emailRes = getJpaBasicsDao().findByEmail(email);
+        return emailRes.isPresent();
     }
 
     /**
