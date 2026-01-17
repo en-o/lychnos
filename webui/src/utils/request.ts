@@ -1,6 +1,7 @@
 import axios, {AxiosError, type AxiosInstance, type AxiosRequestConfig} from 'axios';
 import {AuthErrorCode, type Result} from '../models';
 import {toast} from '../components/ToastContainer';
+import {BOOK_ALREADY_ANALYZED, MODEL_NOT_CONFIGURED} from '../constants/errorCodes';
 
 // 创建axios实例
 const instance: AxiosInstance = axios.create({
@@ -116,14 +117,14 @@ function handleBusinessError(data: Result) {
     return;
   }
 
-  // 特殊处理错误码 1001 - 书籍已分析
-  if (data.code === 1001) {
+  // 特殊处理错误码 - 书籍已分析
+  if (data.code === BOOK_ALREADY_ANALYZED) {
     // 不显示 toast，由调用方处理跳转
     return;
   }
 
-  // 特殊处理错误码 1002 - 用户未配置 AI 模型
-  if (data.code === 1002) {
+  // 特殊处理错误码 - 用户未配置 AI 模型
+  if (data.code === MODEL_NOT_CONFIGURED) {
     toast.error(data.message || '未配置 AI 模型，即将跳转到设置页面');
     // 延迟跳转，让用户看到提示信息
     setTimeout(() => {

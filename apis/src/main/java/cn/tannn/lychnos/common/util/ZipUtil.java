@@ -1,4 +1,4 @@
-package cn.tannn.lychnos.util;
+package cn.tannn.lychnos.common.util;
 
 import lombok.extern.slf4j.Slf4j;
 

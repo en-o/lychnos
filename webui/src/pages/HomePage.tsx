@@ -8,6 +8,7 @@ import {toast} from '../components/ToastContainer';
 import ConfirmDialog from '../components/ConfirmDialog';
 import ImagePreview from '../components/ImagePreview';
 import {getImageUrl} from '../utils/imageUrl';
+import {BOOK_ALREADY_ANALYZED} from '../constants/errorCodes';
 
 // 装饰主题类型
 type DecorationTheme = 'daily' | 'christmas' | 'spring-festival';
@@ -133,8 +134,8 @@ const HomePage: React.FC = () => {
         await bookApi.checkAnalyzed(title);
         // 未分析过，继续执行分析
       } catch (checkError: any) {
-        // 如果是错误码 1001（已分析过），跳转到历史页面
-        if (checkError?.code === 1001) {
+        // 如果是错误码 - 书籍已分析，跳转到历史页面
+        if (checkError?.code === BOOK_ALREADY_ANALYZED) {
           toast.info('该书籍已经分析过，正在跳转到历史记录...');
           navigate(`/history?search=${encodeURIComponent(title)}`);
           return;
@@ -151,8 +152,8 @@ const HomePage: React.FC = () => {
       }
     } catch (error: any) {
       console.error('分析失败:', error);
-      // 如果分析时遇到错误码 1001（已分析过），跳转到历史页面
-      if (error?.code === 1001) {
+      // 如果分析时遇到错误码 - 书籍已分析，跳转到历史页面
+      if (error?.code === BOOK_ALREADY_ANALYZED) {
         toast.info('该书籍已经分析过，正在跳转到历史记录...');
         navigate(`/history?search=${encodeURIComponent(title)}`);
       }

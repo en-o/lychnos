@@ -5,10 +5,11 @@ import cn.tannn.lychnos.ai.config.DynamicAIModelConfig;
 import cn.tannn.lychnos.ai.exception.AIException;
 import cn.tannn.lychnos.ai.factory.DynamicAIClientFactory;
 import cn.tannn.lychnos.ai.service.AIService;
+import cn.tannn.lychnos.common.constant.BusinessErrorCode;
 import cn.tannn.lychnos.common.constant.ModelType;
 import cn.tannn.lychnos.dao.AIModelDao;
 import cn.tannn.lychnos.entity.AIModel;
-import cn.tannn.lychnos.util.ZipUtil;
+import cn.tannn.lychnos.common.util.ZipUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.model.ChatModel;
@@ -323,9 +324,11 @@ public class AIServiceImpl implements AIService {
         List<AIModel> models = aiModelDao.findByUserIdAndTypeAndEnabled(userId, type, true);
 
         if (models.isEmpty()) {
-            // 错误码 1002: 用户未配置可用的模型
-            throw new BusinessException(1002,
-                    String.format("用户未配置可用的 %s 类型模型，请先配置", type.name()));
+            // 使用统一的错误码枚举
+            throw new BusinessException(
+                    BusinessErrorCode.MODEL_NOT_CONFIGURED.getCode(),
+                    BusinessErrorCode.MODEL_NOT_CONFIGURED.formatMessage(type.name())
+            );
         }
 
         // 返回第一个启用的模型（按创建时间倒序）

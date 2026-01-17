@@ -4,6 +4,7 @@ import cn.tannn.jdevelops.annotations.web.authentication.ApiMapping;
 import cn.tannn.jdevelops.annotations.web.mapping.PathRestController;
 import cn.tannn.jdevelops.exception.built.BusinessException;
 import cn.tannn.jdevelops.result.response.ResultVO;
+import cn.tannn.lychnos.common.constant.BusinessErrorCode;
 import cn.tannn.lychnos.common.util.UserUtil;
 import cn.tannn.lychnos.controller.vo.BookRecommend;
 import cn.tannn.lychnos.entity.BookAnalyse;
@@ -66,7 +67,10 @@ public class BookController {
                 bookAnalyse.get().getPosterUrl() != null &&
                 !bookAnalyse.get().getPosterUrl().isEmpty()) {
                 // 已分析过且图片完整，不允许重复分析
-                throw new BusinessException(1001, "该书籍已经分析过，请到历史记录中查看");
+                throw new BusinessException(
+                        BusinessErrorCode.BOOK_ALREADY_ANALYZED.getCode(),
+                        BusinessErrorCode.BOOK_ALREADY_ANALYZED.getMessage()
+                );
             }
             // 如果图片不存在，允许重新分析以补充生成图片
             log.info("书籍已分析但缺少图片，允许重新分析，书名: {}", bookTitle);
@@ -91,7 +95,10 @@ public class BookController {
                 bookAnalyse.get().getPosterUrl() != null &&
                 !bookAnalyse.get().getPosterUrl().isEmpty()) {
                 // 已分析过且图片完整，不允许重复分析
-                throw new BusinessException(1001, "该书籍已经分析过，请到历史记录中查看");
+                throw new BusinessException(
+                        BusinessErrorCode.BOOK_ALREADY_ANALYZED.getCode(),
+                        BusinessErrorCode.BOOK_ALREADY_ANALYZED.getMessage()
+                );
             }
             // 如果图片不存在，返回可以分析（用于补充生成图片）
             log.info("书籍已分析但缺少图片，返回可以分析，书名: {}", bookTitle);
