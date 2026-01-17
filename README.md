@@ -104,6 +104,7 @@ mvn clean package -DskipTests
 | 403 | UNAUTHENTICATED | 系统未授权 | 当前用户无访问权限 | 提示用户无权限 |
 | 403 | UNAUTHENTICATED_PLATFORM | 非法令牌访问 | Token 与访问端不匹配 | 清除 token，跳转登录页 |
 
+
 ## poster_url 格式说明
 
 `tb_book_analyse` 表中的 `poster_url` 字段采用统一格式：**协议:鉴权:路径**

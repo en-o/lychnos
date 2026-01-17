@@ -170,7 +170,7 @@ const ModelSettingsPage: React.FC = () => {
       name: model.name,
       factory: model.factory,
       model: model.model,
-      apiKey: model.apiKey || '',
+      apiKey: '', // 编辑时清空 API Key，用户可选择重新输入或留空保持不变
       apiUrl: model.apiUrl,
       type: model.type,
     });
@@ -183,12 +183,12 @@ const ModelSettingsPage: React.FC = () => {
       name: `${model.name} (副本)`,
       factory: model.factory,
       model: model.model,
-      apiKey: model.apiKey || '',
+      apiKey: '', // 复制时清空 API Key，用户需重新输入
       apiUrl: model.apiUrl,
       type: model.type,
     });
     setShowAddForm(true);
-    toast.success('已复制模型配置，请修改后保存');
+    toast.success('已复制模型配置，请重新输入 API Key 后保存');
   };
 
   const handleConvertModelType = (model: AIModelConfig) => {
@@ -545,8 +545,18 @@ const ModelSettingsPage: React.FC = () => {
                   value={formData.apiKey}
                   onChange={(e) => setFormData({ ...formData, apiKey: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="sk-... (部分厂家如 Ollama 可不填)"
+                  placeholder={editingModel ? "留空保持原有密钥不变" : "sk-... (部分厂家如 Ollama 可不填)"}
                 />
+                {editingModel && (
+                  <p className="mt-1 text-xs text-gray-500">
+                    <span className="text-green-600">🔒 已加密存储</span> - 如需更新密钥请重新输入，留空则保持不变
+                  </p>
+                )}
+                {!editingModel && (
+                  <p className="mt-1 text-xs text-gray-500">
+                    密钥将自动加密存储，保障安全
+                  </p>
+                )}
               </div>
 
               <div>

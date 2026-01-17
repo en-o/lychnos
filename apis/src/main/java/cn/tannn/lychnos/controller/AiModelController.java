@@ -38,6 +38,8 @@ public class AiModelController {
     public ResultVO<List<AIModel>> list(@PathVariable("type") ModelType type, HttpServletRequest request) {
         Long userId = UserUtil.userId2(request);
         List<AIModel> models = aiModelService.findByUserIdAndType(userId, type);
+        // 掩码 API Key
+        aiModelService.maskApiKeys(models);
         return ResultVO.success(models);
     }
 
@@ -48,6 +50,8 @@ public class AiModelController {
         Long userId = UserUtil.userId2(request);
         AIModel model = dto.toEntity(userId);
         aiModelService.saveOne(model);
+        // 掩码 API Key
+        aiModelService.maskApiKey(model);
         return ResultVO.success(model);
     }
 
@@ -61,6 +65,8 @@ public class AiModelController {
         AIModel model = aiModelService.findVerifyRole(id,userId);
         dto.updateEntity(model);
         aiModelService.saveOne(model);
+        // 掩码 API Key
+        aiModelService.maskApiKey(model);
         return ResultVO.success(model);
     }
 

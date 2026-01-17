@@ -3,6 +3,7 @@ package cn.tannn.lychnos.service;
 import cn.tannn.jdevelops.exception.built.BusinessException;
 import cn.tannn.jdevelops.jpa.service.J2ServiceImpl;
 import cn.tannn.lychnos.common.constant.ModelType;
+import cn.tannn.lychnos.common.util.AESUtil;
 import cn.tannn.lychnos.dao.AIModelDao;
 import cn.tannn.lychnos.entity.AIModel;
 import lombok.extern.slf4j.Slf4j;
@@ -66,5 +67,51 @@ public class AIModelService extends J2ServiceImpl<AIModelDao, AIModel, Long> {
             throw new IllegalArgumentException("无权限操作");
         }
         return aiModel;
+    }
+
+    /**
+     * 解密 API Key（用于实际调用 AI 接口）
+     *
+     * @param encryptedApiKey 加密后的 API Key
+     * @return 解密后的 API Key
+     */
+    public String decryptApiKey(String encryptedApiKey) {
+        if (encryptedApiKey == null || encryptedApiKey.isEmpty()) {
+            return encryptedApiKey;
+        }
+        try {
+            return AESUtil.decrypt(encryptedApiKey);
+        } catch (Exception e) {
+            log.error("API Key 解密失败", e);
+            throw new BusinessException("API Key 解密失败");
+        }
+    }
+
+    /**
+     * 将 API Key 掩码显示（用于返回给前端）
+     *
+     * @param model AI 模型
+     */
+    public void maskApiKey(AIModel model) {
+        if (model.getApiKey() != null && !model.getApiKey().isEmpty()) {
+            try {
+                // 先解密，再掩码
+                String decrypted = AESUtil.decrypt(model.getApiKey());
+                model.setApiKey(AESUtil.maskText(decrypted));
+            } catch (Exception e) {
+                log.error("API Key 处理失败", e);
+                // 处理失败时显示为掩码
+                model.setApiKey("****");
+            }
+        }
+    }
+
+    /**
+     * 批量掩码 API Key
+     *
+     * @param models AI 模型列表
+     */
+    public void maskApiKeys(List<AIModel> models) {
+        models.forEach(this::maskApiKey);
     }
 }

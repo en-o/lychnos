@@ -7,6 +7,7 @@ import cn.tannn.lychnos.ai.factory.DynamicAIClientFactory;
 import cn.tannn.lychnos.ai.service.AIService;
 import cn.tannn.lychnos.common.constant.BusinessErrorCode;
 import cn.tannn.lychnos.common.constant.ModelType;
+import cn.tannn.lychnos.common.util.AESUtil;
 import cn.tannn.lychnos.dao.AIModelDao;
 import cn.tannn.lychnos.entity.AIModel;
 import cn.tannn.lychnos.common.util.ZipUtil;
@@ -351,11 +352,22 @@ public class AIServiceImpl implements AIService {
     }
 
     /**
-     * 构建动态配置
+     * 构建动态配置（解密 API Key 用于实际调用）
      */
     private DynamicAIModelConfig buildConfig(AIModel aiModel) {
+        // 解密 API Key
+        String decryptedApiKey = null;
+        if (aiModel.getApiKey() != null && !aiModel.getApiKey().isEmpty()) {
+            try {
+                decryptedApiKey = AESUtil.decrypt(aiModel.getApiKey());
+            } catch (Exception e) {
+                log.error("解密 API Key 失败，模型ID: {}", aiModel.getId(), e);
+                throw new BusinessException("API Key 解密失败，请检查配置");
+            }
+        }
+
         return DynamicAIModelConfig.builder()
-                .apiKey(aiModel.getApiKey())
+                .apiKey(decryptedApiKey)
                 .baseUrl(aiModel.getApiUrl())
                 .model(aiModel.getModel())
                 .build();

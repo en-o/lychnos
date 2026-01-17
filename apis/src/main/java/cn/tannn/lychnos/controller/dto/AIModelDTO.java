@@ -2,6 +2,7 @@ package cn.tannn.lychnos.controller.dto;
 
 import cn.tannn.jdevelops.result.bean.SerializableBean;
 import cn.tannn.lychnos.common.constant.ModelType;
+import cn.tannn.lychnos.common.util.AESUtil;
 import cn.tannn.lychnos.entity.AIModel;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
@@ -74,7 +75,7 @@ public class AIModelDTO extends SerializableBean<AIModelDTO> {
     private Boolean enabled;
 
     /**
-     * 转换为实体
+     * 转换为实体（保存时加密 API Key）
      */
     public AIModel toEntity(Long userId) {
         AIModel model = new AIModel();
@@ -82,7 +83,10 @@ public class AIModelDTO extends SerializableBean<AIModelDTO> {
         model.setName(this.name.trim());
         model.setModel(this.model.trim());
         model.setFactory(this.factory.trim());
-        model.setApiKey(this.apiKey.trim());
+        // 加密 API Key
+        if (this.apiKey != null && !this.apiKey.isEmpty()) {
+            model.setApiKey(AESUtil.encrypt(this.apiKey.trim()));
+        }
         model.setApiUrl(this.apiUrl);
         model.setEnabled(this.enabled != null ? this.enabled : false);
         model.setType(this.type);
@@ -90,13 +94,20 @@ public class AIModelDTO extends SerializableBean<AIModelDTO> {
     }
 
     /**
-     * 更新实体
+     * 更新实体（保存时加密 API Key）
      */
     public void updateEntity(AIModel model) {
         model.setName(this.name.trim());
         model.setModel(this.model.trim());
         model.setFactory(this.factory.trim());
-        model.setApiKey(this.apiKey.trim());
+        // 加密 API Key（如果提供了新的 API Key）
+        if (this.apiKey != null && !this.apiKey.isEmpty()) {
+            // 如果 API Key 不是掩码形式（前端可能返回掩码），才进行加密
+            if (!this.apiKey.contains("***")) {
+                model.setApiKey(AESUtil.encrypt(this.apiKey.trim()));
+            }
+            // 如果是掩码形式，保持原有的加密值不变
+        }
         model.setApiUrl(this.apiUrl);
         model.setType(this.type);
         // 如果 DTO 中指定了 enabled 状态，则更新
