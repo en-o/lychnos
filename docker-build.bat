@@ -19,7 +19,33 @@ echo 版本: %VERSION%
 echo ============================================
 echo.
 
+REM 清理历史编译产物，防止影响 Docker 构建
+echo [清理中] 正在清理历史编译产物...
+echo.
+
+REM 清理前端编译产物
+if exist "webui\dist" (
+    echo - 清理前端 dist 目录
+    rmdir /s /q "webui\dist"
+)
+if exist "webui\node_modules" (
+    echo - 清理前端 node_modules 目录
+    rmdir /s /q "webui\node_modules"
+)
+
+REM 清理后端编译产物
+if exist "apis\target" (
+    echo - 清理后端 target 目录
+    rmdir /s /q "apis\target"
+)
+
+echo.
+echo [清理完成] 历史编译产物已清理
+echo.
+
 REM 执行 Docker 构建
+echo [构建中] 开始 Docker 镜像构建...
+echo.
 docker build -f apis/Dockerfile -t tannnn/lychnos:%VERSION% .
 
 REM 检查构建结果
