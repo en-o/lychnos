@@ -16,6 +16,11 @@ app:
   image:
     # 图片存储根目录
     storage-path: ${IMAGE_STORAGE_PATH:./data/images}
+  security:
+    # AES 加密密钥（用于 API Key 等敏感信息加密存储）
+    # 生成方式：AESUtil.generateSecretKey("Lychnos2026SecretKey")
+    # 注意：生产环境请务必修改此密钥，并妥善保管
+    aes-secret-key: ${AES_SECRET_KEY:kZXQiOjE3MzczOTY3}
 
 jdevelops:
   swagger:

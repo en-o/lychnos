@@ -20,6 +20,7 @@ services:
       DOC_USERNAME: ${DOC_USERNAME:-tan}
       CONFIG_ENV: ${CONFIG_ENV:-prod}
       IMAGE_STORAGE_PATH: ${IMAGE_STORAGE_PATH:-./data/images}
+      AES_SECRET_KEY: ${AES_SECRET_KEY:-kZXQiOjE3MzczOTY3}
     volumes:
       # 可选：持久化日志
       - ./logs:/app/logs

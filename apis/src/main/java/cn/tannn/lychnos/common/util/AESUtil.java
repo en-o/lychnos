@@ -5,6 +5,8 @@ import lombok.extern.slf4j.Slf4j;
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.util.Arrays;
 import java.util.Base64;
 
 /**
@@ -29,10 +31,74 @@ public class AESUtil {
     private static final String TRANSFORMATION = "AES/ECB/PKCS5Padding";
 
     /**
-     * 默认密钥（16字节）
-     * 生产环境建议通过配置文件或环境变量配置，并定期更换
+     * 配置的密钥（由 Spring 注入）
+     * 通过 application.yaml 中的 app.security.aes-secret-key 配置
      */
-    private static final String DEFAULT_SECRET_KEY = "Lychnos2026Key!!";
+    private static String configuredSecretKey;
+
+    /**
+     * 设置密钥（由 Spring 配置类调用）
+     *
+     * @param secretKey 配置的密钥
+     */
+    public static void setSecretKey(String secretKey) {
+        configuredSecretKey = secretKey;
+    }
+
+    /**
+     * 从任意字符串生成 16 字节的 AES 密钥
+     * 使用 MD5 哈希算法将任意长度的字符串转换为 16 字节
+     *
+     * @param seed 种子字符串
+     * @return 16 字节的密钥字符串
+     */
+    public static String generateSecretKey(String seed) {
+        try {
+            MessageDigest md = MessageDigest.getInstance("MD5");
+            byte[] hash = md.digest(seed.getBytes(StandardCharsets.UTF_8));
+            // MD5 生成 16 字节的哈希值，正好符合 AES-128 的要求
+            return Base64.getEncoder().encodeToString(hash);
+        } catch (Exception e) {
+            log.error("生成密钥失败", e);
+            throw new RuntimeException("生成密钥失败: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * 打印配置示例（用于生成配置文件内容）
+     * 使用方式：在启动类中调用此方法，然后将输出复制到 application.yaml
+     *
+     * @param seed 种子字符串（建议使用项目名称或其他唯一标识）
+     */
+    public static void printConfigExample(String seed) {
+        String secretKey = generateSecretKey(seed);
+        System.out.println("\n=================================================");
+        System.out.println("AES 加密密钥配置示例（请复制到 application.yaml）：");
+        System.out.println("=================================================");
+        System.out.println("app:");
+        System.out.println("  security:");
+        System.out.println("    aes-secret-key: " + secretKey);
+        System.out.println("=================================================\n");
+    }
+
+    /**
+     * 获取密钥的 16 字节形式
+     *
+     * @param secretKey 密钥字符串
+     * @return 16 字节的密钥数组
+     */
+    private static byte[] getKeyBytes(String secretKey) {
+        try {
+            byte[] keyBytes = Base64.getDecoder().decode(secretKey);
+            // 确保是 16 字节（AES-128）
+            return Arrays.copyOf(keyBytes, 16);
+        } catch (Exception e) {
+            log.error("密钥格式错误，尝试使用 UTF-8 编码", e);
+            // 如果不是 Base64，则使用原始字符串的 UTF-8 编码
+            byte[] keyBytes = secretKey.getBytes(StandardCharsets.UTF_8);
+            return Arrays.copyOf(keyBytes, 16);
+        }
+    }
 
     /**
      * 加密字符串
@@ -41,14 +107,17 @@ public class AESUtil {
      * @return 加密后的 Base64 编码字符串
      */
     public static String encrypt(String plainText) {
-        return encrypt(plainText, DEFAULT_SECRET_KEY);
+        if (configuredSecretKey == null || configuredSecretKey.isEmpty()) {
+            throw new IllegalStateException("未配置 AES 密钥，请在 application.yaml 中配置 app.security.aes-secret-key");
+        }
+        return encrypt(plainText, configuredSecretKey);
     }
 
     /**
      * 加密字符串
      *
      * @param plainText 明文
-     * @param secretKey 密钥（必须是16、24或32字节）
+     * @param secretKey 密钥
      * @return 加密后的 Base64 编码字符串
      */
     public static String encrypt(String plainText, String secretKey) {
@@ -58,7 +127,8 @@ public class AESUtil {
 
         try {
             // 创建密钥
-            SecretKeySpec keySpec = new SecretKeySpec(secretKey.getBytes(StandardCharsets.UTF_8), ALGORITHM);
+            byte[] keyBytes = getKeyBytes(secretKey);
+            SecretKeySpec keySpec = new SecretKeySpec(keyBytes, ALGORITHM);
 
             // 创建密码器
             Cipher cipher = Cipher.getInstance(TRANSFORMATION);
@@ -82,14 +152,17 @@ public class AESUtil {
      * @return 解密后的明文
      */
     public static String decrypt(String encryptedText) {
-        return decrypt(encryptedText, DEFAULT_SECRET_KEY);
+        if (configuredSecretKey == null || configuredSecretKey.isEmpty()) {
+            throw new IllegalStateException("未配置 AES 密钥，请在 application.yaml 中配置 app.security.aes-secret-key");
+        }
+        return decrypt(encryptedText, configuredSecretKey);
     }
 
     /**
      * 解密字符串
      *
      * @param encryptedText 加密后的 Base64 编码字符串
-     * @param secretKey 密钥（必须是16、24或32字节）
+     * @param secretKey 密钥
      * @return 解密后的明文
      */
     public static String decrypt(String encryptedText, String secretKey) {
@@ -99,7 +172,8 @@ public class AESUtil {
 
         try {
             // 创建密钥
-            SecretKeySpec keySpec = new SecretKeySpec(secretKey.getBytes(StandardCharsets.UTF_8), ALGORITHM);
+            byte[] keyBytes = getKeyBytes(secretKey);
+            SecretKeySpec keySpec = new SecretKeySpec(keyBytes, ALGORITHM);
 
             // 创建密码器
             Cipher cipher = Cipher.getInstance(TRANSFORMATION);

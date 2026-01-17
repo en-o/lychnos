@@ -95,6 +95,8 @@ mvn clean package -DskipTests
 ## 错误码说明
 > 接口结构返回的code,并非http state
 
+### 系统级错误码（HTTP Status Code）
+
 | HTTP Code | 业务 Code | 错误名称 | 说明 | 前端处理 |
 |-----------|----------|---------|------|---------|
 | 401 | TOKEN_ERROR | Token 校验失败 | Token 无效或解析失败 | 清除 token，跳转登录页 |
@@ -103,6 +105,61 @@ mvn clean package -DskipTests
 | 402 | SYS_AUTHORIZED_PAST | 授权过期 | 系统授权已过期 | 提示用户联系管理员 |
 | 403 | UNAUTHENTICATED | 系统未授权 | 当前用户无访问权限 | 提示用户无权限 |
 | 403 | UNAUTHENTICATED_PLATFORM | 非法令牌访问 | Token 与访问端不匹配 | 清除 token，跳转登录页 |
+
+### 业务级错误码（BusinessErrorCode）
+
+| 业务 Code | 错误名称 | 说明 | 前端处理 |
+|----------|---------|------|---------|
+| 1001 | BOOK_ALREADY_ANALYZED | 书籍已分析过 | 不显示 toast，跳转到历史记录页面 |
+| 1002 | MODEL_NOT_CONFIGURED | 用户未配置 AI 模型 | 提示用户未配置模型，1.5秒后自动跳转到 AI 模型设置页面 |
+
+
+## AES 加密密钥配置
+
+为了安全地存储敏感信息（如 AI API Key），系统使用 AES 加密算法。需要在 `application.yaml` 中配置加密密钥。
+
+### 生成密钥
+
+可以使用以下两种方式生成密钥：
+
+#### 方式1：使用代码生成（推荐）
+
+在 Java 代码中调用：
+```java
+// 使用任意字符串作为种子生成 16 字节密钥
+String secretKey = AESUtil.generateSecretKey("Lychnos2026SecretKey");
+System.out.println(secretKey);  // 输出: kZXQiOjE3MzczOTY3
+
+// 或者直接打印配置示例
+AESUtil.printConfigExample("Lychnos2026SecretKey");
+```
+
+#### 方式2：使用环境变量
+
+在 Docker 或生产环境中，可以通过环境变量配置：
+```bash
+docker run -e AES_SECRET_KEY=your-secret-key ...
+```
+
+### 配置文件
+
+在 `application.yaml` 中添加配置：
+```yaml
+app:
+  security:
+    # AES 加密密钥（用于 API Key 等敏感信息加密存储）
+    # 生成方式：AESUtil.generateSecretKey("YourSeedString")
+    # 注意：生产环境请务必修改此密钥，并妥善保管
+    aes-secret-key: ${AES_SECRET_KEY:kZXQiOjE3MzczOTY3}
+```
+
+### 注意事项
+
+1. **生产环境必须修改**：默认密钥仅用于开发测试，生产环境必须使用自己生成的密钥
+2. **妥善保管密钥**：密钥泄露会导致所有加密数据不安全
+3. **定期更换密钥**：建议定期更换密钥以提高安全性
+4. **使用环境变量**：生产环境建议通过环境变量 `AES_SECRET_KEY` 配置，不要硬编码在配置文件中
+
 
 
 ## poster_url 格式说明
