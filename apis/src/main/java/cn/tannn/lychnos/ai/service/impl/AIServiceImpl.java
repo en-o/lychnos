@@ -333,7 +333,19 @@ public class AIServiceImpl implements AIService {
         }
 
         // 返回第一个启用的模型（按创建时间倒序）
-        return models.get(0);
+        AIModel model = models.get(0);
+
+        // 验证 API Key 是否有效（在解密之前检查）
+        if (model.getApiKey() == null || model.getApiKey().trim().isEmpty()) {
+            log.warn("模型 API Key 为空，modelId: {}, userId: {}, type: {}",
+                    model.getId(), userId, type);
+            throw new BusinessException(
+                    BusinessErrorCode.MODEL_NOT_CONFIGURED.getCode(),
+                    BusinessErrorCode.MODEL_NOT_CONFIGURED.formatMessage(type.name())
+            );
+        }
+
+        return model;
     }
 
     /**
@@ -361,8 +373,13 @@ public class AIServiceImpl implements AIService {
             try {
                 decryptedApiKey = AESUtil.decrypt(aiModel.getApiKey());
             } catch (Exception e) {
-                log.error("解密 API Key 失败，模型ID: {}", aiModel.getId(), e);
-                throw new BusinessException("API Key 解密失败，请检查配置");
+                log.error("解密 API Key 失败，模型ID: {}, type: {}, error: {}",
+                        aiModel.getId(), aiModel.getType(), e.getMessage(), e);
+                // API Key 格式错误也视为配置无效
+                throw new BusinessException(
+                        BusinessErrorCode.MODEL_NOT_CONFIGURED.getCode(),
+                        String.format("API Key 格式错误，请重新配置 %s 类型模型", aiModel.getType().name())
+                );
             }
         }
 
