@@ -516,6 +516,16 @@ const HomePage: React.FC = () => {
                 </div>
               </div>
 
+              {/* 隐私协议说明 */}
+              <div className="max-w-2xl mx-auto mb-6">
+                <div className="px-4 py-2.5 bg-blue-50 border border-blue-100 rounded-lg">
+                  <p className="text-xs text-blue-700 text-center">
+                    <span className="font-medium">温馨提示：</span>
+                    点击分析即表示您同意将分析结果用于改进服务质量。我们承诺保护您的隐私安全。
+                  </p>
+                </div>
+              </div>
+
               {/* 快速选择 */}
               <div className="flex items-center justify-center gap-2 flex-wrap">
                 <span className="text-sm text-gray-500">试试:</span>

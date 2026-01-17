@@ -307,6 +307,14 @@ const ModelSettingsPage: React.FC = () => {
               </div>
             </div>
 
+            {/* 隐私协议说明 */}
+            <div className="px-6 py-3 bg-blue-50 border-b border-blue-100">
+              <p className="text-sm text-blue-800">
+                <span className="font-medium">隐私说明：</span>
+                使用 AI 分析功能时，您的书籍分析结果将默认用于改进服务质量和推荐系统。我们承诺不会泄露您的个人隐私信息。
+              </p>
+            </div>
+
             {/* 模型列表 */}
             <div className="p-6">
               {models.length === 0 ? (
