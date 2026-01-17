@@ -46,7 +46,13 @@ public class BookAnalyseService extends J2ServiceImpl<BookAnalyseDao, BookAnalys
 
             // 如果已有图片，直接返回
             if (existing.getPosterUrl() != null && !existing.getPosterUrl().isEmpty()) {
-                log.info("书籍已分析过且有图片，直接返回，书名: {}", bookTitle);
+                log.info("书籍已分析过且有图片，延时1秒后返回，书名: {}", bookTitle);
+                try {
+                    Thread.sleep(1000); // 延时1秒，提供视觉差
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    log.warn("延时被中断", e);
+                }
                 return existing;
             }
 
