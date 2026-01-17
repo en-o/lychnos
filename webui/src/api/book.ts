@@ -31,6 +31,13 @@ export const bookApi = {
     );
   },
 
+  // 公开分析接口（无需登录，仅限推荐书籍）
+  analyzePublic: (title: string) => {
+    return request.get<Result<BookAnalysis>>(
+      `/book/analyze/public/${encodeURIComponent(title)}`
+    );
+  },
+
   // 提交用户分析
   submitFeedback: (data: InterestFeedback) => {
     return request.post<Result<UserInterest>>('/user/interest', data);

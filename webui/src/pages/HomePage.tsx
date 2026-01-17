@@ -109,15 +109,9 @@ const HomePage: React.FC = () => {
     }
   };
 
-  const handleSearch = async (title = bookTitle) => {
+  const handleSearch = async (title = bookTitle, isRecommended = false) => {
     if (!title.trim()) {
       toast.warning('请输入书名');
-      return;
-    }
-
-    // 检查登录状态
-    if (!token) {
-      setShowLoginConfirm(true);
       return;
     }
 
@@ -129,6 +123,23 @@ const HomePage: React.FC = () => {
     setResult(null);
 
     try {
+      // 未登录用户点击推荐书籍，使用公开接口查看
+      if (!token && isRecommended) {
+        const response = await bookApi.analyzePublic(title);
+        if (response.success) {
+          setResult(response.data);
+          toast.info('未登录用户只能查看推荐书籍的分析结果');
+        }
+        return;
+      }
+
+      // 未登录用户搜索非推荐书籍，提示需要登录
+      if (!token) {
+        setShowLoginConfirm(true);
+        return;
+      }
+
+      // 已登录用户，执行完整分析流程
       // 先检查是否已经分析过
       try {
         await bookApi.checkAnalyzed(title);
@@ -192,9 +203,9 @@ const HomePage: React.FC = () => {
    * 数据库的数据快速检索
    * @param title 书名
    */
-  const handleQuickSearch = ( title: string) => {
+  const handleQuickSearch = (title: string) => {
     setBookTitle(title);
-    handleSearch(title);
+    handleSearch(title, true); // 标记为推荐书籍
   };
 
   const handleLogin = () => {
@@ -647,20 +658,36 @@ const HomePage: React.FC = () => {
                 </div>
 
                 {/* 反馈按钮 */}
-                <div className="flex gap-3">
-                  <button
-                    onClick={() => handleFeedback(true)}
-                    className="flex-1 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition font-medium"
-                  >
-                    感兴趣
-                  </button>
-                  <button
-                    onClick={() => handleFeedback(false)}
-                    className="flex-1 px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition font-medium"
-                  >
-                    不感兴趣
-                  </button>
-                </div>
+                {token ? (
+                  <div className="flex gap-3">
+                    <button
+                      onClick={() => handleFeedback(true)}
+                      className="flex-1 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition font-medium"
+                    >
+                      感兴趣
+                    </button>
+                    <button
+                      onClick={() => handleFeedback(false)}
+                      className="flex-1 px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition font-medium"
+                    >
+                      不感兴趣
+                    </button>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                      <p className="text-sm text-blue-700 text-center">
+                        想要分析更多书籍并保存偏好？请先登录
+                      </p>
+                    </div>
+                    <button
+                      onClick={handleLogin}
+                      className="w-full px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium"
+                    >
+                      登录以使用完整功能
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           )}
