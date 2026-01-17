@@ -580,6 +580,12 @@ const ModelSettingsPage: React.FC = () => {
                     密钥将自动加密存储，保障安全
                   </p>
                 )}
+                <div className="mt-2 p-2.5 bg-amber-50 border border-amber-200 rounded-lg">
+                  <p className="text-sm text-amber-800 flex items-start gap-1.5">
+                    <span className="text-base">⚠️</span>
+                    <span>注意：请留意 API Key 的过期时间。本系统不会管理密钥过期，过期后仅通过异常提示，无专门的过期提醒功能。</span>
+                  </p>
+                </div>
               </div>
 
               <div>
