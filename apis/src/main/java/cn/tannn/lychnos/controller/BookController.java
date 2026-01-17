@@ -92,6 +92,23 @@ public class BookController {
     }
 
 
+
+    @Operation(summary = "公开分析图书", description = "无需登录即可查看推荐书籍的分析结果")
+    @ApiMapping(checkToken = false, value = "analyze/public/{bookTitle}", method = RequestMethod.GET)
+    public ResultVO<BookAnalyse> analyzePublic(@PathVariable("bookTitle") String bookTitle) {
+        // 获取推荐书籍列表（真实数据 + 模拟数据）
+        List<String> recommendBookTitles = getRecommendBookTitles();
+
+        // 验证书名是否在推荐列表中
+        validateBookInRecommendation(bookTitle, recommendBookTitles);
+        // 查询并返回书籍分析记录
+        BookAnalyse bookAnalyse = findBookAnalyseByTitle(bookTitle);
+
+        log.info("公开分析接口返回书籍: {}", bookTitle);
+        return ResultVO.success(bookAnalyse);
+    }
+
+
     @Operation(summary = "分析图书", description = "根据书名进行分析图书")
     @PutMapping(value = "analyze/{bookTitle}")
     public ResultVO<BookAnalyse> analyze(@PathVariable("bookTitle") String bookTitle,
@@ -147,5 +164,64 @@ public class BookController {
         }
 
         return ResultVO.successMessage("当前用户为未分析该书籍，可以进行分析");
+    }
+
+
+
+
+    /**
+     * 获取推荐书籍列表（真实数据 + 模拟数据）
+     *
+     * @return 推荐书籍标题列表
+     */
+    private List<String> getRecommendBookTitles() {
+        List<String> recommendBookTitles = userInterestService.getJpaBasicsDao()
+                .findTop5BookTitlesByInterested(true);
+
+        // 如果推荐列表为空，返回模拟数据的书名
+        if (recommendBookTitles.isEmpty()) {
+            log.info("真实推荐数据为空，使用模拟数据");
+            return MOCK_RECOMMENDATIONS.stream()
+                    .map(BookRecommend::getTitle)
+                    .collect(Collectors.toList());
+        }
+
+        return recommendBookTitles;
+    }
+
+    /**
+     * 验证书名是否在推荐列表中
+     *
+     * @param bookTitle 书籍标题
+     * @param recommendBookTitles 推荐书籍列表
+     * @throws BusinessException 如果书籍不在推荐列表中
+     */
+    private void validateBookInRecommendation(String bookTitle, List<String> recommendBookTitles) {
+        if (!recommendBookTitles.contains(bookTitle)) {
+            log.warn("书籍不在推荐列表中: {}", bookTitle);
+            throw new BusinessException(
+                    BusinessErrorCode.BOOK_NOT_IN_RECOMMENDATION.getCode(),
+                    BusinessErrorCode.BOOK_NOT_IN_RECOMMENDATION.getMessage()
+            );
+        }
+    }
+
+    /**
+     * 根据书名查询书籍分析记录
+     *
+     * @param bookTitle 书籍标题
+     * @return 书籍分析对象
+     * @throws BusinessException 如果未找到分析数据
+     */
+    private BookAnalyse findBookAnalyseByTitle(String bookTitle) {
+        return bookAnalyseService.getJpaBasicsDao()
+                .findByTitle(bookTitle)
+                .orElseThrow(() -> {
+                    log.warn("未找到书籍分析数据: {}", bookTitle);
+                    return new BusinessException(
+                            BusinessErrorCode.BOOK_ANALYSIS_NOT_FOUND.getCode(),
+                            BusinessErrorCode.BOOK_ANALYSIS_NOT_FOUND.getMessage()
+                    );
+                });
     }
 }

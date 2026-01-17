@@ -21,7 +21,17 @@ public enum BusinessErrorCode {
     /**
      * 1002: 用户未配置可用的 AI 模型
      */
-    MODEL_NOT_CONFIGURED(1002, "用户未配置可用的 %s 类型模型，请先配置");
+    MODEL_NOT_CONFIGURED(1002, "用户未配置可用的 %s 类型模型，请先配置"),
+
+    /**
+     * 1003: 书籍不在推荐列表中（未登录用户限制）
+     */
+    BOOK_NOT_IN_RECOMMENDATION(1003, "未登录用户只能分析推荐列表中的书籍，请先登录或选择推荐的书籍"),
+
+    /**
+     * 1004: 书籍未找到分析数据
+     */
+    BOOK_ANALYSIS_NOT_FOUND(1004, "该书籍暂无分析数据");
 
     /**
      * 错误码
