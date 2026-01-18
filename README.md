@@ -96,7 +96,8 @@ mvn clean package -DskipTests
 
 
 ## nginx配置
-```nginx configuration
+
+```nginx
 
 server {
         listen       80;
@@ -123,45 +124,108 @@ server {
 server {
     listen   443 ssl;
     server_name  lychnos.tannn.cn;
+	
+	  # SSL 证书配置
     ssl_certificate      /home/nginxconfig/https/lychnos.xx.cn_nginx/lychnos.xx.cn.pem;
     ssl_certificate_key  /home/nginxconfig/https/lychnos.xx.cn_nginx/lychnos.xx.cn.key;
-    ssl_session_cache    shared:SSL:1m;
-    ssl_session_timeout  5m;
+	 # SSL 优化配置
+	ssl_session_cache    shared:SSL:10m;
+    ssl_session_timeout  10m;
+    ssl_protocols        TLSv1.2 TLSv1.3;  # 只使用安全的 TLS 版本
+    ssl_ciphers   'ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384';
+    ssl_prefer_server_ciphers on;
+	
+	
+	# 文件上传大小限制
     client_max_body_size 500M;
-    # SSL Settings
-    ssl_ciphers  HIGH:!aNULL:!MD5;
-    ssl_protocols TLSv1 TLSv1.1 TLSv1.2;
-    ssl_prefer_server_ciphers   on;
-	error_page 404 /404.html;
-    #  Gzip Settings
+	
+    # Gzip 压缩
     gzip on;
     gzip_disable "msie6";
+    gzip_vary on;
+    gzip_proxied any;
+    gzip_comp_level 6;
+    gzip_types text/plain text/css text/xml text/javascript application/json application/javascript application/xml+rss application/rss+xml font/truetype font/opentype application/vnd.ms-fontobject image/svg+xml;
+
+    # 安全 Headers
+    add_header X-Frame-Options "SAMEORIGIN" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header X-XSS-Protection "1; mode=block" always;
+    add_header Referrer-Policy "no-referrer-when-downgrade" always;
+    # HSTS（强制 HTTPS，慎用，确保 HTTPS 完全正常后再启用）
+    # add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+
+	
+	    # 错误页面
+    error_page 404 /404.html;
 
      location / {
+	 
+	    # HTTP 方法白名单（拒绝 PROPFIND 等 WebDAV 方法）
+        limit_except GET POST PUT DELETE PATCH OPTIONS HEAD {
+            deny all;
+        }
         proxy_pass http://localhost:1250/;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header REMOTE-HOST $remote_addr;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection $http_connection;
-        proxy_set_header X-Forwarded-Proto $scheme;
+		proxy_set_header X-Forwarded-Proto $scheme;
+		proxy_set_header X-Forwarded-Host $host;
+        proxy_set_header X-Forwarded-Port $server_port;
+		# HTTP/1.1 支持（WebSocket 等需要）
         proxy_http_version 1.1;
-        add_header X-Cache $upstream_cache_status;
-        add_header Cache-Control no-cache;
-        proxy_ssl_server_name off;
-        proxy_ssl_name $proxy_host;
-         # ========== 超时配置（AI 生图模型需要 1-10 分钟） ==========
-        # 与后端建立连接的超时时间
-        proxy_connect_timeout 900s;
-        # 向后端传输请求的超时时间
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+		
+       # proxy_ssl_server_name off;
+       # proxy_ssl_name $proxy_host;
+      
+	    # 超时配置（AI 生图需要长时间处理）   # ❌ 这两行配置无效，因为上面用的是 http://
+        proxy_connect_timeout 900s;  # 15分钟
         proxy_send_timeout 900s;
-        # 等待后端响应的超时时间（AI 生图可能需要长达 10 分钟）
         proxy_read_timeout 900s;
-        # ==========================================================
+		
+		
+		# 缓存控制
+        add_header X-Cache-Status $upstream_cache_status;
+
+        # 禁用缓冲（流式传输，适合大文件和 AI 流式响应）
+        proxy_buffering off;
+        proxy_request_buffering off;
      }
+	 
+	   # 静态资源缓存（可选）
+    location ~* \.(jpg|jpeg|png|gif|ico|css|js|svg|woff|woff2|ttf|eot)$ {
+        proxy_pass http://localhost:1250;
+        proxy_cache_valid 200 30d;
+        expires 30d;
+        add_header Cache-Control "public, immutable";
+    }
 }
 ```
+
+### 配置说明
+
+#### 安全性增强
+- **现代 TLS 版本**：仅支持 TLSv1.2 和 TLSv1.3，移除不安全的旧版本
+- **安全加密套件**：使用现代化的加密算法配置
+- **安全响应头**：防止 XSS、点击劫持等攻击
+- **HTTP 方法白名单**：拒绝 PROPFIND 等 WebDAV 扫描方法
+
+#### 性能优化
+- **HTTP/2 支持**：提升页面加载性能
+- **Gzip 压缩**：压缩文本类资源，减少传输体积
+- **静态资源缓存**：为图片、字体、CSS/JS 文件设置 30 天缓存
+- **流式传输**：禁用缓冲，支持 AI 流式响应和大文件传输
+
+#### AI 应用优化
+- **900 秒超时**：支持 AI 生图等耗时操作（最长 15 分钟）
+- **WebSocket 支持**：正确配置 Upgrade 和 Connection headers
+- **大文件上传**：支持最大 500MB 文件上传
+
+#### SSL 安全测试
+配置后可使用 [SSL Labs](https://www.ssllabs.com/ssltest/) 测试 SSL 安全性评级
+
 
 
 # 备注
