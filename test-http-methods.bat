@@ -42,17 +42,19 @@ set FAIL_COUNT=0
 
 REM ========================================
 REM 测试允许的方法
+REM 注意：这里只测试过滤器是否允许这些方法，不测试业务逻辑
+REM 使用不存在的路径或根路径，避免影响真实数据
 REM ========================================
 echo === 测试允许的 HTTP 方法 ===
 echo.
 
-call :test_method GET / "允许的 GET 请求"
-call :test_method POST /api/login "允许的 POST 请求"
-call :test_method PUT /api/user/1 "允许的 PUT 请求"
-call :test_method DELETE /api/user/1 "允许的 DELETE 请求"
-call :test_method PATCH /api/user/1 "允许的 PATCH 请求"
-call :test_method OPTIONS / "允许的 OPTIONS 请求"
-call :test_method HEAD / "允许的 HEAD 请求"
+call :test_method GET / "GET 请求（应被允许）"
+call :test_method POST /filter-test "POST 请求（应被允许）"
+call :test_method PUT /filter-test "PUT 请求（应被允许）"
+call :test_method DELETE /filter-test "DELETE 请求（应被允许）"
+call :test_method PATCH /filter-test "PATCH 请求（应被允许）"
+call :test_method OPTIONS / "OPTIONS 请求（应被允许）"
+call :test_method HEAD / "HEAD 请求（应被允许）"
 
 echo.
 

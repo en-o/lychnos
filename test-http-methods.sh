@@ -101,17 +101,19 @@ test_method() {
 
 # ========================================
 # 测试允许的方法（应该返回 2xx/3xx/4xx，但不是 405）
+# 注意：这里只测试过滤器是否允许这些方法，不测试业务逻辑
+# 使用不存在的路径或根路径，避免影响真实数据
 # ========================================
 echo -e "${BLUE}=== 测试允许的 HTTP 方法 ===${NC}"
 echo ""
 
-test_method "GET" "/" "[2-4]" "获取首页"
-test_method "POST" "/api/login" "[2-4]" "登录接口" '{"username":"test","password":"test123"}'
-test_method "PUT" "/api/user/1" "[2-4]" "更新用户"
-test_method "DELETE" "/api/user/1" "[2-4]" "删除用户"
-test_method "PATCH" "/api/user/1" "[2-4]" "部分更新用户"
-test_method "OPTIONS" "/" "[2-4]" "OPTIONS 请求"
-test_method "HEAD" "/" "[2-4]" "HEAD 请求"
+test_method "GET" "/" "[2-4]" "GET 请求（应被允许）"
+test_method "POST" "/filter-test" "[2-4]" "POST 请求（应被允许）"
+test_method "PUT" "/filter-test" "[2-4]" "PUT 请求（应被允许）"
+test_method "DELETE" "/filter-test" "[2-4]" "DELETE 请求（应被允许）"
+test_method "PATCH" "/filter-test" "[2-4]" "PATCH 请求（应被允许）"
+test_method "OPTIONS" "/" "[2-4]" "OPTIONS 请求（应被允许）"
+test_method "HEAD" "/" "[2-4]" "HEAD 请求（应被允许）"
 
 echo ""
 
