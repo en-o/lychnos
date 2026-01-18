@@ -88,6 +88,15 @@ RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories
 # 或使用中科大镜像源
 # RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.ustc.edu.cn/g' /etc/apk/repositories
 
+# 设置时区为中国时区（Asia/Shanghai）
+RUN apk add --no-cache tzdata && \
+    cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && \
+    echo "Asia/Shanghai" > /etc/timezone && \
+    apk del tzdata
+
+# 设置时区环境变量
+ENV TZ=Asia/Shanghai
+
 # 添加维护者信息
 LABEL maintainer="tannnn"
 LABEL author="tannnn"

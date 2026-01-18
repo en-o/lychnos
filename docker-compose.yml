@@ -10,6 +10,8 @@ services:
     ports:
       - "1250:1250"
     environment:
+      # 时区配置
+      TZ: Asia/Shanghai
       FILE_MAX_SIZE: ${FILE_MAX_SIZE:-500MB}
       FILE_MAX_REQUEST: ${FILE_MAX_REQUEST:-500MB}
       MYSQL_PWD: ${MYSQL_PWD:-root}
