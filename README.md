@@ -101,7 +101,7 @@ mvn clean package -DskipTests
 
 server {
         listen       80;
-        server_name  lychnos.xx.cn;
+        server_name  lychnos.tannn.cn;
 
         #charset koi8-r;
         #access_log  logs/host.access.log  main;
@@ -126,8 +126,8 @@ server {
     server_name  lychnos.tannn.cn;
 	
 	  # SSL 证书配置
-    ssl_certificate      /home/nginxconfig/https/lychnos.xx.cn_nginx/lychnos.xx.cn.pem;
-    ssl_certificate_key  /home/nginxconfig/https/lychnos.xx.cn_nginx/lychnos.xx.cn.key;
+    ssl_certificate      /home/nginxconfig/https/lychnos.tannn.cn_nginx/lychnos.tannn.cn.pem;
+    ssl_certificate_key  /home/nginxconfig/https/lychnos.tannn.cn_nginx/lychnos.tannn.cn.key;
 	 # SSL 优化配置
 	ssl_session_cache    shared:SSL_LYCHNOS:10m;
     ssl_session_timeout  10m;
