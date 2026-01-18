@@ -129,7 +129,7 @@ server {
     ssl_certificate      /home/nginxconfig/https/lychnos.xx.cn_nginx/lychnos.xx.cn.pem;
     ssl_certificate_key  /home/nginxconfig/https/lychnos.xx.cn_nginx/lychnos.xx.cn.key;
 	 # SSL 优化配置
-	ssl_session_cache    shared:SSL:10m;
+	ssl_session_cache    shared:SSL_LYCHNOS:10m;
     ssl_session_timeout  10m;
     ssl_protocols        TLSv1.2 TLSv1.3;  # 只使用安全的 TLS 版本
     ssl_ciphers   'ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384';
