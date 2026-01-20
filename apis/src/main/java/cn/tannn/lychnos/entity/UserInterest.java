@@ -77,6 +77,14 @@ public class UserInterest {
     private String bookTitle;
 
     /**
+     * 作者（冗余字段，用于前端显示，非必填）
+     */
+    @Column(columnDefinition = " varchar(200) ")
+    @Comment("作者")
+    @Schema(description = "作者")
+    private String author;
+
+    /**
      * 是否感兴趣
      */
     @Column(columnDefinition = " tinyint(1) ")

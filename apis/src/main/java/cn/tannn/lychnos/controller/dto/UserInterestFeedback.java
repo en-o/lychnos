@@ -23,6 +23,9 @@ public class UserInterestFeedback {
     @Schema(description = "书名")
     private String bookTitle;
 
+    @Schema(description = "作者（可选，用于前端显示）")
+    private String author;
+
     @Schema(description = "是否感兴趣")
     private Boolean interested;
 
