@@ -2,6 +2,7 @@ import {request} from '../utils/request';
 import {
   type AnalysisHistory,
   type BookAnalysis,
+  type BookExtract,
   type BookRecommendItem,
   type PageResult,
   type Result,
@@ -17,16 +18,21 @@ export const bookApi = {
     return request.get<Result<BookRecommendItem[]>>('/book/recommend');
   },
 
-  // 检查书籍是否已分析
+  // 提取书籍信息（从用户输入中提取书名和作者）
+  extractBooks: (input: string) => {
+    return request.post<Result<BookExtract[]>>('/book/extract', { input });
+  },
+
+  // 检查书籍是否已分析（如果已分析则返回分析结果）
   checkAnalyzed: (title: string) => {
-    return request.get<Result<UserInterest | null>>(`/book/check/${encodeURIComponent(title)}`);
+    return request.get<Result<BookAnalysis | null>>(`/book/check/${encodeURIComponent(title)}`);
   },
 
   // 分析图书（需要较长时间：AI分析+图片生成）
-  analyzeBook: (title: string) => {
+  analyzeBook: (bookInfo: { title: string; author?: string }) => {
     return request.put<Result<BookAnalysis>>(
-      `/book/analyze/${encodeURIComponent(title)}`,
-      {},
+      '/book/analyze',
+      bookInfo,
       { timeout: 120000 } // 2分钟超时
     );
   },

@@ -2,7 +2,7 @@ import React, {useState} from 'react';
 import {useNavigate} from 'react-router-dom';
 import {Brain, ChevronDown, Heart, History, Key, LogOut, Search, UserCircle} from 'lucide-react';
 import {bookApi} from '../api/book';
-import type {AnalysisHistory, BookAnalysis, BookRecommendItem} from '../models';
+import type {AnalysisHistory, BookAnalysis, BookExtract, BookRecommendItem} from '../models';
 import Logo from '../components/Logo';
 import {toast} from '../components/ToastContainer';
 import ConfirmDialog from '../components/ConfirmDialog';
@@ -17,7 +17,9 @@ const HomePage: React.FC = () => {
   const navigate = useNavigate();
   const [bookTitle, setBookTitle] = useState('');
   const [loading, setLoading] = useState(false);
+  const [extracting, setExtracting] = useState(false);
   const [result, setResult] = useState<BookAnalysis | null>(null);
+  const [extractedBooks, setExtractedBooks] = useState<BookExtract[]>([]);
   const [feedbackHistory, setFeedbackHistory] = useState<AnalysisHistory[]>([]);
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showLoginConfirm, setShowLoginConfirm] = useState(false);
@@ -121,54 +123,108 @@ const HomePage: React.FC = () => {
 
     setLoading(true);
     setResult(null);
+    setExtractedBooks([]);
 
     try {
-      // 未登录用户点击推荐书籍，使用公开接口查看
-      if (!token && isRecommended) {
-        const response = await bookApi.analyzePublic(title);
-        if (response.success) {
-          setResult(response.data);
-          toast.info('未登录用户只能查看推荐书籍的分析结果');
-        }
-        return;
-      }
-
-      // 未登录用户搜索非推荐书籍，提示需要登录
+      // 1. 未登录用户：只能查看推荐书籍
       if (!token) {
-        setShowLoginConfirm(true);
+        if (isRecommended) {
+          // 推荐书籍，使用公开接口查询
+          const response = await bookApi.analyzePublic(title);
+          if (response.success && response.data) {
+            setResult(response.data);
+            toast.info('未登录用户只能查看推荐书籍的分析结果');
+          }
+        } else {
+          // 非推荐书籍，提示需要登录
+          setShowLoginConfirm(true);
+        }
         return;
       }
 
-      // 已登录用户，执行完整分析流程
-      // 先检查是否已经分析过
-      try {
-        await bookApi.checkAnalyzed(title);
-        // 未分析过，继续执行分析
-      } catch (checkError: any) {
-        // 如果是错误码 - 书籍已分析，跳转到历史页面
-        if (checkError?.code === BOOK_ALREADY_ANALYZED) {
-          toast.info('该书籍已经分析过，正在跳转到历史记录...');
-          navigate(`/history?search=${encodeURIComponent(title)}`);
-          return;
-        }
-        // 其他检查错误直接抛出
-        throw checkError;
+      // 2. 已登录用户：先检查是否已分析过
+      const checkResponse = await bookApi.checkAnalyzed(title);
+      if (checkResponse.success && checkResponse.data) {
+        // 已分析过，跳转到历史记录页面
+        toast.info('该书籍已经分析过，正在跳转到历史记录...');
+        navigate(`/history?search=${encodeURIComponent(title)}`);
+        return;
       }
 
-      // 未分析过，执行分析
-      const response = await bookApi.analyzeBook(title);
+      // 3. 未分析过，开始分析流程：调用 AI 提取书名和作者列表
+      setLoading(false);
+      setExtracting(true);
+
+      const extractResponse = await bookApi.extractBooks(title);
+
+      if (extractResponse.success && extractResponse.data && extractResponse.data.length > 0) {
+        const books = extractResponse.data;
+
+        // 如果只提取到一本书，直接分析
+        if (books.length === 1) {
+          const book = books[0];
+          await analyzeBook(book);
+        } else {
+          // 提取到多本书，显示列表供用户选择
+          setExtractedBooks(books);
+          toast.success(`识别到 ${books.length} 本书籍，请选择要分析的书籍`);
+        }
+      } else {
+        toast.warning('未能识别到书籍信息，请尝试更明确的书名');
+      }
+    } catch (error: any) {
+      console.error('搜索失败:', error);
+      // 错误提示已在request拦截器中统一处理
+    } finally {
+      setLoading(false);
+      setExtracting(false);
+    }
+  };
+
+  // 分析书籍
+  const analyzeBook = async (book: BookExtract) => {
+    setLoading(true);
+    setExtractedBooks([]);
+
+    try {
+      const response = await bookApi.analyzeBook({
+        title: book.title,
+        author: book.author
+      });
 
       if (response.success) {
         setResult(response.data);
+        toast.success('分析完成！');
       }
     } catch (error: any) {
       console.error('分析失败:', error);
-      // 如果分析时遇到错误码 - 书籍已分析，跳转到历史页面
       if (error?.code === BOOK_ALREADY_ANALYZED) {
         toast.info('该书籍已经分析过，正在跳转到历史记录...');
-        navigate(`/history?search=${encodeURIComponent(title)}`);
+        navigate(`/history?search=${encodeURIComponent(book.title)}`);
       }
-      // 其他错误提示已在request拦截器中统一处理
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // 处理书籍选择
+  const handleBookSelect = async (book: BookExtract) => {
+    // 检查是否已分析
+    setLoading(true);
+    try {
+      const checkResponse = await bookApi.checkAnalyzed(book.title);
+      if (checkResponse.success && checkResponse.data) {
+        // 已分析过，跳转到历史记录页面
+        toast.info('该书籍已经分析过，正在跳转到历史记录...');
+        navigate(`/history?search=${encodeURIComponent(book.title)}`);
+      } else {
+        // 未分析过，执行分析
+        await analyzeBook(book);
+      }
+    } catch (error) {
+      console.error('检查失败:', error);
+      // 如果检查失败，直接尝试分析
+      await analyzeBook(book);
     } finally {
       setLoading(false);
     }
@@ -572,6 +628,70 @@ const HomePage: React.FC = () => {
                     {book.title}
                   </button>
                 ))}
+              </div>
+            </div>
+          )}
+
+          {/* 书籍列表选择 */}
+          {extractedBooks.length > 0 && !result && (
+            <div className="animate-fadeIn">
+              <div className="mb-6">
+                <button
+                  onClick={() => {
+                    setExtractedBooks([]);
+                    setBookTitle('');
+                  }}
+                  className="text-sm text-gray-600 hover:text-gray-900 flex items-center gap-1"
+                >
+                  ← 返回搜索
+                </button>
+              </div>
+
+              <div className="bg-white border border-gray-200 rounded-xl p-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                  识别到 {extractedBooks.length} 本书籍，请选择要分析的书籍
+                </h3>
+
+                <div className="space-y-3">
+                  {extractedBooks.map((book, index) => (
+                    <button
+                      key={index}
+                      onClick={() => handleBookSelect(book)}
+                      disabled={loading}
+                      className="w-full p-4 border border-gray-200 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition text-left disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <h4 className="font-medium text-gray-900 mb-1">
+                            {book.title}
+                          </h4>
+                          {book.author && (
+                            <p className="text-sm text-gray-600">
+                              作者：{book.author}
+                            </p>
+                          )}
+                          {book.analyzed && (
+                            <span className="inline-block mt-2 px-2 py-1 text-xs bg-green-100 text-green-700 rounded">
+                              已分析
+                            </span>
+                          )}
+                        </div>
+                        <div className="ml-4">
+                          <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                          </svg>
+                        </div>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+
+                {loading && (
+                  <div className="mt-4 flex items-center justify-center gap-2 text-sm text-gray-600">
+                    <div className="w-4 h-4 border-2 border-gray-300 border-t-blue-600 rounded-full animate-spin" />
+                    <span>正在分析...</span>
+                  </div>
+                )}
               </div>
             </div>
           )}

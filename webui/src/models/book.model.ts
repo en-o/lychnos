@@ -23,6 +23,7 @@ export class BookSummary {
 export class BookAnalysis {
   id: string;
   title: string;
+  author?: string;
   genre: string;
   themes: string[];
   tone: string;
@@ -35,6 +36,7 @@ export class BookAnalysis {
   constructor(data: Partial<BookAnalysis> = {}) {
     this.id = data.id || '';
     this.title = data.title || '';
+    this.author = data.author;
     this.genre = data.genre || '';
     this.themes = data.themes || [];
     this.tone = data.tone || '';
@@ -166,5 +168,18 @@ export class UserPreference {
       readingTrend: '',
     };
     this.annualReport = data.annualReport ? new AnnualReport(data.annualReport) : undefined;
+  }
+}
+
+// 书籍提取结果
+export class BookExtract {
+  title: string;
+  author?: string;
+  analyzed: boolean;
+
+  constructor(data: Partial<BookExtract> = {}) {
+    this.title = data.title || '';
+    this.author = data.author;
+    this.analyzed = data.analyzed ?? false;
   }
 }
