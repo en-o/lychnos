@@ -16,6 +16,8 @@ app:
   image:
     # 图片存储根目录
     storage-path: ${IMAGE_STORAGE_PATH:./data/images}
+    # 未登录用户图片签名有效期（毫秒），默认 2 分钟（def 2 minute）/unit millisecond
+    signature-expiry-ms: ${IMAGE_SIGNATURE_EXPIRY_MS:120000}
   security:
     # AES 加密密钥（用于 API Key 等敏感信息加密存储）
     # 生成方式：AESUtil.generateSecretKey("Lychnos2026SecretKey")

@@ -47,6 +47,9 @@ public class BookController {
     @Value("${app.security.aes-secret-key}")
     private String secretKey;
 
+    @Value("${app.image.signature-expiry-ms}")
+    private long signatureExpiryMs;
+
     /**
      * 模拟推荐数据（用于补充或无真实数据时返回）
      * <p>只要初始化了sql那就有这个</p>
@@ -118,12 +121,16 @@ public class BookController {
             // 查询并返回书籍分析记录
             BookAnalyse bookAnalyse = findBookAnalyseByTitle(bookTitle);
 
-            // 为未登录用户的图片 URL 添加签名（30分钟有效期）
+            // 为未登录用户的图片 URL 添加签名（可配置有效期）
             if (bookAnalyse.getPosterUrl() != null && !bookAnalyse.getPosterUrl().isEmpty()) {
-                String signedParams = SignedUrlUtil.generateSignature(bookAnalyse.getPosterUrl(), secretKey);
+                String signedParams = SignedUrlUtil.generateSignature(
+                        bookAnalyse.getPosterUrl(),
+                        secretKey,
+                        signatureExpiryMs
+                );
                 // 将签名参数附加到 posterUrl（前端会在请求图片时使用）
                 bookAnalyse.setPosterUrl(bookAnalyse.getPosterUrl() + "?" + signedParams);
-                log.info("为未登录用户生成签名 URL，书名: {}", bookTitle);
+                log.info("为未登录用户生成签名 URL，有效期: {}ms，书名: {}", signatureExpiryMs, bookTitle);
             }
 
             log.info("未登录用户查询推荐书籍: {}", bookTitle);

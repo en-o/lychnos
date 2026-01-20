@@ -26,6 +26,8 @@ services:
       # 注意：生产环境请务必修改此密钥，并妥善保管
       # 16位字符
       AES_SECRET_KEY: ${AES_SECRET_KEY:-kZXQiOjE3MzczOTY3}
+      # 单位 毫秒 millisecond
+      IMAGE_SIGNATURE_EXPIRY_MS: ${IMAGE_SIGNATURE_EXPIRY_MS:-120000}
     volumes:
       # 可选：持久化日志
       - ./logs:/app/logs
