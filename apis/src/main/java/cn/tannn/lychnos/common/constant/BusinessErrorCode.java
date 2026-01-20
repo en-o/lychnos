@@ -31,7 +31,12 @@ public enum BusinessErrorCode {
     /**
      * 1004: 书籍未找到分析数据
      */
-    BOOK_ANALYSIS_NOT_FOUND(1004, "该书籍暂无分析数据");
+    BOOK_ANALYSIS_NOT_FOUND(1004, "该书籍暂无分析数据"),
+
+    /**
+     * 1005: 参数错误
+     */
+    PARAM_ERROR(1005, "参数错误");
 
     /**
      * 错误码
