@@ -26,6 +26,35 @@ public class UserAnalysisLogService {
     private final UserAnalysisLogDao userAnalysisLogDao;
 
     /**
+     * 保存书籍提取日志
+     */
+    @Async
+    public void saveExtractLog(Long userId, String userName, String callIp,
+                               AIModel model, String bookTitle, Long bookAnalyseId,
+                               boolean success, String errorMessage) {
+        UserAnalysisLog log = new UserAnalysisLog();
+        log.setUserId(userId);
+        log.setUserName(userName);
+        log.setCallIp(callIp);
+        log.setUsageType(UsageType.BOOK_EXTRACT);
+        log.setBookTitle(bookTitle);
+        log.setBookAnalyseId(bookAnalyseId);
+        log.setSuccess(success);
+        log.setErrorMessage(errorMessage);
+        log.setUseExistingData(false);
+
+        if (model != null) {
+            log.setModelId(model.getId());
+            log.setModelName(model.getModel());
+            log.setModelVendor(model.getFactory());
+            log.setModelType(ModelType.TEXT);
+            log.setModelSource(model.getShare());
+        }
+
+        userAnalysisLogDao.save(log);
+    }
+
+    /**
      * 保存书籍解析日志
      */
     @Async

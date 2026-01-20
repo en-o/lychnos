@@ -12,6 +12,11 @@ import lombok.Getter;
 @Getter
 public enum UsageType {
     /**
+     * 书籍提取
+     */
+    BOOK_EXTRACT("书籍提取"),
+
+    /**
      * 书籍解析
      */
     BOOK_PARSE("书籍解析"),
