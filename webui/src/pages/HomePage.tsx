@@ -17,7 +17,6 @@ const HomePage: React.FC = () => {
   const navigate = useNavigate();
   const [bookTitle, setBookTitle] = useState('');
   const [loading, setLoading] = useState(false);
-  const [extracting, setExtracting] = useState(false);
   const [result, setResult] = useState<BookAnalysis | null>(null);
   const [extractedBooks, setExtractedBooks] = useState<BookExtract[]>([]);
   const [feedbackHistory, setFeedbackHistory] = useState<AnalysisHistory[]>([]);
@@ -142,33 +141,30 @@ const HomePage: React.FC = () => {
         return;
       }
 
-      // 2. 已登录用户：先检查是否已分析过
-      const checkResponse = await bookApi.checkAnalyzed(title);
-      if (checkResponse.success && checkResponse.data) {
-        // 已分析过，跳转到历史记录页面
-        toast.info('该书籍已经分析过，正在跳转到历史记录...');
-        navigate(`/history?search=${encodeURIComponent(title)}`);
+      // 2. 已登录用户 - 推荐书籍：直接检查并分析
+      if (isRecommended) {
+        const checkResponse = await bookApi.checkAnalyzed(title);
+        if (checkResponse.success && checkResponse.data) {
+          // 已分析过，跳转到历史记录页面
+          toast.info('该书籍已经分析过，正在跳转到历史记录...');
+          navigate(`/history?search=${encodeURIComponent(title)}`);
+          return;
+        }
+
+        // 未分析过，直接分析（推荐书籍书名准确，不需要提取）
+        await analyzeBook({ title, author: '', analyzed: false });
         return;
       }
 
-      // 3. 未分析过，开始分析流程：调用 AI 提取书名和作者列表
-      setLoading(false);
-      setExtracting(true);
-
+      // 3. 已登录用户 - 输入框输入：先提取书籍信息
       const extractResponse = await bookApi.extractBooks(title);
 
       if (extractResponse.success && extractResponse.data && extractResponse.data.length > 0) {
         const books = extractResponse.data;
 
-        // 如果只提取到一本书，直接分析
-        if (books.length === 1) {
-          const book = books[0];
-          await analyzeBook(book);
-        } else {
-          // 提取到多本书，显示列表供用户选择
-          setExtractedBooks(books);
-          toast.success(`识别到 ${books.length} 本书籍，请选择要分析的书籍`);
-        }
+        // 无论提取到几本书，都显示列表让用户确认选择
+        setExtractedBooks(books);
+        toast.success(`识别到 ${books.length} 本书籍，请选择要分析的书籍`);
       } else {
         toast.warning('未能识别到书籍信息，请尝试更明确的书名');
       }
@@ -177,7 +173,6 @@ const HomePage: React.FC = () => {
       // 错误提示已在request拦截器中统一处理
     } finally {
       setLoading(false);
-      setExtracting(false);
     }
   };
 
