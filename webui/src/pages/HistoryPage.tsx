@@ -233,18 +233,28 @@ const HistoryPage: React.FC = () => {
                           )}
                         </div>
 
-                        <div className="flex flex-wrap gap-2 mb-2">
-                          <span className="px-2 py-1 bg-blue-50 text-blue-700 rounded text-xs">
-                            {item.analysisData.genre}
-                          </span>
-                          <span className="px-2 py-1 bg-purple-50 text-purple-700 rounded text-xs">
-                            {item.analysisData.tone}
-                          </span>
-                        </div>
+                        {item.author && (
+                          <p className="text-sm text-gray-600 mb-2">
+                            作者：{item.author}
+                          </p>
+                        )}
 
-                        <p className="text-sm text-gray-600 mb-2">
-                          {item.analysisData.themes.slice(0, 3).join('、')}
-                        </p>
+                        {item.analysisData && (
+                          <>
+                            <div className="flex flex-wrap gap-2 mb-2">
+                              <span className="px-2 py-1 bg-blue-50 text-blue-700 rounded text-xs">
+                                {item.analysisData.genre}
+                              </span>
+                              <span className="px-2 py-1 bg-purple-50 text-purple-700 rounded text-xs">
+                                {item.analysisData.tone}
+                              </span>
+                            </div>
+
+                            <p className="text-sm text-gray-600 mb-2">
+                              {item.analysisData.themes.slice(0, 3).join('、')}
+                            </p>
+                          </>
+                        )}
 
                         <p className="text-xs text-gray-500">
                           分析时间: {formatDate(item.createTime)}
@@ -312,14 +322,20 @@ const HistoryPage: React.FC = () => {
             <div className="space-y-4">
               <div className="flex gap-2">
                 <span className="px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-sm">
-                  {selectedItem.analysisData.genre}
+                  {selectedItem.analysisData?.genre || '未知类型'}
                 </span>
                 <span className="px-3 py-1 bg-purple-50 text-purple-700 rounded-full text-sm">
-                  {selectedItem.analysisData.tone}
+                  {selectedItem.analysisData?.tone || '未知基调'}
                 </span>
               </div>
 
-              {selectedItem.analysisData.posterUrl && (
+              {selectedItem.author && (
+                <div className="text-sm text-gray-700">
+                  <span className="font-medium">作者：</span>{selectedItem.author}
+                </div>
+              )}
+
+              {selectedItem.analysisData?.posterUrl && (
                 <div>
                   {!imageError[selectedItem.id] ? (
                     <img
@@ -342,32 +358,42 @@ const HistoryPage: React.FC = () => {
                 </div>
               )}
 
-              <div className="p-4 bg-gray-50 rounded-lg border-l-4 border-blue-500">
-                <p className="text-gray-800">{selectedItem.analysisData.recommendation}</p>
-              </div>
+              {selectedItem.analysisData && (
+                <>
+                  <div className="p-4 bg-gray-50 rounded-lg border-l-4 border-blue-500">
+                    <p className="text-gray-800">{selectedItem.analysisData.recommendation}</p>
+                  </div>
 
-              <div>
-                <h3 className="text-sm font-medium text-gray-900 mb-2">核心主题</h3>
-                <div className="flex flex-wrap gap-2">
-                  {selectedItem.analysisData.themes.map((theme, i) => (
-                    <span key={i} className="px-3 py-1 bg-gray-100 text-gray-700 rounded-lg text-sm">
-                      {theme}
-                    </span>
-                  ))}
+                  <div>
+                    <h3 className="text-sm font-medium text-gray-900 mb-2">核心主题</h3>
+                    <div className="flex flex-wrap gap-2">
+                      {selectedItem.analysisData.themes.map((theme, i) => (
+                        <span key={i} className="px-3 py-1 bg-gray-100 text-gray-700 rounded-lg text-sm">
+                          {theme}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div>
+                    <h3 className="text-sm font-medium text-gray-900 mb-2">关键元素</h3>
+                    <ul className="space-y-1">
+                      {selectedItem.analysisData.keyElements.map((element, i) => (
+                        <li key={i} className="text-sm text-gray-600 flex items-center gap-2">
+                          <span className="w-1 h-1 bg-gray-400 rounded-full" />
+                          {element}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </>
+              )}
+
+              {!selectedItem.analysisData && (
+                <div className="text-center py-8 text-gray-500">
+                  该书籍暂无详细分析数据
                 </div>
-              </div>
-
-              <div>
-                <h3 className="text-sm font-medium text-gray-900 mb-2">关键元素</h3>
-                <ul className="space-y-1">
-                  {selectedItem.analysisData.keyElements.map((element, i) => (
-                    <li key={i} className="text-sm text-gray-600 flex items-center gap-2">
-                      <span className="w-1 h-1 bg-gray-400 rounded-full" />
-                      {element}
-                    </li>
-                  ))}
-                </ul>
-              </div>
+              )}
 
               <div className="pt-4 border-t border-gray-200 text-sm text-gray-500">
                 分析时间: {formatDate(selectedItem.createTime)}

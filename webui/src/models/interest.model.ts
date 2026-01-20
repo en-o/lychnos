@@ -8,6 +8,8 @@ export interface InterestFeedback {
   bookAnalyseId: string,
   // 书名
   bookTitle: string,
+  // 作者（可选）
+  author?: string,
   // 是否感兴趣
   interested: boolean,
   // 理由
