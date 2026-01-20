@@ -263,32 +263,45 @@ public class AIServiceImpl implements AIService {
      * 执行图片生成并返回流（内部方法，避免重复查询）
      */
     private InputStream doGenerateImageStream(AIModel aiModel, String prompt) {
-        try {
-            log.info("调用AI图片生成（流），modelId: {}, userId: {}, model: {}",
-                    aiModel.getId(), aiModel.getUserId(), aiModel.getModel());
+        int maxRetries = 3;
+        int retryDelay = 2000;
 
-            // 先生成图片获取URL
-            ImageResponse response = doGenerateImage(aiModel, prompt);
+        for (int attempt = 1; attempt <= maxRetries; attempt++) {
+            try {
+                log.info("调用AI图片生成（流），modelId: {}, userId: {}, model: {}, 尝试: {}/{}",
+                        aiModel.getId(), aiModel.getUserId(), aiModel.getModel(), attempt, maxRetries);
 
-            // 从响应中提取图片URL
-            String imageUrl = response.getResult().getOutput().getUrl();
-            if (imageUrl == null || imageUrl.isEmpty()) {
-                throw new AIException.ModelCallFailedException("图片URL为空", null);
+                ImageResponse response = doGenerateImage(aiModel, prompt);
+                String imageUrl = response.getResult().getOutput().getUrl();
+                if (imageUrl == null || imageUrl.isEmpty()) {
+                    throw new AIException.ModelCallFailedException("图片URL为空", null);
+                }
+
+                log.info("从URL下载图片流，url: {}", imageUrl);
+                URL url = new URL(imageUrl);
+                InputStream inputStream = url.openStream();
+
+                log.info("AI图片流生成成功，modelId: {}", aiModel.getId());
+                return inputStream;
+            } catch (javax.net.ssl.SSLHandshakeException e) {
+                log.warn("SSL握手失败（尝试 {}/{}），modelId: {}, error: {}",
+                        attempt, maxRetries, aiModel.getId(), e.getMessage());
+                if (attempt < maxRetries) {
+                    try {
+                        Thread.sleep(retryDelay);
+                    } catch (InterruptedException ie) {
+                        Thread.currentThread().interrupt();
+                    }
+                } else {
+                    throw new AIException.ModelCallFailedException("图片流生成失败（SSL握手失败，已重试" + maxRetries + "次）: " + e.getMessage(), e);
+                }
+            } catch (Exception e) {
+                log.error("AI图片流生成失败，modelId: {}, userId: {}, error: {}",
+                        aiModel.getId(), aiModel.getUserId(), e.getMessage(), e);
+                throw new AIException.ModelCallFailedException("图片流生成失败: " + e.getMessage(), e);
             }
-
-            log.info("从URL下载图片流，url: {}", imageUrl);
-
-            // 从URL下载图片并返回流
-            URL url = new URL(imageUrl);
-            InputStream inputStream = url.openStream();
-
-            log.info("AI图片流生成成功，modelId: {}", aiModel.getId());
-            return inputStream;
-        } catch (Exception e) {
-            log.error("AI图片流生成失败，modelId: {}, userId: {}, error: {}",
-                    aiModel.getId(), aiModel.getUserId(), e.getMessage(), e);
-            throw new AIException.ModelCallFailedException("图片流生成失败: " + e.getMessage(), e);
         }
+        throw new AIException.ModelCallFailedException("图片流生成失败（已重试" + maxRetries + "次）", null);
     }
 
     /**
