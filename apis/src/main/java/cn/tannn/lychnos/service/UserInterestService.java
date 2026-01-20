@@ -55,6 +55,7 @@ public class UserInterestService extends J2ServiceImpl<UserInterestDao, UserInte
         userInterest.setUserId(userId);
         userInterest.setBookAnalyseId(interest.getBookAnalyseId());
         userInterest.setBookTitle(interest.getBookTitle());
+        userInterest.setAuthor(interest.getAuthor());
         userInterest.setInterested(interest.getInterested());
         userInterest.setReason(interest.getReason());
         // 这个数据需要异步写入，因为ai可能很慢
@@ -77,7 +78,7 @@ public class UserInterestService extends J2ServiceImpl<UserInterestDao, UserInte
                 pageRequest
         ).getContent();
 
-        return interests.stream().map(this::convertToVO).collect(Collectors.toList());
+        return convertToVOList(interests);
     }
 
     /**
@@ -96,27 +97,28 @@ public class UserInterestService extends J2ServiceImpl<UserInterestDao, UserInte
                 where,
                 page.getPage().pageable()
         );
-        Page<AnalysisHistoryVO> voPage = interests.map(this::convertToVO);
-        return JpaPageResult.toPage(voPage);
+        List<AnalysisHistoryVO> voList = convertToVOList(interests.getContent());
+        return new JpaPageResult<>(interests.getNumber()+1,
+                interests.getSize(),
+                interests.getTotalPages(),
+                interests.getTotalElements(),
+                voList);
     }
 
     /**
-     * 转换为 VO
+     * 批量转换为 VO（列表页懒加载，不查询BookAnalyse）
+     * 列表页只显示基本信息，详情页才查询完整的BookAnalyse数据
      */
-    private AnalysisHistoryVO convertToVO(UserInterest interest) {
-        AnalysisHistoryVO vo = new AnalysisHistoryVO();
-        vo.setId(interest.getId());
-        vo.setInterested(interest.getInterested());
-        vo.setCreateTime(interest.getCreateTime().format(FORMATTER));
-
-        // 获取书籍分析数据
-        BookAnalyse bookAnalyse = bookAnalyseService.findById(interest.getBookAnalyseId()).orElse(null);
-        if (bookAnalyse != null) {
-            vo.setTitle(bookAnalyse.getTitle());
-            vo.setAnalysisData(bookAnalyse);
-        }
-
-        return vo;
+    private List<AnalysisHistoryVO> convertToVOList(List<UserInterest> interests) {
+        return interests.stream().map(interest -> {
+            AnalysisHistoryVO vo = new AnalysisHistoryVO();
+            vo.setId(interest.getId());
+            vo.setTitle(interest.getBookTitle());
+            vo.setAuthor(interest.getAuthor());
+            vo.setInterested(interest.getInterested());
+            vo.setCreateTime(interest.getCreateTime().format(FORMATTER));
+            return vo;
+        }).collect(Collectors.toList());
     }
 
     /**
