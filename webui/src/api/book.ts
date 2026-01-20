@@ -20,7 +20,11 @@ export const bookApi = {
 
   // 提取书籍信息（从用户输入中提取书名和作者）
   extractBooks: (input: string) => {
-    return request.post<Result<BookExtract[]>>('/book/extract', { input });
+    return request.post<Result<BookExtract[]>>(
+      '/book/extract',
+      { input },
+      { timeout: 6000000 } // 10分钟超时
+    );
   },
 
   // 查询书籍分析结果（已登录用户检查是否已反馈，未登录用户只能查看推荐书籍）
@@ -33,7 +37,7 @@ export const bookApi = {
     return request.put<Result<BookAnalysis>>(
       '/book/analyze',
       bookInfo,
-      { timeout: 120000 } // 2分钟超时
+      { timeout: 6000000 } // 10分钟超时
     );
   },
 
