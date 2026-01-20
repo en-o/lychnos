@@ -22,15 +22,33 @@ export function getImageUrl(posterUrl: string | undefined | null): string {
     return posterUrl;
   }
 
+  // 检查是否包含签名参数（未登录用户的情况）
+  // 格式: l:1:/path?expires=xxx&signature=yyy
+  let actualPosterUrl = posterUrl;
+  let signatureParams = '';
+
+  const questionMarkIndex = posterUrl.indexOf('?');
+  if (questionMarkIndex !== -1) {
+    actualPosterUrl = posterUrl.substring(0, questionMarkIndex);
+    signatureParams = posterUrl.substring(questionMarkIndex + 1);
+  }
+
   // 解析格式: 协议:鉴权:路径
   // 使用正则匹配前两个字段，避免路径中的冒号被分割
-  const match = posterUrl.match(/^([^:]+):([^:]+):(.+)$/);
+  const match = actualPosterUrl.match(/^([^:]+):([^:]+):(.+)$/);
 
   if (!match) {
     // 无法解析，可能是旧的相对路径格式，通过后端代理
     // 确保路径拼接正确，避免出现 //image 的情况
     const baseUrl = API_BASE_URL.endsWith('/') ? API_BASE_URL.slice(0, -1) : API_BASE_URL;
-    return buildImageUrlWithToken(`${baseUrl}/image?path=${encodeURIComponent(posterUrl)}`);
+    let imageUrl = `${baseUrl}/image?path=${encodeURIComponent(actualPosterUrl)}`;
+
+    // 添加签名参数（如果有）
+    if (signatureParams) {
+      imageUrl += `&${signatureParams}`;
+    }
+
+    return buildImageUrlWithToken(imageUrl);
   }
 
   const [, , auth, path] = match;
@@ -40,10 +58,18 @@ export function getImageUrl(posterUrl: string | undefined | null): string {
     return path;
   }
 
-  // 有鉴权（1）- 通过后端代理访问，并附加 token
+  // 有鉴权（1）- 通过后端代理访问，并附加 token 或签名
   // 确保路径拼接正确，避免出现 //image 的情况
   const baseUrl = API_BASE_URL.endsWith('/') ? API_BASE_URL.slice(0, -1) : API_BASE_URL;
-  const imageUrl = `${baseUrl}/image?path=${encodeURIComponent(posterUrl)}`;
+  let imageUrl = `${baseUrl}/image?path=${encodeURIComponent(actualPosterUrl)}`;
+
+  // 添加签名参数（如果有，说明是未登录用户）
+  if (signatureParams) {
+    imageUrl += `&${signatureParams}`;
+    return imageUrl; // 未登录用户使用签名，不需要 token
+  }
+
+  // 已登录用户添加 token
   return buildImageUrlWithToken(imageUrl);
 }
 
