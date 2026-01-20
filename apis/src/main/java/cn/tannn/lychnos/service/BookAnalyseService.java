@@ -5,6 +5,7 @@ import cn.tannn.lychnos.ai.service.AIService;
 import cn.tannn.lychnos.common.constant.BookSourceType;
 import cn.tannn.lychnos.controller.vo.BookExtractVO;
 import cn.tannn.lychnos.dao.BookAnalyseDao;
+import cn.tannn.lychnos.dao.UserInterestDao;
 import cn.tannn.lychnos.entity.BookAnalyse;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONArray;
@@ -30,16 +31,18 @@ public class BookAnalyseService extends J2ServiceImpl<BookAnalyseDao, BookAnalys
 
     private final AIService aiService;
     private final ImageStorageService imageStorageService;
+    private final UserInterestDao userInterestDao;
 
-    public BookAnalyseService(AIService aiService, ImageStorageService imageStorageService) {
+    public BookAnalyseService(AIService aiService, ImageStorageService imageStorageService, UserInterestDao userInterestDao) {
         super(BookAnalyse.class);
         this.aiService = aiService;
         this.imageStorageService = imageStorageService;
+        this.userInterestDao = userInterestDao;
     }
 
     /**
      * 从用户输入中提取书籍信息（书名和作者）
-     * 优先检查数据库，如果已分析过则直接返回
+     * 优先检查数据库和用户反馈记录
      * @param userInput 用户输入的书籍信息
      * @param userId 用户ID
      * @return 书籍信息列表（书名+作者）
@@ -56,32 +59,43 @@ public class BookAnalyseService extends J2ServiceImpl<BookAnalyseDao, BookAnalys
             BookAnalyse found = existingBook.get();
             log.info("在数据库中找到已分析的书籍: {}", found.getTitle());
 
-            // 创建结果列表，第一本是数据库中找到的
-            List<BookExtractVO> result = new ArrayList<>();
-            result.add(new BookExtractVO(
-                found.getTitle(),
-                found.getAuthor(),
-                true,
-                BookSourceType.ALREADY_ANALYZED
-            ));
+            // 2. 检查当前用户是否已经对这本书进行过反馈
+            var userInterest = userInterestDao.findByUserIdAndBookTitle(userId, found.getTitle());
 
-            // 仍然调用AI获取相似推荐（但修改提示词，告诉AI这本书已找到）
-            String prompt = buildExtractPromptWithFound(userInput, found.getTitle(), found.getAuthor());
-            String aiResponse = aiService.generateText(userId, prompt);
-            List<BookExtractVO> aiBooks = parseExtractResponse(aiResponse);
+            if (userInterest.isPresent()) {
+                // 用户已经反馈过这本书，标记为 ALREADY_ANALYZED
+                log.info("用户已经对书籍进行过反馈: {}", found.getTitle());
 
-            // 将AI推荐的书籍添加到结果中（排除已找到的书籍）
-            for (BookExtractVO book : aiBooks) {
-                if (!book.getTitle().equals(found.getTitle())) {
-                    result.add(book);
+                // 创建结果列表，第一本是用户已反馈的书籍
+                List<BookExtractVO> result = new ArrayList<>();
+                result.add(new BookExtractVO(
+                    found.getTitle(),
+                    found.getAuthor(),
+                    true,
+                    BookSourceType.ALREADY_ANALYZED
+                ));
+
+                // 仍然调用AI获取相似推荐
+                String prompt = buildExtractPromptWithFound(userInput, found.getTitle(), found.getAuthor());
+                String aiResponse = aiService.generateText(userId, prompt);
+                List<BookExtractVO> aiBooks = parseExtractResponse(aiResponse);
+
+                // 将AI推荐的书籍添加到结果中（排除已找到的书籍）
+                for (BookExtractVO book : aiBooks) {
+                    if (!book.getTitle().equals(found.getTitle())) {
+                        result.add(book);
+                    }
                 }
-            }
 
-            log.info("返回{}本书籍（1本已分析 + {}本推荐）", result.size(), result.size() - 1);
-            return result;
+                log.info("返回{}本书籍（1本已反馈 + {}本推荐）", result.size(), result.size() - 1);
+                return result;
+            } else {
+                // 书籍已分析但用户未反馈，走正常流程（不标记为 ALREADY_ANALYZED）
+                log.info("书籍已分析但用户未反馈，走正常流程: {}", found.getTitle());
+            }
         }
 
-        // 2. 数据库中未找到，使用正常的AI提取流程
+        // 3. 数据库中未找到或用户未反馈，使用正常的AI提取流程
         String prompt = buildExtractPrompt(userInput);
         String aiResponse = aiService.generateText(userId, prompt);
 
