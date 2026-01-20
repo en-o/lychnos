@@ -159,7 +159,7 @@ public class BookController {
         Long userId = UserUtil.userId2(request);
 
         // 检查是否已分析过，且图片是否完整
-        var existingInterest = userInterestService.checkAnalyzed(userId, bookTitle);
+        var existingInterest = userInterestService.checkAnalyzed(userId, bookTitle.trim());
         if (existingInterest.isPresent()) {
             // 查询书籍分析记录，检查图片是否存在
             var bookAnalyse = bookAnalyseService.findById(existingInterest.get().getBookAnalyseId());
