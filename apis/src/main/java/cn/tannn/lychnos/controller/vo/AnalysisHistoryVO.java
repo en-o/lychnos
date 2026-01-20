@@ -27,11 +27,11 @@ public class AnalysisHistoryVO {
     @Schema(description = "书名")
     private String title;
 
+    @Schema(description = "作者")
+    private String author;
+
     @Schema(description = "是否感兴趣")
     private Boolean interested;
-
-    @Schema(description = "书籍分析数据")
-    private BookAnalyse analysisData;
 
     @Schema(description = "创建时间")
     private String createTime;
