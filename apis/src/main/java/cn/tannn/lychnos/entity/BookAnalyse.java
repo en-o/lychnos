@@ -47,6 +47,14 @@ public class BookAnalyse extends JpaCommonBean<BookAnalyse> {
     private String title;
 
     /**
+     * 作者
+     */
+    @Column(columnDefinition = " varchar(200) ")
+    @Comment("作者")
+    @Schema(description = "作者")
+    private String author;
+
+    /**
      * 类型/流派
      */
     @Column(columnDefinition = " varchar(200) ")
