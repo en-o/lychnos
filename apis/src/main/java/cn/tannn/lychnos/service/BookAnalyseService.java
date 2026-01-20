@@ -566,10 +566,12 @@ public class BookAnalyseService extends J2ServiceImpl<BookAnalyseDao, BookAnalys
      */
     private String getUserName(Long userId) {
         try {
-            var request = ((ServletRequestAttributes)
-                    RequestContextHolder.getRequestAttributes()).getRequest();
+            var attributes = RequestContextHolder.getRequestAttributes();
+            if (attributes == null) {
+                return null;
+            }
+            var request = ((ServletRequestAttributes) attributes).getRequest();
             var jwtInfo = UserUtil.getLoginJwtExtendInfoExpires(request);
-            // 优先使用userName，如果没有则使用loginName
             String userName = jwtInfo.getUserName();
             return userName != null ? userName : jwtInfo.getLoginName();
         } catch (Exception e) {
