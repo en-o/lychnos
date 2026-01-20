@@ -75,27 +75,51 @@ public class BookAnalyseService extends J2ServiceImpl<BookAnalyseDao, BookAnalys
                     BookSourceType.ALREADY_ANALYZED
                 ));
 
-                // 仍然调用AI获取相似推荐
-                String prompt = buildExtractPromptWithFound(userInput, found.getTitle(), found.getAuthor());
-                String aiResponse = aiService.generateText(userId, prompt);
-                List<BookExtractVO> aiBooks = parseExtractResponse(aiResponse);
+                // 尝试调用AI获取相似推荐
+                try {
+                    String prompt = buildExtractPromptWithFound(userInput, found.getTitle(), found.getAuthor());
+                    String aiResponse = aiService.generateText(userId, prompt);
+                    List<BookExtractVO> aiBooks = parseExtractResponse(aiResponse);
 
-                // 将AI推荐的书籍添加到结果中（排除已找到的书籍）
-                for (BookExtractVO book : aiBooks) {
-                    if (!book.getTitle().equals(found.getTitle())) {
-                        result.add(book);
+                    // 将AI推荐的书籍添加到结果中（排除已找到的书籍）
+                    for (BookExtractVO book : aiBooks) {
+                        if (!book.getTitle().equals(found.getTitle())) {
+                            result.add(book);
+                        }
                     }
+
+                    log.info("返回{}本书籍（1本已反馈 + {}本推荐）", result.size(), result.size() - 1);
+                } catch (Exception e) {
+                    log.warn("AI推荐失败，仅返回数据库中的书籍，书名: {}, 错误: {}", found.getTitle(), e.getMessage());
                 }
 
-                log.info("返回{}本书籍（1本已反馈 + {}本推荐）", result.size(), result.size() - 1);
+                // 无论AI是否成功，都返回至少包含数据库书籍的结果
                 return result;
             } else {
-                // 书籍已分析但用户未反馈，走正常流程（不标记为 ALREADY_ANALYZED）
-                log.info("书籍已分析但用户未反馈，走正常流程: {}", found.getTitle());
+                // 书籍已分析但用户未反馈，尝试使用AI获取推荐，失败则返回数据库书籍
+                log.info("书籍已分析但用户未反馈，尝试AI提取: {}", found.getTitle());
+
+                try {
+                    String prompt = buildExtractPrompt(userInput);
+                    String aiResponse = aiService.generateText(userId, prompt);
+                    return parseExtractResponse(aiResponse);
+                } catch (Exception e) {
+                    log.warn("AI提取失败，返回数据库中的书籍，书名: {}, 错误: {}", found.getTitle(), e.getMessage());
+
+                    // AI失败，返回数据库中的书籍
+                    List<BookExtractVO> fallbackResult = new ArrayList<>();
+                    fallbackResult.add(new BookExtractVO(
+                        found.getTitle(),
+                        found.getAuthor(),
+                        false,
+                        BookSourceType.USER_INPUT
+                    ));
+                    return fallbackResult;
+                }
             }
         }
 
-        // 3. 数据库中未找到或用户未反馈，使用正常的AI提取流程
+        // 3. 数据库中未找到，使用正常的AI提取流程（这里失败就真的失败了，因为没有备选数据）
         String prompt = buildExtractPrompt(userInput);
         String aiResponse = aiService.generateText(userId, prompt);
 

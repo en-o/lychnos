@@ -70,11 +70,10 @@ public class BookController {
     }
 
 
-
     @Operation(summary = "查询书籍分析结果", description = "查询书籍分析结果，已登录用户会检查是否已反馈，未登录用户只能查看推荐书籍")
     @ApiMapping(checkToken = false, value = "query/{bookTitle}", method = RequestMethod.GET)
     public ResultVO<BookAnalyse> queryBookAnalysis(@PathVariable("bookTitle") String bookTitle,
-                                                    HttpServletRequest request) {
+                                                   HttpServletRequest request) {
         Long userId = null;
         try {
             userId = UserUtil.userId2(request);
@@ -83,9 +82,11 @@ public class BookController {
             log.debug("获取用户ID失败，可能是未登录用户: {}", e.getMessage());
         }
 
+        bookTitle = bookTitle.trim();
+
         if (userId != null) {
             // 已登录用户：检查是否已分析过，且图片是否完整
-            var existingInterest = userInterestService.checkAnalyzed(userId, bookTitle.trim());
+            var existingInterest = userInterestService.checkAnalyzed(userId, bookTitle);
             if (existingInterest.isPresent()) {
                 // 查询书籍分析记录，检查图片是否存在
                 var bookAnalyse = bookAnalyseService.findById(existingInterest.get().getBookAnalyseId());
@@ -153,8 +154,18 @@ public class BookController {
     @Operation(summary = "提取书籍信息", description = "从用户输入中提取书名和作者信息")
     @PostMapping(value = "extract")
     public ResultVO<List<BookExtractVO>> extractBooks(@RequestBody BookExtractDTO dto,
-                                                       HttpServletRequest request) {
-        Long userId = UserUtil.userId2(request);
+                                                      HttpServletRequest request) {
+        Long userId = null;
+        try {
+            userId = UserUtil.userId2(request);
+        } catch (Exception e) {
+            // Token 不存在或无效
+            log.debug("获取用户ID失败，可能是未登录用户: {}", e.getMessage());
+            throw new BusinessException(
+                    BusinessErrorCode.PARAM_ERROR.getCode(),
+                    "需要登录才能使用书籍提取功能"
+            );
+        }
 
         if (dto.getInput() == null || dto.getInput().trim().isEmpty()) {
             throw new BusinessException(
@@ -182,7 +193,6 @@ public class BookController {
         log.info("提取到{}本书籍信息", books.size());
         return ResultVO.success(books);
     }
-
 
 
     /**
@@ -222,7 +232,7 @@ public class BookController {
     /**
      * 验证书名是否在推荐列表中
      *
-     * @param bookTitle 书籍标题
+     * @param bookTitle           书籍标题
      * @param recommendBookTitles 推荐书籍列表
      * @throws BusinessException 如果书籍不在推荐列表中
      */
