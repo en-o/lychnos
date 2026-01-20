@@ -2,10 +2,10 @@ package cn.tannn.lychnos.service;
 
 import cn.tannn.lychnos.common.constant.ModelType;
 import cn.tannn.lychnos.common.constant.UsageType;
+import cn.tannn.lychnos.common.pojo.UserRequestInfo;
 import cn.tannn.lychnos.dao.UserAnalysisLogDao;
 import cn.tannn.lychnos.entity.AIModel;
 import cn.tannn.lychnos.entity.UserAnalysisLog;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
@@ -29,13 +29,12 @@ public class UserAnalysisLogService {
      * 保存书籍提取日志
      */
     @Async
-    public void saveExtractLog(Long userId, String userName, String callIp,
-                               AIModel model, String bookTitle, Long bookAnalyseId,
-                               boolean success, String errorMessage) {
+    public void saveExtractLog(Long userId, UserRequestInfo userInfo, AIModel model,
+                               String bookTitle, Long bookAnalyseId, boolean success, String errorMessage) {
         UserAnalysisLog log = new UserAnalysisLog();
         log.setUserId(userId);
-        log.setUserName(userName);
-        log.setCallIp(callIp);
+        log.setUserName(userInfo != null ? userInfo.getUsername() : null);
+        log.setCallIp(userInfo != null ? userInfo.getIp() : null);
         log.setUsageType(UsageType.BOOK_EXTRACT);
         log.setBookTitle(bookTitle);
         log.setBookAnalyseId(bookAnalyseId);
@@ -58,13 +57,12 @@ public class UserAnalysisLogService {
      * 保存书籍解析日志
      */
     @Async
-    public void saveParseLog(Long userId, String userName, String callIp,
-                             AIModel model, String bookTitle, Long bookAnalyseId,
-                             boolean success, String errorMessage) {
+    public void saveParseLog(Long userId, UserRequestInfo userInfo, AIModel model,
+                             String bookTitle, Long bookAnalyseId, boolean success, String errorMessage) {
         UserAnalysisLog log = new UserAnalysisLog();
         log.setUserId(userId);
-        log.setUserName(userName);
-        log.setCallIp(callIp);
+        log.setUserName(userInfo != null ? userInfo.getUsername() : null);
+        log.setCallIp(userInfo != null ? userInfo.getIp() : null);
         log.setUsageType(UsageType.BOOK_PARSE);
         log.setBookTitle(bookTitle);
         log.setBookAnalyseId(bookAnalyseId);
@@ -87,13 +85,12 @@ public class UserAnalysisLogService {
      * 保存书籍生图日志
      */
     @Async
-    public void saveImageLog(Long userId, String userName, String callIp,
-                             AIModel model, String bookTitle, Long bookAnalyseId,
-                             boolean success, String errorMessage) {
+    public void saveImageLog(Long userId, UserRequestInfo userInfo, AIModel model,
+                             String bookTitle, Long bookAnalyseId, boolean success, String errorMessage) {
         UserAnalysisLog log = new UserAnalysisLog();
         log.setUserId(userId);
-        log.setUserName(userName);
-        log.setCallIp(callIp);
+        log.setUserName(userInfo != null ? userInfo.getUsername() : null);
+        log.setCallIp(userInfo != null ? userInfo.getIp() : null);
         log.setUsageType(UsageType.BOOK_IMAGE);
         log.setBookTitle(bookTitle);
         log.setBookAnalyseId(bookAnalyseId);
@@ -116,12 +113,12 @@ public class UserAnalysisLogService {
      * 保存使用已有数据的日志（模型字段为空）
      */
     @Async
-    public void saveUseExistingDataLog(Long userId, String userName, String callIp,
+    public void saveUseExistingDataLog(Long userId, UserRequestInfo userInfo,
                                        String bookTitle, Long bookAnalyseId) {
         UserAnalysisLog log = new UserAnalysisLog();
         log.setUserId(userId);
-        log.setUserName(userName);
-        log.setCallIp(callIp);
+        log.setUserName(userInfo != null ? userInfo.getUsername() : null);
+        log.setCallIp(userInfo != null ? userInfo.getIp() : null);
         log.setUsageType(UsageType.BOOK_PARSE);
         log.setBookTitle(bookTitle);
         log.setBookAnalyseId(bookAnalyseId);
@@ -129,22 +126,5 @@ public class UserAnalysisLogService {
         log.setUseExistingData(true);
 
         userAnalysisLogDao.save(log);
-    }
-
-    /**
-     * 从请求中获取真实IP
-     */
-    public static String getRealIp(HttpServletRequest request) {
-        String ip = request.getHeader("X-Forwarded-For");
-        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
-            ip = request.getHeader("X-Real-IP");
-        }
-        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
-            ip = request.getRemoteAddr();
-        }
-        if (ip != null && ip.contains(",")) {
-            ip = ip.split(",")[0].trim();
-        }
-        return ip;
     }
 }
