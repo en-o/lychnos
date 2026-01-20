@@ -75,7 +75,13 @@ public class BookController {
     @ApiMapping(checkToken = false, value = "query/{bookTitle}", method = RequestMethod.GET)
     public ResultVO<BookAnalyse> queryBookAnalysis(@PathVariable("bookTitle") String bookTitle,
                                                     HttpServletRequest request) {
-        Long userId = UserUtil.userId2(request);
+        Long userId = null;
+        try {
+            userId = UserUtil.userId2(request);
+        } catch (Exception e) {
+            // Token 不存在或无效，userId 保持为 null
+            log.debug("获取用户ID失败，可能是未登录用户: {}", e.getMessage());
+        }
 
         if (userId != null) {
             // 已登录用户：检查是否已分析过，且图片是否完整
