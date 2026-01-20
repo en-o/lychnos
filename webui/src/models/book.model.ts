@@ -176,10 +176,14 @@ export class BookExtract {
   title: string;
   author?: string;
   analyzed: boolean;
+  sourceType?: string; // USER_INPUT, SIMILAR, NOT_FOUND_RECOMMEND
+  sourceLabel?: string; // 来源说明
 
   constructor(data: Partial<BookExtract> = {}) {
     this.title = data.title || '';
     this.author = data.author;
     this.analyzed = data.analyzed ?? false;
+    this.sourceType = data.sourceType || 'USER_INPUT';
+    this.sourceLabel = data.sourceLabel;
   }
 }

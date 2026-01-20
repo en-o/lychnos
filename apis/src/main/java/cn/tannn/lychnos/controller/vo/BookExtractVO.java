@@ -37,6 +37,21 @@ public class BookExtractVO {
     @Schema(description = "是否已分析过")
     private Boolean analyzed;
 
+    /**
+     * 书籍来源类型
+     * USER_INPUT: 用户输入的书籍（AI识别出的）
+     * SIMILAR: 相似推荐书籍
+     * NOT_FOUND_RECOMMEND: 未找到时的推荐书籍
+     */
+    @Schema(description = "书籍来源类型：USER_INPUT-用户输入, SIMILAR-相似推荐, NOT_FOUND_RECOMMEND-未找到推荐")
+    private String sourceType;
+
+    /**
+     * 来源说明（用于前端显示提示信息）
+     */
+    @Schema(description = "来源说明")
+    private String sourceLabel;
+
     public BookExtractVO() {
     }
 
@@ -44,11 +59,21 @@ public class BookExtractVO {
         this.title = title;
         this.author = author;
         this.analyzed = false;
+        this.sourceType = "USER_INPUT";
     }
 
     public BookExtractVO(String title, String author, Boolean analyzed) {
         this.title = title;
         this.author = author;
         this.analyzed = analyzed;
+        this.sourceType = "USER_INPUT";
+    }
+
+    public BookExtractVO(String title, String author, Boolean analyzed, String sourceType, String sourceLabel) {
+        this.title = title;
+        this.author = author;
+        this.analyzed = analyzed;
+        this.sourceType = sourceType;
+        this.sourceLabel = sourceLabel;
     }
 }

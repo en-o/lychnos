@@ -136,40 +136,78 @@ public class BookAnalyseService extends J2ServiceImpl<BookAnalyseDao, BookAnalys
     }
 
     /**
-     * 构建书籍提取提示词
+     * 构建书籍提取提示词-包含相似书籍推荐
      */
     private String buildExtractPrompt(String userInput) {
         return String.format("""
-                你是一位专业的图书信息识别专家。请从用户输入中提取书籍信息。
+                你是一位专业的图书信息识别专家和推荐专家。请从用户输入中提取书籍信息，并推荐相似书籍。
 
                 用户输入：%s
 
-                请识别并提取书籍的书名和作者信息。如果用户输入包含多本书，请全部提取。
+                任务要求：
+                1. 识别用户输入的书籍（如果能识别到）
+                2. 推荐与用户输入相关的4-5本真实存在的书籍（类型相似、主题相关、作者相关等）
+                3. 如果用户输入无法识别为书籍，则根据输入内容推荐5本相关的真实书籍
 
-                返回JSON格式（数组）：
+                返回JSON格式（数组，总共返回5本书）：
                 [
                   {
                     "title": "书名",
-                    "author": "作者"
+                    "author": "作者",
+                    "sourceType": "类型标识",
+                    "sourceLabel": "来源说明"
                   }
                 ]
 
-                识别规则：
-                1. 如果用户明确提供了书名和作者，直接提取
-                2. 如果只提供了书名，尝试根据你的知识库补充作者信息
-                3. 如果无法确定作者，author字段可以为空字符串
-                4. 书名必须准确，不要修改或简化
-                5. 如果输入不是书籍信息，返回空数组 []
+                sourceType 类型说明：
+                - "USER_INPUT": 用户输入的书籍（AI识别出的）
+                - "SIMILAR": 相似推荐书籍（与用户输入相关）
+                - "NOT_FOUND_RECOMMEND": 未找到时的推荐书籍（用户输入无法识别为书籍时）
 
-                示例：
-                - 输入："三体 刘慈欣" → [{"title": "三体", "author": "刘慈欣"}]
-                - 输入："三体" → [{"title": "三体", "author": "刘慈欣"}]
-                - 输入："活着，解忧杂货店" → [{"title": "活着", "author": "余华"}, {"title": "解忧杂货店", "author": "东野圭吾"}]
+                sourceLabel 说明示例：
+                - "您输入的书籍"
+                - "相似推荐：同作者作品"
+                - "相似推荐：同类型书籍"
+                - "相似推荐：相关主题"
+                - "您可能在找这本书"
+
+                识别和推荐规则：
+                1. 如果用户明确提供了书名和作者，将其作为第一本书（sourceType="USER_INPUT"）
+                2. 如果只提供了书名，尝试根据你的知识库补充作者信息，作为第一本书（sourceType="USER_INPUT"）
+                3. 如果用户输入无法识别为书籍，则全部返回推荐书籍（sourceType="NOT_FOUND_RECOMMEND"）
+                4. 在识别出用户输入的书籍后，推荐4本相似书籍（sourceType="SIMILAR"）
+                5. 推荐的书籍必须是真实存在的，不能编造虚假书籍
+                6. 推荐书籍应该与用户输入高度相关（同作者、同类型、同主题等）
+                7. 如果用户输入包含多本书，只提取第一本作为USER_INPUT，其余作为SIMILAR推荐
+
+                示例1（能识别到书籍）：
+                输入："三体"
+                返回：
+                [
+                  {"title": "三体", "author": "刘慈欣", "sourceType": "USER_INPUT", "sourceLabel": "您输入的书籍"},
+                  {"title": "三体Ⅱ·黑暗森林", "author": "刘慈欣", "sourceType": "SIMILAR", "sourceLabel": "相似推荐：系列作品"},
+                  {"title": "三体Ⅲ·死神永生", "author": "刘慈欣", "sourceType": "SIMILAR", "sourceLabel": "相似推荐：系列作品"},
+                  {"title": "球状闪电", "author": "刘慈欣", "sourceType": "SIMILAR", "sourceLabel": "相似推荐：同作者作品"},
+                  {"title": "流浪地球", "author": "刘慈欣", "sourceType": "SIMILAR", "sourceLabel": "相似推荐：同作者作品"}
+                ]
+
+                示例2（无法识别为书籍）：
+                输入："科幻小说"
+                返回：
+                [
+                  {"title": "三体", "author": "刘慈欣", "sourceType": "NOT_FOUND_RECOMMEND", "sourceLabel": "您可能在找这本书"},
+                  {"title": "银河帝国：基地", "author": "艾萨克·阿西莫夫", "sourceType": "NOT_FOUND_RECOMMEND", "sourceLabel": "您可能在找这本书"},
+                  {"title": "沙丘", "author": "弗兰克·赫伯特", "sourceType": "NOT_FOUND_RECOMMEND", "sourceLabel": "您可能在找这本书"},
+                  {"title": "神经漫游者", "author": "威廉·吉布森", "sourceType": "NOT_FOUND_RECOMMEND", "sourceLabel": "您可能在找这本书"},
+                  {"title": "安德的游戏", "author": "奥森·斯科特·卡德", "sourceType": "NOT_FOUND_RECOMMEND", "sourceLabel": "您可能在找这本书"}
+                ]
 
                 注意事项：
                 - 只返回JSON格式，不要包含任何其他文字
                 - 确保JSON格式正确，可以被解析
-                - 如果无法识别任何书籍信息，返回空数组 []
+                - 总是返回5本书（1本用户输入+4本推荐，或5本推荐）
+                - 所有推荐的书籍必须是真实存在的，不能编造
+                - sourceLabel要简洁明了，帮助用户理解书籍来源
                 """, userInput);
     }
 
@@ -305,7 +343,7 @@ public class BookAnalyseService extends J2ServiceImpl<BookAnalyseDao, BookAnalys
     }
 
     /**
-     * 解析书籍提取响应
+     * 解析书籍提取响应（增强版：包含来源标注）
      */
     private List<BookExtractVO> parseExtractResponse(String aiResponse) {
         try {
@@ -329,13 +367,20 @@ public class BookAnalyseService extends J2ServiceImpl<BookAnalyseDao, BookAnalys
                 JSONObject json = jsonArray.getJSONObject(i);
                 String title = json.getString("title");
                 String author = json.getString("author");
+                String sourceType = json.getString("sourceType");
+                String sourceLabel = json.getString("sourceLabel");
 
                 if (title != null && !title.isEmpty()) {
-                    result.add(new BookExtractVO(title, author));
+                    // 如果AI没有返回sourceType，默认为USER_INPUT
+                    if (sourceType == null || sourceType.isEmpty()) {
+                        sourceType = "USER_INPUT";
+                    }
+
+                    result.add(new BookExtractVO(title, author, false, sourceType, sourceLabel));
                 }
             }
 
-            log.info("成功提取{}本书籍信息", result.size());
+            log.info("成功提取{}本书籍信息（包含推荐）", result.size());
             return result;
         } catch (Exception e) {
             log.error("解析书籍提取响应失败，响应内容: {}", aiResponse, e);

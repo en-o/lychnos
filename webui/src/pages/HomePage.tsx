@@ -627,69 +627,6 @@ const HomePage: React.FC = () => {
             </div>
           )}
 
-          {/* 书籍列表选择 */}
-          {extractedBooks.length > 0 && !result && (
-            <div className="animate-fadeIn">
-              <div className="mb-6">
-                <button
-                  onClick={() => {
-                    setExtractedBooks([]);
-                    setBookTitle('');
-                  }}
-                  className="text-sm text-gray-600 hover:text-gray-900 flex items-center gap-1"
-                >
-                  ← 返回搜索
-                </button>
-              </div>
-
-              <div className="bg-white border border-gray-200 rounded-xl p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                  识别到 {extractedBooks.length} 本书籍，请选择要分析的书籍
-                </h3>
-
-                <div className="space-y-3">
-                  {extractedBooks.map((book, index) => (
-                    <button
-                      key={index}
-                      onClick={() => handleBookSelect(book)}
-                      disabled={loading}
-                      className="w-full p-4 border border-gray-200 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition text-left disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <h4 className="font-medium text-gray-900 mb-1">
-                            {book.title}
-                          </h4>
-                          {book.author && (
-                            <p className="text-sm text-gray-600">
-                              作者：{book.author}
-                            </p>
-                          )}
-                          {book.analyzed && (
-                            <span className="inline-block mt-2 px-2 py-1 text-xs bg-green-100 text-green-700 rounded">
-                              已分析
-                            </span>
-                          )}
-                        </div>
-                        <div className="ml-4">
-                          <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                          </svg>
-                        </div>
-                      </div>
-                    </button>
-                  ))}
-                </div>
-
-                {loading && (
-                  <div className="mt-4 flex items-center justify-center gap-2 text-sm text-gray-600">
-                    <div className="w-4 h-4 border-2 border-gray-300 border-t-blue-600 rounded-full animate-spin" />
-                    <span>正在分析...</span>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
 
           {/* 结果展示 */}
           {result && (
@@ -1144,6 +1081,91 @@ const HomePage: React.FC = () => {
                 })}
               </div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* 书籍选择弹窗 */}
+      {extractedBooks.length > 0 && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[10000] p-4">
+          <div className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 rounded-t-xl">
+              <div className="flex items-center justify-between">
+                <h3 className="text-xl font-semibold text-gray-900">
+                  识别到 {extractedBooks.length} 本书籍
+                </h3>
+                <button
+                  onClick={() => {
+                    setExtractedBooks([]);
+                    setBookTitle('');
+                  }}
+                  className="text-gray-400 hover:text-gray-600 transition"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+              <p className="text-sm text-gray-600 mt-2">
+                请选择要分析的书籍
+              </p>
+            </div>
+
+            <div className="p-6 space-y-3">
+              {extractedBooks.map((book, index) => (
+                <button
+                  key={index}
+                  onClick={() => handleBookSelect(book)}
+                  disabled={loading}
+                  className="w-full p-4 border-2 border-gray-200 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition text-left disabled:opacity-50 disabled:cursor-not-allowed group"
+                >
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <h4 className="font-medium text-gray-900 group-hover:text-blue-700">
+                          {book.title}
+                        </h4>
+                        {book.sourceLabel && (
+                          <span className={`inline-block px-2 py-0.5 text-xs rounded ${
+                            book.sourceType === 'USER_INPUT'
+                              ? 'bg-blue-100 text-blue-700'
+                              : book.sourceType === 'SIMILAR'
+                              ? 'bg-purple-100 text-purple-700'
+                              : 'bg-amber-100 text-amber-700'
+                          }`}>
+                            {book.sourceLabel}
+                          </span>
+                        )}
+                      </div>
+                      {book.author && (
+                        <p className="text-sm text-gray-600 mb-2">
+                          作者：{book.author}
+                        </p>
+                      )}
+                      {book.analyzed && (
+                        <span className="inline-block px-2 py-1 text-xs bg-green-100 text-green-700 rounded">
+                          已分析
+                        </span>
+                      )}
+                    </div>
+                    <div className="ml-4 flex-shrink-0">
+                      <svg className="w-5 h-5 text-gray-400 group-hover:text-blue-500 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </div>
+                  </div>
+                </button>
+              ))}
+            </div>
+
+            {loading && (
+              <div className="sticky bottom-0 bg-white border-t border-gray-200 px-6 py-4 rounded-b-xl">
+                <div className="flex items-center justify-center gap-2 text-sm text-gray-600">
+                  <div className="w-4 h-4 border-2 border-gray-300 border-t-blue-600 rounded-full animate-spin" />
+                  <span>正在处理...</span>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}
