@@ -1,5 +1,6 @@
 package cn.tannn.lychnos.ai.factory;
 
+import cn.tannn.lychnos.ai.config.CustomRetryConfig;
 import cn.tannn.lychnos.ai.config.DynamicAIModelConfig;
 import cn.tannn.lychnos.ai.modelscope.ModelScopeImageModel;
 import lombok.extern.slf4j.Slf4j;
@@ -10,7 +11,7 @@ import org.springframework.ai.openai.OpenAiImageModel;
 import org.springframework.ai.openai.OpenAiImageOptions;
 import org.springframework.ai.openai.api.OpenAiApi;
 import org.springframework.ai.openai.api.OpenAiImageApi;
-import org.springframework.ai.retry.RetryUtils;
+import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
@@ -49,6 +50,9 @@ public class DynamicAIClientFactory {
         // 创建 OpenAI API 客户端
         OpenAiApi openAiApi = createOpenAiApi(config);
 
+        // 创建自定义重试模板
+        RetryTemplate retryTemplate = CustomRetryConfig.createRetryTemplate();
+
         // 创建 OpenAI 聊天模型
         return OpenAiChatModel.builder()
                 .openAiApi(openAiApi)
@@ -57,6 +61,7 @@ public class DynamicAIClientFactory {
                         .temperature(config.getTemperature())
                         .maxTokens(config.getMaxTokens())
                         .build())
+                .retryTemplate(retryTemplate)
                 .build();
     }
 
@@ -106,8 +111,11 @@ public class DynamicAIClientFactory {
                 .height(1080)
                 .build();
 
+        // 创建自定义重试模板
+        RetryTemplate retryTemplate = CustomRetryConfig.createRetryTemplate();
+
         // 创建 OpenAI 图片模型（在构造函数中传入选项）
-        return new OpenAiImageModel(openAiImageApi, imageOptions, RetryUtils.DEFAULT_RETRY_TEMPLATE);
+        return new OpenAiImageModel(openAiImageApi, imageOptions, retryTemplate);
     }
 
     /**
