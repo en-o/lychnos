@@ -4,6 +4,8 @@ import cn.tannn.lychnos.common.constant.ModelType;
 import cn.tannn.lychnos.common.constant.ShareType;
 import cn.tannn.lychnos.common.constant.UsageType;
 import cn.tannn.lychnos.common.pojo.JpaCommonBean;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -42,6 +44,7 @@ public class UserAnalysisLog extends JpaCommonBean<UserAnalysisLog> {
     @Column(columnDefinition = "bigint not null")
     @Comment("用户ID")
     @Schema(description = "用户ID")
+    @JsonSerialize(using = ToStringSerializer.class)
     private Long userId;
 
     @Column(columnDefinition = "varchar(100)")
@@ -57,6 +60,7 @@ public class UserAnalysisLog extends JpaCommonBean<UserAnalysisLog> {
     @Column(columnDefinition = "bigint")
     @Comment("模型ID")
     @Schema(description = "模型ID")
+    @JsonSerialize(using = ToStringSerializer.class)
     private Long modelId;
 
     @Column(columnDefinition = "varchar(200)")
