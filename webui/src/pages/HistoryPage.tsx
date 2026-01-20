@@ -360,11 +360,11 @@ const HistoryPage: React.FC = () => {
                 <div>
                   {!imageError[selectedItem.id] ? (
                     <img
-                      src={getImageUrl(selectedItem.analysisData.posterUrl)}
+                      src={getImageUrl(selectedItem.analysisData!.posterUrl)}
                       alt={selectedItem.title}
                       className="w-full h-48 object-fill rounded-lg cursor-pointer hover:opacity-90 transition"
                       onError={() => setImageError(prev => ({ ...prev, [selectedItem.id]: true }))}
-                      onClick={() => setPreviewImage(getImageUrl(selectedItem.analysisData.posterUrl))}
+                      onClick={() => setPreviewImage(getImageUrl(selectedItem.analysisData!.posterUrl))}
                     />
                   ) : (
                     <div className="w-full h-48 bg-gray-100 rounded-lg flex items-center justify-center">

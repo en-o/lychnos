@@ -115,6 +115,7 @@ export class AnalysisHistory {
   themes?: string[];
   interested: boolean;
   createTime: string;
+  analysisData?: BookAnalysis;
 
   constructor(data: Partial<AnalysisHistory> = {}) {
     this.id = data.id || '';
@@ -123,6 +124,7 @@ export class AnalysisHistory {
     this.themes = data.themes;
     this.interested = data.interested ?? false;
     this.createTime = data.createTime || new Date().toISOString();
+    this.analysisData = data.analysisData;
   }
 }
 

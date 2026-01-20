@@ -1065,11 +1065,11 @@ const HomePage: React.FC = () => {
                     <div>
                       {!imageError[selectedHistoryItem.id] ? (
                         <img
-                          src={getImageUrl(selectedHistoryItem.analysisData.posterUrl)}
+                          src={getImageUrl(selectedHistoryItem.analysisData!.posterUrl)}
                           alt={selectedHistoryItem.title}
                           className="w-full h-48 object-fill rounded-lg cursor-pointer hover:opacity-90 transition"
                           onError={() => setImageError(prev => ({ ...prev, [selectedHistoryItem.id]: true }))}
-                          onClick={() => setPreviewImage(getImageUrl(selectedHistoryItem.analysisData.posterUrl))}
+                          onClick={() => setPreviewImage(getImageUrl(selectedHistoryItem.analysisData!.posterUrl))}
                         />
                       ) : (
                         <div className="w-full h-48 bg-gray-100 rounded-lg flex items-center justify-center">
