@@ -2,7 +2,7 @@ chcp 65001 >nul
 @echo off
 REM ============================================
 REM lychnos Docker 镜像构建脚本
-REM 当前最新版本 0.0.2.2
+REM 当前最新版本 0.0.2.3
 REM 如果build有镜像拉取问题，使用下面的先拉一次试试
 REM docker pull node:20-alpine && docker pull eclipse-temurin:17-jre-alpine && docker pull maven:3.9-eclipse-temurin-17
 REM 确保 npm run build 和 mvn package 能够正确的执行（即项目能正确编译）
