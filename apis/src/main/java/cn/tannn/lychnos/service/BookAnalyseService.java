@@ -2,14 +2,18 @@ package cn.tannn.lychnos.service;
 
 import cn.tannn.jdevelops.jpa.service.J2ServiceImpl;
 import cn.tannn.lychnos.ai.service.AIService;
+import cn.tannn.lychnos.controller.vo.BookExtractVO;
 import cn.tannn.lychnos.dao.BookAnalyseDao;
 import cn.tannn.lychnos.entity.BookAnalyse;
 import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -33,12 +37,29 @@ public class BookAnalyseService extends J2ServiceImpl<BookAnalyseDao, BookAnalys
     }
 
     /**
-     * 根据书名分析书籍
+     * 从用户输入中提取书籍信息（书名和作者）
+     * @param userInput 用户输入的书籍信息
+     * @param userId 用户ID
+     * @return 书籍信息列表（书名+作者）
+     */
+    public List<BookExtractVO> extractBooks(String userInput, Long userId) {
+        log.info("开始从用户输入提取书籍信息，用户ID: {}, 输入: {}", userId, userInput);
+
+        String prompt = buildExtractPrompt(userInput);
+        String aiResponse = aiService.generateText(userId, prompt);
+
+        // 解析AI响应
+        return parseExtractResponse(aiResponse);
+    }
+
+    /**
+     * 根据书名和作者分析书籍
      * @param bookTitle 书名
+     * @param author 作者
      * @param userId 用户ID
      * @return 书籍分析
      */
-    public BookAnalyse analyse(String bookTitle, Long userId){
+    public BookAnalyse analyse(String bookTitle, String author, Long userId){
         // 先查询是否已经分析过
         Optional<BookAnalyse> existingAnalyse = getJpaBasicsDao().findByTitle(bookTitle);
         if (existingAnalyse.isPresent()) {
@@ -63,13 +84,13 @@ public class BookAnalyseService extends J2ServiceImpl<BookAnalyseDao, BookAnalys
         }
 
         // 使用AI进行分析
-        log.info("开始AI分析书籍，书名: {}, 用户ID: {}", bookTitle, userId);
+        log.info("开始AI分析书籍，书名: {}, 作者: {}, 用户ID: {}", bookTitle, author, userId);
 
-        String prompt = buildAnalysisPrompt(bookTitle);
+        String prompt = buildAnalysisPrompt(bookTitle, author);
         String aiResponse = aiService.generateText(userId, prompt);
 
         // 解析AI响应并保存
-        BookAnalyse bookAnalyse = parseAIResponse(bookTitle, aiResponse);
+        BookAnalyse bookAnalyse = parseAIResponse(bookTitle, author, aiResponse);
 
         // 生成书籍分析信息图
         log.info("开始生成书籍分析信息图，书名: {}", bookTitle);
@@ -115,11 +136,53 @@ public class BookAnalyseService extends J2ServiceImpl<BookAnalyseDao, BookAnalys
     }
 
     /**
+     * 构建书籍提取提示词
+     */
+    private String buildExtractPrompt(String userInput) {
+        return String.format("""
+                你是一位专业的图书信息识别专家。请从用户输入中提取书籍信息。
+
+                用户输入：%s
+
+                请识别并提取书籍的书名和作者信息。如果用户输入包含多本书，请全部提取。
+
+                返回JSON格式（数组）：
+                [
+                  {
+                    "title": "书名",
+                    "author": "作者"
+                  }
+                ]
+
+                识别规则：
+                1. 如果用户明确提供了书名和作者，直接提取
+                2. 如果只提供了书名，尝试根据你的知识库补充作者信息
+                3. 如果无法确定作者，author字段可以为空字符串
+                4. 书名必须准确，不要修改或简化
+                5. 如果输入不是书籍信息，返回空数组 []
+
+                示例：
+                - 输入："三体 刘慈欣" → [{"title": "三体", "author": "刘慈欣"}]
+                - 输入："三体" → [{"title": "三体", "author": "刘慈欣"}]
+                - 输入："活着，解忧杂货店" → [{"title": "活着", "author": "余华"}, {"title": "解忧杂货店", "author": "东野圭吾"}]
+
+                注意事项：
+                - 只返回JSON格式，不要包含任何其他文字
+                - 确保JSON格式正确，可以被解析
+                - 如果无法识别任何书籍信息，返回空数组 []
+                """, userInput);
+    }
+
+    /**
      * 构建分析提示词
      */
-    private String buildAnalysisPrompt(String bookTitle) {
+    private String buildAnalysisPrompt(String bookTitle, String author) {
+        String bookInfo = author != null && !author.trim().isEmpty()
+            ? String.format("《%s》（作者：%s）", bookTitle, author)
+            : String.format("《%s》", bookTitle);
+
         return String.format("""
-                你是一位资深的图书评论专家和文学研究者。请对书籍《%s》进行全面而精准的分析。
+                你是一位资深的图书评论专家和文学研究者。请对书籍%s进行全面而精准的分析。
 
                 重要说明：
                 1. 请基于你的知识库中关于这本书的信息进行分析
@@ -158,7 +221,7 @@ public class BookAnalyseService extends J2ServiceImpl<BookAnalyseDao, BookAnalys
                 - 严格控制每个字段的字数，避免超出限制
                 - themes和keyElements必须是字符串数组
                 - 确保内容准确、精炼、有价值
-                """, bookTitle);
+                """, bookInfo);
     }
 
     /**
@@ -242,9 +305,48 @@ public class BookAnalyseService extends J2ServiceImpl<BookAnalyseDao, BookAnalys
     }
 
     /**
+     * 解析书籍提取响应
+     */
+    private List<BookExtractVO> parseExtractResponse(String aiResponse) {
+        try {
+            // 移除可能的markdown代码块标记
+            String jsonStr = aiResponse.trim();
+            if (jsonStr.startsWith("```json")) {
+                jsonStr = jsonStr.substring(7);
+            }
+            if (jsonStr.startsWith("```")) {
+                jsonStr = jsonStr.substring(3);
+            }
+            if (jsonStr.endsWith("```")) {
+                jsonStr = jsonStr.substring(0, jsonStr.length() - 3);
+            }
+            jsonStr = jsonStr.trim();
+
+            JSONArray jsonArray = JSON.parseArray(jsonStr);
+            List<BookExtractVO> result = new ArrayList<>();
+
+            for (int i = 0; i < jsonArray.size(); i++) {
+                JSONObject json = jsonArray.getJSONObject(i);
+                String title = json.getString("title");
+                String author = json.getString("author");
+
+                if (title != null && !title.isEmpty()) {
+                    result.add(new BookExtractVO(title, author));
+                }
+            }
+
+            log.info("成功提取{}本书籍信息", result.size());
+            return result;
+        } catch (Exception e) {
+            log.error("解析书籍提取响应失败，响应内容: {}", aiResponse, e);
+            return new ArrayList<>();
+        }
+    }
+
+    /**
      * 解析AI响应
      */
-    private BookAnalyse parseAIResponse(String bookTitle, String aiResponse) {
+    private BookAnalyse parseAIResponse(String bookTitle, String author, String aiResponse) {
         try {
             // 移除可能的markdown代码块标记
             String jsonStr = aiResponse.trim();
@@ -263,6 +365,7 @@ public class BookAnalyseService extends J2ServiceImpl<BookAnalyseDao, BookAnalys
 
             BookAnalyse bookAnalyse = new BookAnalyse();
             bookAnalyse.setTitle(bookTitle);
+            bookAnalyse.setAuthor(author);
             bookAnalyse.setGenre(json.getString("genre"));
             bookAnalyse.setThemes(json.getJSONArray("themes"));
             bookAnalyse.setTone(json.getString("tone"));
@@ -276,6 +379,7 @@ public class BookAnalyseService extends J2ServiceImpl<BookAnalyseDao, BookAnalys
             // 返回一个包含原始响应的基础分析结果
             BookAnalyse fallbackAnalyse = new BookAnalyse();
             fallbackAnalyse.setTitle(bookTitle);
+            fallbackAnalyse.setAuthor(author);
             fallbackAnalyse.setRecommendation("AI分析结果解析失败，原始响应: " + aiResponse.substring(0, Math.min(500, aiResponse.length())));
             return fallbackAnalyse;
         }
