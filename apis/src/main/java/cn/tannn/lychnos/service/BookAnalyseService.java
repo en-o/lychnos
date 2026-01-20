@@ -32,12 +32,18 @@ public class BookAnalyseService extends J2ServiceImpl<BookAnalyseDao, BookAnalys
     private final AIService aiService;
     private final ImageStorageService imageStorageService;
     private final UserInterestDao userInterestDao;
+    private final UserAnalysisLogService userAnalysisLogService;
+    private final UserInfoService userInfoService;
 
-    public BookAnalyseService(AIService aiService, ImageStorageService imageStorageService, UserInterestDao userInterestDao) {
+    public BookAnalyseService(AIService aiService, ImageStorageService imageStorageService,
+                              UserInterestDao userInterestDao, UserAnalysisLogService userAnalysisLogService,
+                              UserInfoService userInfoService) {
         super(BookAnalyse.class);
         this.aiService = aiService;
         this.imageStorageService = imageStorageService;
         this.userInterestDao = userInterestDao;
+        this.userAnalysisLogService = userAnalysisLogService;
+        this.userInfoService = userInfoService;
     }
 
     /**
@@ -66,6 +72,9 @@ public class BookAnalyseService extends J2ServiceImpl<BookAnalyseDao, BookAnalys
                 // 用户已经反馈过这本书，标记为 ALREADY_ANALYZED
                 log.info("用户已经对书籍进行过反馈: {}", found.getTitle());
 
+                // 记录使用已有数据日志
+                userAnalysisLogService.saveUseExistingDataLog(userId, getUserName(userId), null, found.getTitle(), found.getId());
+
                 // 创建结果列表，第一本是用户已反馈的书籍
                 List<BookExtractVO> result = new ArrayList<>();
                 result.add(new BookExtractVO(
@@ -79,6 +88,10 @@ public class BookAnalyseService extends J2ServiceImpl<BookAnalyseDao, BookAnalys
                 try {
                     String prompt = buildExtractPromptWithFound(userInput, found.getTitle(), found.getAuthor());
                     String aiResponse = aiService.generateText(userId, prompt);
+
+                    // 记录AI提取日志（成功）
+                    userAnalysisLogService.saveParseLog(userId, getUserName(userId), null, null, userInput, null, true, null);
+
                     List<BookExtractVO> aiBooks = parseExtractResponse(aiResponse);
 
                     // 将AI推荐的书籍添加到结果中（排除已找到的书籍）
@@ -91,6 +104,8 @@ public class BookAnalyseService extends J2ServiceImpl<BookAnalyseDao, BookAnalys
                     log.info("返回{}本书籍（1本已反馈 + {}本推荐）", result.size(), result.size() - 1);
                 } catch (Exception e) {
                     log.warn("AI推荐失败，仅返回数据库中的书籍，书名: {}, 错误: {}", found.getTitle(), e.getMessage());
+                    // 记录AI提取日志（失败）
+                    userAnalysisLogService.saveParseLog(userId, getUserName(userId), null, null, userInput, null, false, e.getMessage());
                 }
 
                 // 无论AI是否成功，都返回至少包含数据库书籍的结果
@@ -102,9 +117,16 @@ public class BookAnalyseService extends J2ServiceImpl<BookAnalyseDao, BookAnalys
                 try {
                     String prompt = buildExtractPrompt(userInput);
                     String aiResponse = aiService.generateText(userId, prompt);
+
+                    // 记录AI提取日志（成功）
+                    userAnalysisLogService.saveParseLog(userId, getUserName(userId), null, null, userInput, null, true, null);
+
                     return parseExtractResponse(aiResponse);
                 } catch (Exception e) {
                     log.warn("AI提取失败，返回数据库中的书籍，书名: {}, 错误: {}", found.getTitle(), e.getMessage());
+
+                    // 记录AI提取日志（失败）
+                    userAnalysisLogService.saveParseLog(userId, getUserName(userId), null, null, userInput, null, false, e.getMessage());
 
                     // AI失败，返回数据库中的书籍
                     List<BookExtractVO> fallbackResult = new ArrayList<>();
@@ -120,11 +142,20 @@ public class BookAnalyseService extends J2ServiceImpl<BookAnalyseDao, BookAnalys
         }
 
         // 3. 数据库中未找到，使用正常的AI提取流程（这里失败就真的失败了，因为没有备选数据）
-        String prompt = buildExtractPrompt(userInput);
-        String aiResponse = aiService.generateText(userId, prompt);
+        try {
+            String prompt = buildExtractPrompt(userInput);
+            String aiResponse = aiService.generateText(userId, prompt);
 
-        // 解析AI响应
-        return parseExtractResponse(aiResponse);
+            // 记录AI提取日志（成功）
+            userAnalysisLogService.saveParseLog(userId, getUserName(userId), null, null, userInput, null, true, null);
+
+            // 解析AI响应
+            return parseExtractResponse(aiResponse);
+        } catch (Exception e) {
+            // 记录AI提取日志（失败）
+            userAnalysisLogService.saveParseLog(userId, getUserName(userId), null, null, userInput, null, false, e.getMessage());
+            throw e;
+        }
     }
 
     /**
@@ -143,6 +174,10 @@ public class BookAnalyseService extends J2ServiceImpl<BookAnalyseDao, BookAnalys
             // 如果已有图片，直接返回
             if (existing.getPosterUrl() != null && !existing.getPosterUrl().isEmpty()) {
                 log.info("书籍已分析过且有图片，延时1秒后返回，书名: {}", bookTitle);
+
+                // 记录使用已有数据日志
+                userAnalysisLogService.saveUseExistingDataLog(userId, getUserName(userId), null, bookTitle, existing.getId());
+
                 try {
                     Thread.sleep(1000); // 延时1秒，提供视觉差
                 } catch (InterruptedException e) {
@@ -161,20 +196,29 @@ public class BookAnalyseService extends J2ServiceImpl<BookAnalyseDao, BookAnalys
         // 使用AI进行分析
         log.info("开始AI分析书籍，书名: {}, 作者: {}, 用户ID: {}", bookTitle, author, userId);
 
-        String prompt = buildAnalysisPrompt(bookTitle, author);
-        String aiResponse = aiService.generateText(userId, prompt);
+        try {
+            String prompt = buildAnalysisPrompt(bookTitle, author);
+            String aiResponse = aiService.generateText(userId, prompt);
 
-        // 解析AI响应并保存
-        BookAnalyse bookAnalyse = parseAIResponse(bookTitle, author, aiResponse);
+            // 记录AI解析日志（成功）
+            userAnalysisLogService.saveParseLog(userId, getUserName(userId), null, null, bookTitle, null, true, null);
 
-        // 生成书籍分析信息图
-        log.info("开始生成书籍分析信息图，书名: {}", bookTitle);
-        generateAndSavePoster(bookAnalyse, userId, bookTitle);
+            // 解析AI响应并保存
+            BookAnalyse bookAnalyse = parseAIResponse(bookTitle, author, aiResponse);
 
-        BookAnalyse saved = getJpaBasicsDao().save(bookAnalyse);
+            // 生成书籍分析信息图
+            log.info("开始生成书籍分析信息图，书名: {}", bookTitle);
+            generateAndSavePoster(bookAnalyse, userId, bookTitle);
 
-        log.info("书籍分析完成并保存，书名: {}", bookTitle);
-        return saved;
+            BookAnalyse saved = getJpaBasicsDao().save(bookAnalyse);
+
+            log.info("书籍分析完成并保存，书名: {}", bookTitle);
+            return saved;
+        } catch (Exception e) {
+            // 记录AI解析日志（失败）
+            userAnalysisLogService.saveParseLog(userId, getUserName(userId), null, null, bookTitle, null, false, e.getMessage());
+            throw e;
+        }
     }
 
     /**
@@ -198,14 +242,21 @@ public class BookAnalyseService extends J2ServiceImpl<BookAnalyseDao, BookAnalys
             try (InputStream imageStream = aiService.generateImageStreamWithContent(userId, imageContentPrompt)) {
                 if (imageStream == null) {
                     log.warn("AI 返回的图片流为 null，书名: {}", bookTitle);
+                    // 记录生图日志（失败）
+                    userAnalysisLogService.saveImageLog(userId, getUserName(userId), null, null, bookTitle, bookAnalyse.getId(), false, "AI返回的图片流为null");
                     return;
                 }
                 String posterUrl = imageStorageService.saveImage(imageStream, bookTitle);
                 bookAnalyse.setPosterUrl(posterUrl);
                 log.info("书籍分析信息图生成并保存成功，posterUrl: {}", posterUrl);
+
+                // 记录生图日志（成功）
+                userAnalysisLogService.saveImageLog(userId, getUserName(userId), null, null, bookTitle, bookAnalyse.getId(), true, null);
             }
         } catch (Exception e) {
             log.warn("书籍分析信息图生成失败，书名: {}, 错误: {}", bookTitle, e.getMessage());
+            // 记录生图日志（失败）
+            userAnalysisLogService.saveImageLog(userId, getUserName(userId), null, null, bookTitle, bookAnalyse.getId(), false, e.getMessage());
             // 图片生成失败不影响业务流程，posterUrl 保持为 null，后续可以补充生成
         }
     }
@@ -504,6 +555,20 @@ public class BookAnalyseService extends J2ServiceImpl<BookAnalyseDao, BookAnalys
         } catch (Exception e) {
             log.error("解析书籍提取响应失败，响应内容: {}", aiResponse, e);
             return new ArrayList<>();
+        }
+    }
+
+    /**
+     * 获取用户名
+     */
+    private String getUserName(Long userId) {
+        try {
+            return userInfoService.getJpaBasicsDao().findById(userId)
+                    .map(user -> user.getNickname() != null ? user.getNickname() : user.getLoginName())
+                    .orElse(null);
+        } catch (Exception e) {
+            log.warn("获取用户名失败，userId: {}", userId, e);
+            return null;
         }
     }
 

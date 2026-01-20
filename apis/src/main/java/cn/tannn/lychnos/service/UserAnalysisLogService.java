@@ -45,10 +45,10 @@ public class UserAnalysisLogService {
 
         if (model != null) {
             log.setModelId(model.getId());
-            log.setModelName(model.getModelName());
-            log.setModelVendor(model.getVendor());
+            log.setModelName(model.getModel());
+            log.setModelVendor(model.getFactory());
             log.setModelType(ModelType.TEXT);
-            log.setModelSource(model.getShareType());
+            log.setModelSource(model.getShare());
         }
 
         userAnalysisLogDao.save(log);
@@ -74,10 +74,10 @@ public class UserAnalysisLogService {
 
         if (model != null) {
             log.setModelId(model.getId());
-            log.setModelName(model.getModelName());
-            log.setModelVendor(model.getVendor());
+            log.setModelName(model.getModel());
+            log.setModelVendor(model.getFactory());
             log.setModelType(ModelType.IMAGE);
-            log.setModelSource(model.getShareType());
+            log.setModelSource(model.getShare());
         }
 
         userAnalysisLogDao.save(log);

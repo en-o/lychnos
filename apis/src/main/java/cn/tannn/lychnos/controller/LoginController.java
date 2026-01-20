@@ -86,7 +86,7 @@ public class LoginController {
         LoginJwtExtendInfo<String> loginJwtExtendInfo = new LoginJwtExtendInfo<>();
         loginJwtExtendInfo.setUserId(account.getId() + "");
         loginJwtExtendInfo.setUserNo(account.getId() + "");
-        loginJwtExtendInfo.setUserName(account.getLoginName());
+        loginJwtExtendInfo.setUserName(account.getNickname());
         loginJwtExtendInfo.setLoginName(account.getLoginName());
         init.setMap(loginJwtExtendInfo);
         return loginService.login(init).getSign();
