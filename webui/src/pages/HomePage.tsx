@@ -823,6 +823,15 @@ const HomePage: React.FC = () => {
                             作者：{item.author}
                           </p>
                         )}
+                        {item.themes && item.themes.length > 0 && (
+                          <div className="flex flex-wrap gap-1 mb-2">
+                            {item.themes.slice(0, 3).map((theme, i) => (
+                              <span key={i} className="px-2 py-0.5 bg-gray-100 text-gray-700 rounded text-xs">
+                                {theme}
+                              </span>
+                            ))}
+                          </div>
+                        )}
                         {item.analysisData && (
                           <>
                             <div className="flex flex-wrap gap-1 mb-2">
