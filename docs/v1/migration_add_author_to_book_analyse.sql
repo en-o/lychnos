@@ -15,7 +15,7 @@ UPDATE tb_book_analyse SET author = '余华' WHERE title = '活着';
 UPDATE tb_book_analyse SET author = '余华' WHERE title = '许三观卖血记';
 UPDATE tb_book_analyse SET author = '东野圭吾' WHERE title = '解忧杂货店';
 UPDATE tb_book_analyse SET author = '尤瓦尔·赫拉利' WHERE title = '人类简史';
-UPDATE tb_book_analyse SET author = '格拉宁' WHERE title = '奇特的一生';
+UPDATE tb_book_analyse SET author = '达尼伊尔·格拉宁' WHERE title = '奇特的一生';
 UPDATE tb_book_analyse SET author = '连城三紀彦' WHERE title = '宵待草夜情';
 UPDATE tb_book_analyse SET author = '薄伽丘' WHERE title = '十日谈';
 UPDATE tb_book_analyse SET author = '连城三紀彦' WHERE title = '一朵桔梗花';
