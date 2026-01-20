@@ -6,6 +6,8 @@ import cn.tannn.jdevelops.exception.built.BusinessException;
 import cn.tannn.jdevelops.result.response.ResultVO;
 import cn.tannn.lychnos.common.constant.BusinessErrorCode;
 import cn.tannn.lychnos.common.util.UserUtil;
+import cn.tannn.lychnos.controller.dto.BookExtractDTO;
+import cn.tannn.lychnos.controller.vo.BookExtractVO;
 import cn.tannn.lychnos.controller.vo.BookRecommend;
 import cn.tannn.lychnos.entity.BookAnalyse;
 import cn.tannn.lychnos.service.BookAnalyseService;
@@ -15,13 +17,11 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -87,12 +87,15 @@ public class BookController {
     }
 
 
-    @Operation(summary = "分析图书", description = "根据书名进行分析图书")
-    @PutMapping(value = "analyze/{bookTitle}")
-    public ResultVO<BookAnalyse> analyze(@PathVariable("bookTitle") String bookTitle,
+    @Operation(summary = "分析图书", description = "根据书名和作者进行分析图书")
+    @PutMapping(value = "analyze")
+    public ResultVO<BookAnalyse> analyze(@RequestBody BookExtractVO bookInfo,
                                          HttpServletRequest request) {
 
         Long userId = UserUtil.userId2(request);
+
+        String bookTitle = bookInfo.getTitle().trim();
+        String author = bookInfo.getAuthor();
 
         // 检查是否已分析过，且图片是否完整
         var existingInterest = userInterestService.checkAnalyzed(userId, bookTitle);
@@ -113,13 +116,46 @@ public class BookController {
         }
 
         // 使用 AI 进行书籍分析（首次分析或补充图片）
-        return ResultVO.success(bookAnalyseService.analyse(bookTitle, userId));
+        return ResultVO.success(bookAnalyseService.analyse(bookTitle, author, userId));
     }
 
-    @Operation(summary = "检查书籍是否已分析", description = "根据书名检查当前用户是否已经分析过该书籍")
+    @Operation(summary = "提取书籍信息", description = "从用户输入中提取书名和作者信息")
+    @PostMapping(value = "extract")
+    public ResultVO<List<BookExtractVO>> extractBooks(@RequestBody BookExtractDTO dto,
+                                                       HttpServletRequest request) {
+        Long userId = UserUtil.userId2(request);
+
+        if (dto.getInput() == null || dto.getInput().trim().isEmpty()) {
+            throw new BusinessException(
+                    BusinessErrorCode.PARAM_ERROR.getCode(),
+                    "输入内容不能为空"
+            );
+        }
+
+        // 使用AI提取书籍信息
+        List<BookExtractVO> books = bookAnalyseService.extractBooks(dto.getInput(), userId);
+
+        // 检查每本书是否已分析过
+        for (BookExtractVO book : books) {
+            var existingInterest = userInterestService.checkAnalyzed(userId, book.getTitle());
+            if (existingInterest.isPresent()) {
+                var bookAnalyse = bookAnalyseService.findById(existingInterest.get().getBookAnalyseId());
+                if (bookAnalyse.isPresent() &&
+                    bookAnalyse.get().getPosterUrl() != null &&
+                    !bookAnalyse.get().getPosterUrl().isEmpty()) {
+                    book.setAnalyzed(true);
+                }
+            }
+        }
+
+        log.info("提取到{}本书籍信息", books.size());
+        return ResultVO.success(books);
+    }
+
+    @Operation(summary = "检查书籍是否已分析", description = "根据书名检查当前用户是否已经分析过该书籍，如果已分析则返回分析结果")
     @GetMapping(value = "check/{bookTitle}")
-    public ResultVO<String> checkAnalyzed(@PathVariable("bookTitle") String bookTitle,
-                                          HttpServletRequest request) {
+    public ResultVO<BookAnalyse> checkAnalyzed(@PathVariable("bookTitle") String bookTitle,
+                                                HttpServletRequest request) {
         Long userId = UserUtil.userId2(request);
 
         // 检查是否已分析过，且图片是否完整
@@ -130,18 +166,17 @@ public class BookController {
             if (bookAnalyse.isPresent() &&
                 bookAnalyse.get().getPosterUrl() != null &&
                 !bookAnalyse.get().getPosterUrl().isEmpty()) {
-                // 已分析过且图片完整，不允许重复分析
-                throw new BusinessException(
-                        BusinessErrorCode.BOOK_ALREADY_ANALYZED.getCode(),
-                        BusinessErrorCode.BOOK_ALREADY_ANALYZED.getMessage()
-                );
+                // 已分析过且图片完整，直接返回分析结果
+                log.info("书籍已分析过，返回分析结果，书名: {}", bookTitle);
+                return ResultVO.success(bookAnalyse.get());
             }
-            // 如果图片不存在，返回可以分析（用于补充生成图片）
-            log.info("书籍已分析但缺少图片，返回可以分析，书名: {}", bookTitle);
-            return ResultVO.successMessage("该书籍图片缺失，可以重新分析补充图片");
+            // 如果图片不存在，返回null表示可以分析（用于补充生成图片）
+            log.info("书籍已分析但缺少图片，返回null表示可以分析，书名: {}", bookTitle);
+            return ResultVO.success(null);
         }
 
-        return ResultVO.successMessage("当前用户为未分析该书籍，可以进行分析");
+        // 未分析过，返回null
+        return ResultVO.success(null);
     }
 
 
