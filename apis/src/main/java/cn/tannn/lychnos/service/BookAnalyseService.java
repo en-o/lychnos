@@ -3,6 +3,7 @@ package cn.tannn.lychnos.service;
 import cn.tannn.jdevelops.jpa.service.J2ServiceImpl;
 import cn.tannn.lychnos.ai.service.AIService;
 import cn.tannn.lychnos.common.constant.BookSourceType;
+import cn.tannn.lychnos.common.util.UserUtil;
 import cn.tannn.lychnos.controller.vo.BookExtractVO;
 import cn.tannn.lychnos.dao.BookAnalyseDao;
 import cn.tannn.lychnos.dao.UserInterestDao;
@@ -12,6 +13,8 @@ import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -559,15 +562,18 @@ public class BookAnalyseService extends J2ServiceImpl<BookAnalyseDao, BookAnalys
     }
 
     /**
-     * 获取用户名
+     * 获取用户名（从JWT中获取，避免数据库查询）
      */
     private String getUserName(Long userId) {
         try {
-            return userInfoService.getJpaBasicsDao().findById(userId)
-                    .map(user -> user.getNickname() != null ? user.getNickname() : user.getLoginName())
-                    .orElse(null);
+            var request = ((ServletRequestAttributes)
+                    RequestContextHolder.getRequestAttributes()).getRequest();
+            var jwtInfo = UserUtil.getLoginJwtExtendInfoExpires(request);
+            // 优先使用userName，如果没有则使用loginName
+            String userName = jwtInfo.getUserName();
+            return userName != null ? userName : jwtInfo.getLoginName();
         } catch (Exception e) {
-            log.warn("获取用户名失败，userId: {}", userId, e);
+            log.warn("从JWT获取用户名失败，userId: {}", userId, e);
             return null;
         }
     }
