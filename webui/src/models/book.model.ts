@@ -111,15 +111,15 @@ export class FeedbackHistory {
 export class AnalysisHistory {
   id: string;
   title: string;
+  author?: string;
   interested: boolean;
-  analysisData: BookAnalysis;
   createTime: string;
 
   constructor(data: Partial<AnalysisHistory> = {}) {
     this.id = data.id || '';
     this.title = data.title || '';
+    this.author = data.author;
     this.interested = data.interested ?? false;
-    this.analysisData = data.analysisData ? new BookAnalysis(data.analysisData) : new BookAnalysis();
     this.createTime = data.createTime || new Date().toISOString();
   }
 }
