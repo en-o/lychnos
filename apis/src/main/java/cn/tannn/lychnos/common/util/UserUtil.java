@@ -34,9 +34,9 @@ public class UserUtil extends cn.tannn.jdevelops.jwt.standalone.util.UserUtil {
     }
 
     /**
-     * 获取用户名（从JWT中获取，避免数据库查询）
+     * 获取用户请求信息（从JWT中获取，避免数据库查询）
      */
-    private UserRequestInfo userRequestInfo() {
+    public static UserRequestInfo userRequestInfo() {
         try {
             var attributes = RequestContextHolder.getRequestAttributes();
             if (attributes == null) {
@@ -49,7 +49,7 @@ public class UserUtil extends cn.tannn.jdevelops.jwt.standalone.util.UserUtil {
                     ,jwtInfo.getLoginName()
                     ,jwtInfo.getUserId());
         } catch (Exception e) {
-            log.warn("从JWT获取用户名失败", e);
+            log.warn("从JWT获取用户信息失败", e);
             return null;
         }
     }
