@@ -3,10 +3,12 @@ package cn.tannn.lychnos.service;
 import cn.tannn.jdevelops.jpa.service.J2ServiceImpl;
 import cn.tannn.lychnos.ai.service.AIService;
 import cn.tannn.lychnos.common.constant.BookSourceType;
+import cn.tannn.lychnos.common.constant.ModelType;
 import cn.tannn.lychnos.common.util.UserUtil;
 import cn.tannn.lychnos.controller.vo.BookExtractVO;
 import cn.tannn.lychnos.dao.BookAnalyseDao;
 import cn.tannn.lychnos.dao.UserInterestDao;
+import cn.tannn.lychnos.entity.AIModel;
 import cn.tannn.lychnos.entity.BookAnalyse;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONArray;
@@ -448,7 +450,7 @@ public class BookAnalyseService extends J2ServiceImpl<BookAnalyseDao, BookAnalys
 
         // 提取推荐语的核心内容（前80字）作为补充描述
         String shortRecommendation = "";
-        if (analysis.getRecommendation() != null && analysis.getRecommendation().length() > 0) {
+        if (analysis.getRecommendation() != null && !analysis.getRecommendation().isEmpty()) {
             shortRecommendation = analysis.getRecommendation().length() > 80 ?
                     analysis.getRecommendation().substring(0, 80) + "..." :
                     analysis.getRecommendation();
@@ -558,37 +560,20 @@ public class BookAnalyseService extends J2ServiceImpl<BookAnalyseDao, BookAnalys
         }
     }
 
-    /**
-     * 获取用户名（从JWT中获取，避免数据库查询）
-     */
-    private String getUserName(Long userId) {
-        try {
-            var attributes = RequestContextHolder.getRequestAttributes();
-            if (attributes == null) {
-                return null;
-            }
-            var request = ((ServletRequestAttributes) attributes).getRequest();
-            var jwtInfo = UserUtil.getLoginJwtExtendInfoExpires(request);
-            String userName = jwtInfo.getUserName();
-            return userName != null ? userName : jwtInfo.getLoginName();
-        } catch (Exception e) {
-            log.warn("从JWT获取用户名失败，userId: {}", userId, e);
-            return null;
-        }
-    }
 
-    private cn.tannn.lychnos.entity.AIModel getTextModel(Long userId) {
+
+    private AIModel getTextModel(Long userId) {
         try {
-            var models = aiModelService.findByUserIdAndType(userId, cn.tannn.lychnos.common.constant.ModelType.TEXT);
+            var models = aiModelService.findByUserIdAndType(userId, ModelType.TEXT);
             return models.stream().filter(m -> Boolean.TRUE.equals(m.getEnabled())).findFirst().orElse(null);
         } catch (Exception e) {
             return null;
         }
     }
 
-    private cn.tannn.lychnos.entity.AIModel getImageModel(Long userId) {
+    private AIModel getImageModel(Long userId) {
         try {
-            var models = aiModelService.findByUserIdAndType(userId, cn.tannn.lychnos.common.constant.ModelType.IMAGE);
+            var models = aiModelService.findByUserIdAndType(userId, ModelType.IMAGE);
             return models.stream().filter(m -> Boolean.TRUE.equals(m.getEnabled())).findFirst().orElse(null);
         } catch (Exception e) {
             return null;
