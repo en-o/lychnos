@@ -7,6 +7,7 @@
 
 -- 添加 author 字段（可选字段，用于前端显示）
 ALTER TABLE tb_user_interest ADD COLUMN author VARCHAR(200) COMMENT '作者（冗余字段，用于前端显示，非必填）';
+ALTER TABLE tb_user_interest ADD COLUMN themes json DEFAULT NULL COMMENT '书主题（冗余字段，用于前端显示，非必填）';
 
 -- 注意：
 -- 1. 此字段为可选字段，允许为空
