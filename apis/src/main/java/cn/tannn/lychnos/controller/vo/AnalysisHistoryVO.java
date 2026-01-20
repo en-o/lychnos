@@ -1,6 +1,6 @@
 package cn.tannn.lychnos.controller.vo;
 
-import cn.tannn.lychnos.entity.BookAnalyse;
+import com.alibaba.fastjson2.JSONArray;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -29,6 +29,9 @@ public class AnalysisHistoryVO {
 
     @Schema(description = "作者")
     private String author;
+
+    @Schema(description = "主题")
+    private JSONArray themes;
 
     @Schema(description = "是否感兴趣")
     private Boolean interested;

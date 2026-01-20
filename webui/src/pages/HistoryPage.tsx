@@ -260,21 +260,14 @@ const HistoryPage: React.FC = () => {
                           </p>
                         )}
 
-                        {item.analysisData && (
-                          <>
-                            <div className="flex flex-wrap gap-2 mb-2">
-                              <span className="px-2 py-1 bg-blue-50 text-blue-700 rounded text-xs">
-                                {item.analysisData.genre}
+                        {item.themes && item.themes.length > 0 && (
+                          <div className="flex flex-wrap gap-2 mb-2">
+                            {item.themes.slice(0, 5).map((theme, i) => (
+                              <span key={i} className="px-2 py-1 bg-gray-100 text-gray-700 rounded text-xs">
+                                {theme}
                               </span>
-                              <span className="px-2 py-1 bg-purple-50 text-purple-700 rounded text-xs">
-                                {item.analysisData.tone}
-                              </span>
-                            </div>
-
-                            <p className="text-sm text-gray-600 mb-2">
-                              {item.analysisData.themes.slice(0, 3).join('、')}
-                            </p>
-                          </>
+                            ))}
+                          </div>
                         )}
 
                         <p className="text-xs text-gray-500">

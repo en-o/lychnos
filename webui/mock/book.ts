@@ -177,6 +177,8 @@ export default [
         const historyItem: AnalysisHistory = {
           id: userInterest.id,
           title: bookAnalysis.title,
+          author: bookAnalysis.author,
+          themes: bookAnalysis.themes,
           interested: interested ?? false,
           analysisData: bookAnalysis,
           createTime: userInterest.createTime || new Date().toISOString(),

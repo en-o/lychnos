@@ -112,6 +112,7 @@ export class AnalysisHistory {
   id: string;
   title: string;
   author?: string;
+  themes?: string[];
   interested: boolean;
   createTime: string;
 
@@ -119,6 +120,7 @@ export class AnalysisHistory {
     this.id = data.id || '';
     this.title = data.title || '';
     this.author = data.author;
+    this.themes = data.themes;
     this.interested = data.interested ?? false;
     this.createTime = data.createTime || new Date().toISOString();
   }

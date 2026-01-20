@@ -116,6 +116,7 @@ public class UserInterestService extends J2ServiceImpl<UserInterestDao, UserInte
             vo.setId(interest.getId());
             vo.setTitle(interest.getBookTitle());
             vo.setAuthor(interest.getAuthor());
+            vo.setThemes(interest.getThemes());
             vo.setInterested(interest.getInterested());
             vo.setCreateTime(interest.getCreateTime().format(FORMATTER));
             return vo;
