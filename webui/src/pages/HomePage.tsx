@@ -23,6 +23,7 @@ const HomePage: React.FC = () => {
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showLoginConfirm, setShowLoginConfirm] = useState(false);
   const [selectedHistoryItem, setSelectedHistoryItem] = useState<AnalysisHistory | null>(null);
+  const [historyDetailLoading, setHistoryDetailLoading] = useState(false);
   const [showBackConfirm, setShowBackConfirm] = useState(false);
   const [quickBooks, setQuickBooks] = useState<BookRecommendItem[]>([]);
   const [decorationTheme, setDecorationTheme] = useState<DecorationTheme>('daily');
@@ -284,6 +285,26 @@ const HomePage: React.FC = () => {
     setResult(null);
     setBookTitle('');
     setShowBackConfirm(false);
+  };
+
+  // 点击历史记录详情时获取完整的书籍分析数据
+  const handleViewHistoryDetail = async (item: AnalysisHistory) => {
+    setSelectedHistoryItem(item);
+    setHistoryDetailLoading(true);
+    try {
+      const response = await bookApi.getBookDetail(item.title);
+      if (response.success && response.data) {
+        // 更新 selectedHistoryItem 的 analysisData
+        setSelectedHistoryItem({
+          ...item,
+          analysisData: response.data
+        });
+      }
+    } catch (error) {
+      console.error('获取书籍详情失败:', error);
+    } finally {
+      setHistoryDetailLoading(false);
+    }
   };
 
   // 切换主题
@@ -780,7 +801,7 @@ const HomePage: React.FC = () => {
                 {feedbackHistory.slice(0, 10).map((item) => (
                   <div
                     key={item.id}
-                    onClick={() => setSelectedHistoryItem(item)}
+                    onClick={() => handleViewHistoryDetail(item)}
                     className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md hover:border-blue-300 transition cursor-pointer"
                   >
                     <div className="flex items-start gap-3">
@@ -799,6 +820,11 @@ const HomePage: React.FC = () => {
                         <h4 className="font-medium text-gray-900 mb-1 truncate">
                           {item.title}
                         </h4>
+                        {item.author && (
+                          <p className="text-xs text-gray-500 mb-2">
+                            作者：{item.author}
+                          </p>
+                        )}
                         {item.analysisData && (
                           <>
                             <div className="flex flex-wrap gap-1 mb-2">
@@ -1002,8 +1028,14 @@ const HomePage: React.FC = () => {
               </button>
             </div>
 
-            <div className="space-y-4">
-              {selectedHistoryItem.analysisData && (
+            {historyDetailLoading ? (
+              <div className="text-center py-12">
+                <div className="inline-block w-8 h-8 border-4 border-gray-300 border-t-blue-600 rounded-full animate-spin"></div>
+                <p className="text-gray-600 mt-4">加载详情中...</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {selectedHistoryItem.analysisData && (
                 <>
                   <div className="flex gap-2">
                     <span className="px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-sm">
@@ -1013,6 +1045,13 @@ const HomePage: React.FC = () => {
                       {selectedHistoryItem.analysisData.tone}
                     </span>
                   </div>
+
+                  {(selectedHistoryItem.author || selectedHistoryItem.analysisData.author) && (
+                    <div className="text-sm text-gray-700">
+                      <span className="font-medium">作者：</span>
+                      {selectedHistoryItem.author || selectedHistoryItem.analysisData.author}
+                    </div>
+                  )}
 
                   {selectedHistoryItem.analysisData.posterUrl && (
                     <div>
@@ -1082,6 +1121,7 @@ const HomePage: React.FC = () => {
                 })}
               </div>
             </div>
+            )}
           </div>
         </div>
       )}

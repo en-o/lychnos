@@ -266,6 +266,15 @@ public class BookController {
         }
     }
 
+    @Operation(summary = "根据书名获取书籍分析详情", description = "用于历史记录详情页懒加载")
+    @GetMapping(value = "detail/{bookTitle}")
+    public ResultVO<BookAnalyse> getBookDetail(@PathVariable("bookTitle") String bookTitle) {
+        bookTitle = bookTitle.trim();
+        BookAnalyse bookAnalyse = findBookAnalyseByTitle(bookTitle);
+        log.info("查询书籍分析详情: {}", bookTitle);
+        return ResultVO.success(bookAnalyse);
+    }
+
     /**
      * 根据书名查询书籍分析记录
      *

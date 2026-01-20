@@ -62,6 +62,11 @@ export const bookApi = {
     });
   },
 
+  // 根据书名获取书籍分析详情（用于历史记录详情页懒加载）
+  getBookDetail: (title: string) => {
+    return request.get<Result<BookAnalysis>>(`/book/detail/${encodeURIComponent(title)}`);
+  },
+
   // 获取用户偏好
   getUserPreference: () => {
     return request.get<Result<UserPreference>>('/user/preference');

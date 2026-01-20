@@ -16,6 +16,7 @@ const HistoryPage: React.FC = () => {
   const [hasMore, setHasMore] = useState(true);
   const [total, setTotal] = useState(0);
   const [selectedItem, setSelectedItem] = useState<AnalysisHistory | null>(null);
+  const [detailLoading, setDetailLoading] = useState(false);
   const [imageError, setImageError] = useState<Record<string, boolean>>({});
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -135,6 +136,26 @@ const HistoryPage: React.FC = () => {
       hour: '2-digit',
       minute: '2-digit',
     });
+  };
+
+  // 点击详情时获取完整的书籍分析数据
+  const handleViewDetail = async (item: AnalysisHistory) => {
+    setSelectedItem(item);
+    setDetailLoading(true);
+    try {
+      const response = await bookApi.getBookDetail(item.title);
+      if (response.success && response.data) {
+        // 更新 selectedItem 的 analysisData
+        setSelectedItem({
+          ...item,
+          analysisData: response.data
+        });
+      }
+    } catch (error) {
+      console.error('获取书籍详情失败:', error);
+    } finally {
+      setDetailLoading(false);
+    }
   };
 
   return (
@@ -262,7 +283,7 @@ const HistoryPage: React.FC = () => {
                       </div>
 
                       <button
-                        onClick={() => setSelectedItem(item)}
+                        onClick={() => handleViewDetail(item)}
                         className="ml-4 px-3 py-2 text-sm text-blue-600 hover:bg-blue-50 rounded-lg transition flex items-center gap-1"
                       >
                         <Eye className="w-4 h-4" />
@@ -319,7 +340,13 @@ const HistoryPage: React.FC = () => {
               </button>
             </div>
 
-            <div className="space-y-4">
+            {detailLoading ? (
+              <div className="text-center py-12">
+                <div className="inline-block w-8 h-8 border-4 border-gray-300 border-t-blue-600 rounded-full animate-spin"></div>
+                <p className="text-gray-600 mt-4">加载详情中...</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
               <div className="flex gap-2">
                 <span className="px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-sm">
                   {selectedItem.analysisData?.genre || '未知类型'}
@@ -398,7 +425,8 @@ const HistoryPage: React.FC = () => {
               <div className="pt-4 border-t border-gray-200 text-sm text-gray-500">
                 分析时间: {formatDate(selectedItem.createTime)}
               </div>
-            </div>
+              </div>
+            )}
           </div>
         </div>
       )}
