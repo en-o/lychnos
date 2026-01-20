@@ -50,12 +50,13 @@ public class UserInterestService extends J2ServiceImpl<UserInterestDao, UserInte
      * 创建用户兴趣
      * @param interest  UserInterestFeedback
      */
-    public void feedback(@Valid UserInterestFeedback interest, Long userId) {
+    public void feedback(@Valid UserInterestFeedback interest, Long userId, BookAnalyse bookAnalyse) {
         UserInterest userInterest = new UserInterest();
         userInterest.setUserId(userId);
         userInterest.setBookAnalyseId(interest.getBookAnalyseId());
-        userInterest.setBookTitle(interest.getBookTitle());
-        userInterest.setAuthor(interest.getAuthor());
+        userInterest.setBookTitle(bookAnalyse.getTitle());
+        userInterest.setAuthor(bookAnalyse.getAuthor());
+        userInterest.setThemes(bookAnalyse.getThemes());
         userInterest.setInterested(interest.getInterested());
         userInterest.setReason(interest.getReason());
         // 这个数据需要异步写入，因为ai可能很慢

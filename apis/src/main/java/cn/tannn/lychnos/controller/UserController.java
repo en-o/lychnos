@@ -14,7 +14,9 @@ import cn.tannn.lychnos.controller.dto.UserInfoFix;
 import cn.tannn.lychnos.controller.dto.UserInterestFeedback;
 import cn.tannn.lychnos.controller.vo.AnalysisHistoryVO;
 import cn.tannn.lychnos.controller.vo.UserPreferenceVO;
+import cn.tannn.lychnos.entity.BookAnalyse;
 import cn.tannn.lychnos.entity.UserInfo;
+import cn.tannn.lychnos.service.BookAnalyseService;
 import cn.tannn.lychnos.service.UserInfoService;
 import cn.tannn.lychnos.service.UserInterestService;
 import com.fasterxml.jackson.annotation.JsonView;
@@ -53,6 +55,7 @@ import java.util.List;
 public class UserController {
 
     private final UserInfoService userInfoService;
+    private final BookAnalyseService bookAnalyseService;
     private final UserInterestService userInterestService;
 
 
@@ -94,13 +97,14 @@ public class UserController {
     @Transactional(rollbackFor = Exception.class)
     public ResultVO<String> interest(@RequestBody @Valid UserInterestFeedback interest, HttpServletRequest request) {
         Long userId = UserUtil.userId2(request);
-
+        BookAnalyse bookAnalyse = bookAnalyseService.findById(interest.getBookAnalyseId())
+                .orElseThrow(() -> new BusinessException("书籍分析不存在，无法提交反馈"));
         // 检查是否已经分析过该书籍
-        if (userInterestService.checkAnalyzed(userId, interest.getBookTitle()).isPresent()) {
+        if (userInterestService.checkAnalyzed(userId, bookAnalyse.getTitle()).isPresent()) {
             throw new BusinessException("该书籍已经分析过，请到历史记录中查看");
         }
 
-        userInterestService.feedback(interest, userId);
+        userInterestService.feedback(interest, userId, bookAnalyse);
         return ResultVO.successMessage("反馈已提交！");
     }
 

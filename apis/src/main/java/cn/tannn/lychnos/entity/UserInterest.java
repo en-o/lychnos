@@ -1,18 +1,19 @@
 package cn.tannn.lychnos.entity;
 
 import cn.tannn.jdevelops.jpa.generator.UuidCustomGenerator;
+import com.alibaba.fastjson2.JSONArray;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
+import jakarta.persistence.Index;
+import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import org.hibernate.annotations.Comment;
-import org.hibernate.annotations.DynamicInsert;
-import org.hibernate.annotations.DynamicUpdate;
-import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.*;
+import org.hibernate.type.SqlTypes;
 import org.springframework.data.annotation.CreatedDate;
 
 import java.time.LocalDateTime;
@@ -83,6 +84,16 @@ public class UserInterest {
     @Comment("作者")
     @Schema(description = "作者")
     private String author;
+
+    /**
+     * 书主题（冗余字段，用于前端显示，非必填）
+     */
+    @Column(columnDefinition = " json ")
+    @Comment("书主题（冗余字段，用于前端显示，非必填）")
+    @Schema(description = "书主题（冗余字段，用于前端显示，非必填）")
+    @JdbcTypeCode(SqlTypes.JSON)
+    private JSONArray themes;
+
 
     /**
      * 是否感兴趣
