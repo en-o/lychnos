@@ -71,19 +71,44 @@ public class BookController {
 
 
 
-    @Operation(summary = "公开分析图书", description = "无需登录即可查看推荐书籍的分析结果")
-    @ApiMapping(checkToken = false, value = "analyze/public/{bookTitle}", method = RequestMethod.GET)
-    public ResultVO<BookAnalyse> analyzePublic(@PathVariable("bookTitle") String bookTitle) {
-        // 获取推荐书籍列表（真实数据 + 模拟数据）
-        List<String> recommendBookTitles = getRecommendBookTitles();
+    @Operation(summary = "查询书籍分析结果", description = "查询书籍分析结果，已登录用户会检查是否已反馈，未登录用户只能查看推荐书籍")
+    @ApiMapping(checkToken = false, value = "query/{bookTitle}", method = RequestMethod.GET)
+    public ResultVO<BookAnalyse> queryBookAnalysis(@PathVariable("bookTitle") String bookTitle,
+                                                    HttpServletRequest request) {
+        Long userId = UserUtil.userId2(request);
 
-        // 验证书名是否在推荐列表中
-        validateBookInRecommendation(bookTitle, recommendBookTitles);
-        // 查询并返回书籍分析记录
-        BookAnalyse bookAnalyse = findBookAnalyseByTitle(bookTitle);
+        if (userId != null) {
+            // 已登录用户：检查是否已分析过，且图片是否完整
+            var existingInterest = userInterestService.checkAnalyzed(userId, bookTitle.trim());
+            if (existingInterest.isPresent()) {
+                // 查询书籍分析记录，检查图片是否存在
+                var bookAnalyse = bookAnalyseService.findById(existingInterest.get().getBookAnalyseId());
+                if (bookAnalyse.isPresent() &&
+                    bookAnalyse.get().getPosterUrl() != null &&
+                    !bookAnalyse.get().getPosterUrl().isEmpty()) {
+                    // 已分析过且图片完整，直接返回分析结果
+                    log.info("用户已分析过该书籍，返回分析结果，书名: {}", bookTitle);
+                    return ResultVO.success(bookAnalyse.get());
+                }
+                // 如果图片不存在，返回null表示可以分析（用于补充生成图片）
+                log.info("书籍已分析但缺少图片，返回null表示可以分析，书名: {}", bookTitle);
+                return ResultVO.success(null);
+            }
 
-        log.info("公开分析接口返回书籍: {}", bookTitle);
-        return ResultVO.success(bookAnalyse);
+            // 未分析过，返回null
+            return ResultVO.success(null);
+        } else {
+            // 未登录用户：只能查看推荐书籍
+            List<String> recommendBookTitles = getRecommendBookTitles();
+
+            // 验证书名是否在推荐列表中
+            validateBookInRecommendation(bookTitle, recommendBookTitles);
+            // 查询并返回书籍分析记录
+            BookAnalyse bookAnalyse = findBookAnalyseByTitle(bookTitle);
+
+            log.info("未登录用户查询推荐书籍: {}", bookTitle);
+            return ResultVO.success(bookAnalyse);
+        }
     }
 
 
@@ -151,34 +176,6 @@ public class BookController {
         log.info("提取到{}本书籍信息", books.size());
         return ResultVO.success(books);
     }
-
-    @Operation(summary = "检查书籍是否已分析", description = "根据书名检查当前用户是否已经分析过该书籍，如果已分析则返回分析结果")
-    @GetMapping(value = "check/{bookTitle}")
-    public ResultVO<BookAnalyse> checkAnalyzed(@PathVariable("bookTitle") String bookTitle,
-                                                HttpServletRequest request) {
-        Long userId = UserUtil.userId2(request);
-
-        // 检查是否已分析过，且图片是否完整
-        var existingInterest = userInterestService.checkAnalyzed(userId, bookTitle.trim());
-        if (existingInterest.isPresent()) {
-            // 查询书籍分析记录，检查图片是否存在
-            var bookAnalyse = bookAnalyseService.findById(existingInterest.get().getBookAnalyseId());
-            if (bookAnalyse.isPresent() &&
-                bookAnalyse.get().getPosterUrl() != null &&
-                !bookAnalyse.get().getPosterUrl().isEmpty()) {
-                // 已分析过且图片完整，直接返回分析结果
-                log.info("书籍已分析过，返回分析结果，书名: {}", bookTitle);
-                return ResultVO.success(bookAnalyse.get());
-            }
-            // 如果图片不存在，返回null表示可以分析（用于补充生成图片）
-            log.info("书籍已分析但缺少图片，返回null表示可以分析，书名: {}", bookTitle);
-            return ResultVO.success(null);
-        }
-
-        // 未分析过，返回null
-        return ResultVO.success(null);
-    }
-
 
 
 

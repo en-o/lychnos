@@ -23,9 +23,9 @@ export const bookApi = {
     return request.post<Result<BookExtract[]>>('/book/extract', { input });
   },
 
-  // 检查书籍是否已分析（如果已分析则返回分析结果）
-  checkAnalyzed: (title: string) => {
-    return request.get<Result<BookAnalysis | null>>(`/book/check/${encodeURIComponent(title)}`);
+  // 查询书籍分析结果（已登录用户检查是否已反馈，未登录用户只能查看推荐书籍）
+  queryBookAnalysis: (title: string) => {
+    return request.get<Result<BookAnalysis | null>>(`/book/query/${encodeURIComponent(title)}`);
   },
 
   // 分析图书（需要较长时间：AI分析+图片生成）
@@ -34,13 +34,6 @@ export const bookApi = {
       '/book/analyze',
       bookInfo,
       { timeout: 120000 } // 2分钟超时
-    );
-  },
-
-  // 公开分析接口（无需登录，仅限推荐书籍）
-  analyzePublic: (title: string) => {
-    return request.get<Result<BookAnalysis>>(
-      `/book/analyze/public/${encodeURIComponent(title)}`
     );
   },
 

@@ -128,8 +128,8 @@ const HomePage: React.FC = () => {
       // 1. 未登录用户：只能查看推荐书籍
       if (!token) {
         if (isRecommended) {
-          // 推荐书籍，使用公开接口查询
-          const response = await bookApi.analyzePublic(title);
+          // 推荐书籍，使用统一接口查询
+          const response = await bookApi.queryBookAnalysis(title);
           if (response.success && response.data) {
             setResult(response.data);
             toast.info('未登录用户只能查看推荐书籍的分析结果');
@@ -143,7 +143,7 @@ const HomePage: React.FC = () => {
 
       // 2. 已登录用户 - 推荐书籍：直接检查并分析
       if (isRecommended) {
-        const checkResponse = await bookApi.checkAnalyzed(title);
+        const checkResponse = await bookApi.queryBookAnalysis(title);
         if (checkResponse.success && checkResponse.data) {
           // 已分析过，跳转到历史记录页面
           toast.info('该书籍已经分析过，正在跳转到历史记录...');
@@ -207,7 +207,7 @@ const HomePage: React.FC = () => {
     // 检查是否已分析
     setLoading(true);
     try {
-      const checkResponse = await bookApi.checkAnalyzed(book.title);
+      const checkResponse = await bookApi.queryBookAnalysis(book.title);
       if (checkResponse.success && checkResponse.data) {
         // 已分析过，跳转到历史记录页面
         toast.info('该书籍已经分析过，正在跳转到历史记录...');
