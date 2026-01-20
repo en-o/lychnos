@@ -44,7 +44,6 @@ public class UserUtil extends cn.tannn.jdevelops.jwt.standalone.util.UserUtil {
             }
             var request = ((ServletRequestAttributes) attributes).getRequest();
             var jwtInfo = UserUtil.getLoginJwtExtendInfoExpires(request);
-            String userName = jwtInfo.getUserName();
             return new UserRequestInfo(IpUtil.getPoxyIpEnhance(request)
                     ,jwtInfo.getUserName()
                     ,jwtInfo.getLoginName()
