@@ -36,17 +36,17 @@ public class BookAnalyseService extends J2ServiceImpl<BookAnalyseDao, BookAnalys
     private final ImageStorageService imageStorageService;
     private final UserInterestDao userInterestDao;
     private final UserAnalysisLogService userAnalysisLogService;
-    private final UserInfoService userInfoService;
+    private final AIModelService aiModelService;
 
     public BookAnalyseService(AIService aiService, ImageStorageService imageStorageService,
                               UserInterestDao userInterestDao, UserAnalysisLogService userAnalysisLogService,
-                              UserInfoService userInfoService) {
+                              AIModelService aiModelService) {
         super(BookAnalyse.class);
         this.aiService = aiService;
         this.imageStorageService = imageStorageService;
         this.userInterestDao = userInterestDao;
         this.userAnalysisLogService = userAnalysisLogService;
-        this.userInfoService = userInfoService;
+        this.aiModelService = aiModelService;
     }
 
     /**
@@ -93,7 +93,7 @@ public class BookAnalyseService extends J2ServiceImpl<BookAnalyseDao, BookAnalys
                     String aiResponse = aiService.generateText(userId, prompt);
 
                     // 记录AI提取日志（成功）
-                    userAnalysisLogService.saveParseLog(userId, getUserName(userId), null, null, userInput, null, true, null);
+                    userAnalysisLogService.saveExtractLog(userId, getUserName(userId), null, getTextModel(userId), userInput, null, true, null);
 
                     List<BookExtractVO> aiBooks = parseExtractResponse(aiResponse);
 
@@ -108,7 +108,7 @@ public class BookAnalyseService extends J2ServiceImpl<BookAnalyseDao, BookAnalys
                 } catch (Exception e) {
                     log.warn("AI推荐失败，仅返回数据库中的书籍，书名: {}, 错误: {}", found.getTitle(), e.getMessage());
                     // 记录AI提取日志（失败）
-                    userAnalysisLogService.saveParseLog(userId, getUserName(userId), null, null, userInput, null, false, e.getMessage());
+                    userAnalysisLogService.saveExtractLog(userId, getUserName(userId), null, getTextModel(userId), userInput, null, false, e.getMessage());
                 }
 
                 // 无论AI是否成功，都返回至少包含数据库书籍的结果
@@ -122,14 +122,14 @@ public class BookAnalyseService extends J2ServiceImpl<BookAnalyseDao, BookAnalys
                     String aiResponse = aiService.generateText(userId, prompt);
 
                     // 记录AI提取日志（成功）
-                    userAnalysisLogService.saveParseLog(userId, getUserName(userId), null, null, userInput, null, true, null);
+                    userAnalysisLogService.saveExtractLog(userId, getUserName(userId), null, getTextModel(userId), userInput, null, true, null);
 
                     return parseExtractResponse(aiResponse);
                 } catch (Exception e) {
                     log.warn("AI提取失败，返回数据库中的书籍，书名: {}, 错误: {}", found.getTitle(), e.getMessage());
 
                     // 记录AI提取日志（失败）
-                    userAnalysisLogService.saveParseLog(userId, getUserName(userId), null, null, userInput, null, false, e.getMessage());
+                    userAnalysisLogService.saveExtractLog(userId, getUserName(userId), null, getTextModel(userId), userInput, null, false, e.getMessage());
 
                     // AI失败，返回数据库中的书籍
                     List<BookExtractVO> fallbackResult = new ArrayList<>();
@@ -150,13 +150,13 @@ public class BookAnalyseService extends J2ServiceImpl<BookAnalyseDao, BookAnalys
             String aiResponse = aiService.generateText(userId, prompt);
 
             // 记录AI提取日志（成功）
-            userAnalysisLogService.saveParseLog(userId, getUserName(userId), null, null, userInput, null, true, null);
+            userAnalysisLogService.saveExtractLog(userId, getUserName(userId), null, getTextModel(userId), userInput, null, true, null);
 
             // 解析AI响应
             return parseExtractResponse(aiResponse);
         } catch (Exception e) {
             // 记录AI提取日志（失败）
-            userAnalysisLogService.saveParseLog(userId, getUserName(userId), null, null, userInput, null, false, e.getMessage());
+            userAnalysisLogService.saveExtractLog(userId, getUserName(userId), null, getTextModel(userId), userInput, null, false, e.getMessage());
             throw e;
         }
     }
@@ -204,7 +204,7 @@ public class BookAnalyseService extends J2ServiceImpl<BookAnalyseDao, BookAnalys
             String aiResponse = aiService.generateText(userId, prompt);
 
             // 记录AI解析日志（成功）
-            userAnalysisLogService.saveParseLog(userId, getUserName(userId), null, null, bookTitle, null, true, null);
+            userAnalysisLogService.saveParseLog(userId, getUserName(userId), null, getTextModel(userId), bookTitle, null, true, null);
 
             // 解析AI响应并保存
             BookAnalyse bookAnalyse = parseAIResponse(bookTitle, author, aiResponse);
@@ -219,7 +219,7 @@ public class BookAnalyseService extends J2ServiceImpl<BookAnalyseDao, BookAnalys
             return saved;
         } catch (Exception e) {
             // 记录AI解析日志（失败）
-            userAnalysisLogService.saveParseLog(userId, getUserName(userId), null, null, bookTitle, null, false, e.getMessage());
+            userAnalysisLogService.saveParseLog(userId, getUserName(userId), null, getTextModel(userId), bookTitle, null, false, e.getMessage());
             throw e;
         }
     }
@@ -246,7 +246,7 @@ public class BookAnalyseService extends J2ServiceImpl<BookAnalyseDao, BookAnalys
                 if (imageStream == null) {
                     log.warn("AI 返回的图片流为 null，书名: {}", bookTitle);
                     // 记录生图日志（失败）
-                    userAnalysisLogService.saveImageLog(userId, getUserName(userId), null, null, bookTitle, bookAnalyse.getId(), false, "AI返回的图片流为null");
+                    userAnalysisLogService.saveImageLog(userId, getUserName(userId), null, getImageModel(userId), bookTitle, bookAnalyse.getId(), false, "AI返回的图片流为null");
                     return;
                 }
                 String posterUrl = imageStorageService.saveImage(imageStream, bookTitle);
@@ -254,12 +254,12 @@ public class BookAnalyseService extends J2ServiceImpl<BookAnalyseDao, BookAnalys
                 log.info("书籍分析信息图生成并保存成功，posterUrl: {}", posterUrl);
 
                 // 记录生图日志（成功）
-                userAnalysisLogService.saveImageLog(userId, getUserName(userId), null, null, bookTitle, bookAnalyse.getId(), true, null);
+                userAnalysisLogService.saveImageLog(userId, getUserName(userId), null, getImageModel(userId), bookTitle, bookAnalyse.getId(), true, null);
             }
         } catch (Exception e) {
             log.warn("书籍分析信息图生成失败，书名: {}, 错误: {}", bookTitle, e.getMessage());
             // 记录生图日志（失败）
-            userAnalysisLogService.saveImageLog(userId, getUserName(userId), null, null, bookTitle, bookAnalyse.getId(), false, e.getMessage());
+            userAnalysisLogService.saveImageLog(userId, getUserName(userId), null, getImageModel(userId), bookTitle, bookAnalyse.getId(), false, e.getMessage());
             // 图片生成失败不影响业务流程，posterUrl 保持为 null，后续可以补充生成
         }
     }
@@ -576,6 +576,24 @@ public class BookAnalyseService extends J2ServiceImpl<BookAnalyseDao, BookAnalys
             return userName != null ? userName : jwtInfo.getLoginName();
         } catch (Exception e) {
             log.warn("从JWT获取用户名失败，userId: {}", userId, e);
+            return null;
+        }
+    }
+
+    private cn.tannn.lychnos.entity.AIModel getTextModel(Long userId) {
+        try {
+            var models = aiModelService.findByUserIdAndType(userId, cn.tannn.lychnos.common.constant.ModelType.TEXT);
+            return models.stream().filter(m -> Boolean.TRUE.equals(m.getEnabled())).findFirst().orElse(null);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    private cn.tannn.lychnos.entity.AIModel getImageModel(Long userId) {
+        try {
+            var models = aiModelService.findByUserIdAndType(userId, cn.tannn.lychnos.common.constant.ModelType.IMAGE);
+            return models.stream().filter(m -> Boolean.TRUE.equals(m.getEnabled())).findFirst().orElse(null);
+        } catch (Exception e) {
             return null;
         }
     }
