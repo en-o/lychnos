@@ -1112,50 +1112,70 @@ const HomePage: React.FC = () => {
             </div>
 
             <div className="p-6 space-y-3">
-              {extractedBooks.map((book, index) => (
-                <button
-                  key={index}
-                  onClick={() => handleBookSelect(book)}
-                  disabled={loading}
-                  className="w-full p-4 border-2 border-gray-200 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition text-left disabled:opacity-50 disabled:cursor-not-allowed group"
-                >
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        <h4 className="font-medium text-gray-900 group-hover:text-blue-700">
-                          {book.title}
-                        </h4>
-                        {book.sourceLabel && (
-                          <span className={`inline-block px-2 py-0.5 text-xs rounded ${
-                            book.sourceType === 'USER_INPUT'
-                              ? 'bg-blue-100 text-blue-700'
-                              : book.sourceType === 'SIMILAR'
-                              ? 'bg-purple-100 text-purple-700'
-                              : 'bg-amber-100 text-amber-700'
+              {extractedBooks.map((book, index) => {
+                const isAlreadyAnalyzed = book.sourceType === 'ALREADY_ANALYZED';
+
+                return (
+                  <button
+                    key={index}
+                    onClick={() => handleBookSelect(book)}
+                    disabled={loading}
+                    className={`w-full p-4 border-2 rounded-lg transition text-left disabled:opacity-50 disabled:cursor-not-allowed group ${
+                      isAlreadyAnalyzed
+                        ? 'border-green-300 bg-green-50 hover:border-green-500 hover:bg-green-100'
+                        : 'border-gray-200 hover:border-blue-500 hover:bg-blue-50'
+                    }`}
+                  >
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <h4 className={`font-medium ${
+                            isAlreadyAnalyzed
+                              ? 'text-green-900 group-hover:text-green-700'
+                              : 'text-gray-900 group-hover:text-blue-700'
                           }`}>
-                            {book.sourceLabel}
-                          </span>
+                            {book.title}
+                          </h4>
+                          {book.sourceLabel && (
+                            <span className={`inline-block px-2 py-0.5 text-xs rounded ${
+                              book.sourceType === 'ALREADY_ANALYZED'
+                                ? 'bg-green-200 text-green-800 font-medium'
+                                : book.sourceType === 'USER_INPUT'
+                                ? 'bg-blue-100 text-blue-700'
+                                : book.sourceType === 'SIMILAR'
+                                ? 'bg-purple-100 text-purple-700'
+                                : 'bg-amber-100 text-amber-700'
+                            }`}>
+                              {book.sourceLabel}
+                            </span>
+                          )}
+                        </div>
+                        {book.author && (
+                          <p className={`text-sm mb-2 ${
+                            isAlreadyAnalyzed ? 'text-green-700' : 'text-gray-600'
+                          }`}>
+                            作者：{book.author}
+                          </p>
+                        )}
+                        {isAlreadyAnalyzed && (
+                          <div className="mt-2 p-2 bg-green-100 border border-green-200 rounded text-xs text-green-800">
+                            💡 该书籍已分析过，点击可直接查看分析结果
+                          </div>
                         )}
                       </div>
-                      {book.author && (
-                        <p className="text-sm text-gray-600 mb-2">
-                          作者：{book.author}
-                        </p>
-                      )}
-                      {book.analyzed && (
-                        <span className="inline-block px-2 py-1 text-xs bg-green-100 text-green-700 rounded">
-                          已分析
-                        </span>
-                      )}
+                      <div className="ml-4 flex-shrink-0">
+                        <svg className={`w-5 h-5 transition ${
+                          isAlreadyAnalyzed
+                            ? 'text-green-500 group-hover:text-green-600'
+                            : 'text-gray-400 group-hover:text-blue-500'
+                        }`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
+                      </div>
                     </div>
-                    <div className="ml-4 flex-shrink-0">
-                      <svg className="w-5 h-5 text-gray-400 group-hover:text-blue-500 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                      </svg>
-                    </div>
-                  </div>
-                </button>
-              ))}
+                  </button>
+                );
+              })}
             </div>
 
             {loading && (

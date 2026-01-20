@@ -2,6 +2,7 @@ package cn.tannn.lychnos.service;
 
 import cn.tannn.jdevelops.jpa.service.J2ServiceImpl;
 import cn.tannn.lychnos.ai.service.AIService;
+import cn.tannn.lychnos.common.constant.BookSourceType;
 import cn.tannn.lychnos.controller.vo.BookExtractVO;
 import cn.tannn.lychnos.dao.BookAnalyseDao;
 import cn.tannn.lychnos.entity.BookAnalyse;
@@ -38,6 +39,7 @@ public class BookAnalyseService extends J2ServiceImpl<BookAnalyseDao, BookAnalys
 
     /**
      * 从用户输入中提取书籍信息（书名和作者）
+     * 优先检查数据库，如果已分析过则直接返回
      * @param userInput 用户输入的书籍信息
      * @param userId 用户ID
      * @return 书籍信息列表（书名+作者）
@@ -45,6 +47,41 @@ public class BookAnalyseService extends J2ServiceImpl<BookAnalyseDao, BookAnalys
     public List<BookExtractVO> extractBooks(String userInput, Long userId) {
         log.info("开始从用户输入提取书籍信息，用户ID: {}, 输入: {}", userId, userInput);
 
+        // 1. 先尝试在数据库中查找（简单的书名匹配）
+        String trimmedInput = userInput.trim();
+        Optional<BookAnalyse> existingBook = getJpaBasicsDao().findByTitle(trimmedInput);
+
+        if (existingBook.isPresent() && existingBook.get().getPosterUrl() != null && !existingBook.get().getPosterUrl().isEmpty()) {
+            // 数据库中找到了已分析的书籍
+            BookAnalyse found = existingBook.get();
+            log.info("在数据库中找到已分析的书籍: {}", found.getTitle());
+
+            // 创建结果列表，第一本是数据库中找到的
+            List<BookExtractVO> result = new ArrayList<>();
+            result.add(new BookExtractVO(
+                found.getTitle(),
+                found.getAuthor(),
+                true,
+                BookSourceType.ALREADY_ANALYZED
+            ));
+
+            // 仍然调用AI获取相似推荐（但修改提示词，告诉AI这本书已找到）
+            String prompt = buildExtractPromptWithFound(userInput, found.getTitle(), found.getAuthor());
+            String aiResponse = aiService.generateText(userId, prompt);
+            List<BookExtractVO> aiBooks = parseExtractResponse(aiResponse);
+
+            // 将AI推荐的书籍添加到结果中（排除已找到的书籍）
+            for (BookExtractVO book : aiBooks) {
+                if (!book.getTitle().equals(found.getTitle())) {
+                    result.add(book);
+                }
+            }
+
+            log.info("返回{}本书籍（1本已分析 + {}本推荐）", result.size(), result.size() - 1);
+            return result;
+        }
+
+        // 2. 数据库中未找到，使用正常的AI提取流程
         String prompt = buildExtractPrompt(userInput);
         String aiResponse = aiService.generateText(userId, prompt);
 
@@ -212,6 +249,53 @@ public class BookAnalyseService extends J2ServiceImpl<BookAnalyseDao, BookAnalys
     }
 
     /**
+     * 构建书籍提取提示词（已找到书籍的情况）
+     * 用于数据库中已找到用户输入的书籍，只需要AI推荐相似书籍
+     */
+    private String buildExtractPromptWithFound(String userInput, String foundTitle, String foundAuthor) {
+        return String.format("""
+                你是一位专业的图书推荐专家。用户输入了"%s"，我们已经在数据库中找到了这本书：《%s》（作者：%s）。
+
+                现在请你推荐4-5本与这本书相似的真实存在的书籍。
+
+                返回JSON格式（数组，只返回推荐书籍，不要包含已找到的书籍）：
+                [
+                  {
+                    "title": "书名",
+                    "author": "作者",
+                    "sourceType": "SIMILAR",
+                    "sourceLabel": "来源说明"
+                  }
+                ]
+
+                推荐规则：
+                1. 推荐4-5本与《%s》相似的书籍
+                2. 相似维度可以是：同作者作品、系列作品、同类型书籍、相关主题等
+                3. 所有推荐书籍的sourceType都必须是"SIMILAR"
+                4. sourceLabel要说明推荐理由，如："相似推荐：同作者作品"、"相似推荐：系列作品"、"相似推荐：同类型书籍"等
+                5. 推荐的书籍必须是真实存在的，不能编造虚假书籍
+                6. 不要在返回结果中包含已找到的书籍《%s》
+
+                示例：
+                已找到书籍：《三体》（刘慈欣）
+                返回：
+                [
+                  {"title": "三体Ⅱ·黑暗森林", "author": "刘慈欣", "sourceType": "SIMILAR", "sourceLabel": "相似推荐：系列作品"},
+                  {"title": "三体Ⅲ·死神永生", "author": "刘慈欣", "sourceType": "SIMILAR", "sourceLabel": "相似推荐：系列作品"},
+                  {"title": "球状闪电", "author": "刘慈欣", "sourceType": "SIMILAR", "sourceLabel": "相似推荐：同作者作品"},
+                  {"title": "流浪地球", "author": "刘慈欣", "sourceType": "SIMILAR", "sourceLabel": "相似推荐：同作者作品"}
+                ]
+
+                注意事项：
+                - 只返回JSON格式，不要包含任何其他文字
+                - 确保JSON格式正确，可以被解析
+                - 返回4-5本推荐书籍
+                - 所有书籍必须是真实存在的
+                - 不要包含已找到的书籍
+                """, userInput, foundTitle, foundAuthor, foundTitle, foundTitle);
+    }
+
+    /**
      * 构建分析提示词
      */
     private String buildAnalysisPrompt(String bookTitle, String author) {
@@ -367,16 +451,13 @@ public class BookAnalyseService extends J2ServiceImpl<BookAnalyseDao, BookAnalys
                 JSONObject json = jsonArray.getJSONObject(i);
                 String title = json.getString("title");
                 String author = json.getString("author");
-                String sourceType = json.getString("sourceType");
-                String sourceLabel = json.getString("sourceLabel");
+                String sourceTypeStr = json.getString("sourceType");
 
                 if (title != null && !title.isEmpty()) {
-                    // 如果AI没有返回sourceType，默认为USER_INPUT
-                    if (sourceType == null || sourceType.isEmpty()) {
-                        sourceType = "USER_INPUT";
-                    }
+                    // 将字符串转换为枚举类型
+                    BookSourceType sourceType = BookSourceType.fromCode(sourceTypeStr);
 
-                    result.add(new BookExtractVO(title, author, false, sourceType, sourceLabel));
+                    result.add(new BookExtractVO(title, author, false, sourceType));
                 }
             }
 

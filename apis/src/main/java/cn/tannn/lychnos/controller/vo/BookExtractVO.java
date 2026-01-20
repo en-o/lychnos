@@ -1,5 +1,6 @@
 package cn.tannn.lychnos.controller.vo;
 
+import cn.tannn.lychnos.common.constant.BookSourceType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.Getter;
@@ -39,18 +40,9 @@ public class BookExtractVO {
 
     /**
      * 书籍来源类型
-     * USER_INPUT: 用户输入的书籍（AI识别出的）
-     * SIMILAR: 相似推荐书籍
-     * NOT_FOUND_RECOMMEND: 未找到时的推荐书籍
      */
-    @Schema(description = "书籍来源类型：USER_INPUT-用户输入, SIMILAR-相似推荐, NOT_FOUND_RECOMMEND-未找到推荐")
-    private String sourceType;
-
-    /**
-     * 来源说明（用于前端显示提示信息）
-     */
-    @Schema(description = "来源说明")
-    private String sourceLabel;
+    @Schema(description = "书籍来源类型")
+    private BookSourceType sourceType;
 
     public BookExtractVO() {
     }
@@ -59,21 +51,27 @@ public class BookExtractVO {
         this.title = title;
         this.author = author;
         this.analyzed = false;
-        this.sourceType = "USER_INPUT";
+        this.sourceType = BookSourceType.USER_INPUT;
     }
 
     public BookExtractVO(String title, String author, Boolean analyzed) {
         this.title = title;
         this.author = author;
         this.analyzed = analyzed;
-        this.sourceType = "USER_INPUT";
+        this.sourceType = BookSourceType.USER_INPUT;
     }
 
-    public BookExtractVO(String title, String author, Boolean analyzed, String sourceType, String sourceLabel) {
+    public BookExtractVO(String title, String author, Boolean analyzed, BookSourceType sourceType) {
         this.title = title;
         this.author = author;
         this.analyzed = analyzed;
         this.sourceType = sourceType;
-        this.sourceLabel = sourceLabel;
+    }
+
+    /**
+     * 获取来源说明（从枚举中获取）
+     */
+    public String getSourceLabel() {
+        return sourceType != null ? sourceType.getDefaultLabel() : null;
     }
 }
