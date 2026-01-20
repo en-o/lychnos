@@ -2,12 +2,16 @@ package cn.tannn.lychnos.common.util;
 
 
 import cn.tannn.jdevelops.jwt.standalone.util.JwtWebUtil;
+import cn.tannn.jdevelops.utils.http.IpUtil;
 import cn.tannn.jdevelops.utils.jwt.core.JwtService;
 import cn.tannn.jdevelops.utils.jwt.module.LoginJwtExtendInfo;
+import cn.tannn.lychnos.common.pojo.UserRequestInfo;
 import cn.tannn.lychnos.controller.LoginController;
 import cn.tannn.lychnos.entity.UserInfo;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 /**
  * 用户相关
@@ -29,6 +33,27 @@ public class UserUtil extends cn.tannn.jdevelops.jwt.standalone.util.UserUtil {
         return JwtService.getLoginJwtExtendInfoExpires(token);
     }
 
+    /**
+     * 获取用户名（从JWT中获取，避免数据库查询）
+     */
+    private UserRequestInfo userRequestInfo() {
+        try {
+            var attributes = RequestContextHolder.getRequestAttributes();
+            if (attributes == null) {
+                return null;
+            }
+            var request = ((ServletRequestAttributes) attributes).getRequest();
+            var jwtInfo = UserUtil.getLoginJwtExtendInfoExpires(request);
+            String userName = jwtInfo.getUserName();
+            return new UserRequestInfo(IpUtil.getPoxyIpEnhance(request)
+                    ,jwtInfo.getUserName()
+                    ,jwtInfo.getLoginName()
+                    ,jwtInfo.getUserId());
+        } catch (Exception e) {
+            log.warn("从JWT获取用户名失败", e);
+            return null;
+        }
+    }
 
 
     /**
