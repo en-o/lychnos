@@ -9,6 +9,7 @@ import ConfirmDialog from '../components/ConfirmDialog';
 import ImagePreview from '../components/ImagePreview';
 import {getImageUrl} from '../utils/imageUrl';
 import {BOOK_ALREADY_ANALYZED} from '../constants/errorCodes';
+import {getThemeColor} from '../utils/themeColor';
 
 // 装饰主题类型
 type DecorationTheme = 'daily' | 'christmas' | 'spring-festival';
@@ -727,7 +728,7 @@ const HomePage: React.FC = () => {
                     {result.themes.map((theme, i) => (
                       <span
                         key={i}
-                        className="px-3 py-1 bg-gray-100 text-gray-700 rounded-lg text-sm"
+                        className={`px-3 py-1 rounded-lg text-sm ${getThemeColor(theme)}`}
                       >
                         {theme}
                       </span>
@@ -826,7 +827,7 @@ const HomePage: React.FC = () => {
                         {item.themes && item.themes.length > 0 && (
                           <div className="flex flex-wrap gap-1 mb-2">
                             {item.themes.slice(0, 3).map((theme, i) => (
-                              <span key={i} className="px-2 py-0.5 bg-gray-100 text-gray-700 rounded text-xs">
+                              <span key={i} className={`px-2 py-0.5 rounded text-xs ${getThemeColor(theme)}`}>
                                 {theme}
                               </span>
                             ))}
@@ -1091,7 +1092,7 @@ const HomePage: React.FC = () => {
                     <h3 className="text-sm font-medium text-gray-900 mb-2">核心主题</h3>
                     <div className="flex flex-wrap gap-2">
                       {selectedHistoryItem.analysisData.themes.map((theme, i) => (
-                        <span key={i} className="px-3 py-1 bg-gray-100 text-gray-700 rounded-lg text-sm">
+                        <span key={i} className={`px-3 py-1 rounded-lg text-sm ${getThemeColor(theme)}`}>
                           {theme}
                         </span>
                       ))}

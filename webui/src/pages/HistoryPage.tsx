@@ -6,6 +6,7 @@ import type {AnalysisHistory} from '../models';
 import Logo from '../components/Logo';
 import ImagePreview from '../components/ImagePreview';
 import {getImageUrl} from '../utils/imageUrl';
+import {getThemeColor} from '../utils/themeColor';
 
 const HistoryPage: React.FC = () => {
   const navigate = useNavigate();
@@ -263,7 +264,7 @@ const HistoryPage: React.FC = () => {
                         {item.themes && item.themes.length > 0 && (
                           <div className="flex flex-wrap gap-2 mb-2">
                             {item.themes.slice(0, 5).map((theme, i) => (
-                              <span key={i} className="px-2 py-1 bg-gray-100 text-gray-700 rounded text-xs">
+                              <span key={i} className={`px-2 py-1 rounded text-xs ${getThemeColor(theme)}`}>
                                 {theme}
                               </span>
                             ))}
@@ -388,7 +389,7 @@ const HistoryPage: React.FC = () => {
                     <h3 className="text-sm font-medium text-gray-900 mb-2">核心主题</h3>
                     <div className="flex flex-wrap gap-2">
                       {selectedItem.analysisData.themes.map((theme, i) => (
-                        <span key={i} className="px-3 py-1 bg-gray-100 text-gray-700 rounded-lg text-sm">
+                        <span key={i} className={`px-3 py-1 rounded-lg text-sm ${getThemeColor(theme)}`}>
                           {theme}
                         </span>
                       ))}
