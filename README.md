@@ -87,6 +87,58 @@ mvn clean package -DskipTests
 ## docker compose
 [docker-compose.yml](docker-compose.yml)
 
+## 环境变量配置
+
+以下是所有可配置的环境变量及其说明：
+
+| 环境变量 | 说明 | 默认值 | 单位 |
+|---------|------|--------|------|
+| `TZ` | 时区设置 | `Asia/Shanghai` | - |
+| `FILE_MAX_SIZE` | 单个文件最大上传大小 | `500MB` | - |
+| `FILE_MAX_REQUEST` | 请求最大大小 | `500MB` | - |
+| `MYSQL_PWD` | MySQL 数据库密码 | `root` | - |
+| `MYSQL_UNM` | MySQL 数据库用户名 | `root` | - |
+| `MYSQL_URL` | MySQL 数据库地址 | `localhost:3306` | - |
+| `MYSQL_DB` | MySQL 数据库名称 | `db_lychnos` | - |
+| `DOC_PASSWORD` | API 文档访问密码 | `tan` | - |
+| `DOC_USERNAME` | API 文档访问用户名 | `tan` | - |
+| `CONFIG_ENV` | 配置环境（dev/prod） | `prod` | - |
+| `IMAGE_STORAGE_PATH` | 图片存储根目录 | `./data/images` | - |
+| `AES_SECRET_KEY` | AES 加密密钥（16位字符）<br/>生成方式：`AESUtil.generateSecretKey("Lychnos2026SecretKey")`<br/>⚠️ 生产环境必须修改此密钥 | `kZXQiOjE3MzczOTY3` | - |
+| `IMAGE_SIGNATURE_EXPIRY_MS` | 未登录用户图片签名有效期<br/>用于生成时效性签名 URL，允许未登录用户安全访问推荐书籍图片 | `120000`（2分钟） | 毫秒 |
+
+### Docker Compose 示例
+
+```yaml
+environment:
+  TZ: Asia/Shanghai
+  FILE_MAX_SIZE: ${FILE_MAX_SIZE:-500MB}
+  FILE_MAX_REQUEST: ${FILE_MAX_REQUEST:-500MB}
+  MYSQL_PWD: ${MYSQL_PWD:-root}
+  MYSQL_UNM: ${MYSQL_UNM:-root}
+  MYSQL_URL: ${MYSQL_URL:-localhost:3306}
+  MYSQL_DB: ${MYSQL_DB:-db_lychnos}
+  DOC_PASSWORD: ${DOC_PASSWORD:-tan}
+  DOC_USERNAME: ${DOC_USERNAME:-tan}
+  CONFIG_ENV: ${CONFIG_ENV:-prod}
+  IMAGE_STORAGE_PATH: ${IMAGE_STORAGE_PATH:-./data/images}
+  AES_SECRET_KEY: ${AES_SECRET_KEY:-kZXQiOjE3MzczOTY3}
+  IMAGE_SIGNATURE_EXPIRY_MS: ${IMAGE_SIGNATURE_EXPIRY_MS:-120000}
+```
+
+### 安全说明
+
+1. **AES_SECRET_KEY**：
+   - 用于加密存储敏感信息（如 AI API Key）
+   - 生产环境必须使用自己生成的密钥
+   - 生成方法见下方 "AES 加密密钥配置" 章节
+
+2. **IMAGE_SIGNATURE_EXPIRY_MS**：
+   - 控制未登录用户访问图片的时效性
+   - 使用 HMAC-SHA256 签名确保 URL 不可篡改
+   - 建议根据实际需求调整（默认 2 分钟）
+   - 时间过长可能存在安全风险，时间过短可能影响用户体验
+
 ## sql初始化
 > 项目启动会自己创建仓库和表结构，你只需要初始化点数据就好了用来预置的分析
 
