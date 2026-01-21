@@ -24,7 +24,7 @@ class LychnosApplicationTests {
      * 添加或更新 GitHub 配置
      * <p>
      * 请替换 "your_xxx" 为实际值后运行
-     * https://github.com/settings/applications/new
+     * https://github.com/settings/applications/3348764
      * </p>
      */
     // @Test
