@@ -1,8 +1,10 @@
-import React, {useState} from 'react';
-import {Link, useNavigate, useSearchParams} from 'react-router-dom';
-import {authApi} from '../api/auth';
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { authApi } from '../api/auth';
+import { oauthApi } from '../api/oauth';
+import type { OAuth2Provider } from '../models/OAuth2';
 import Logo from '../components/Logo';
-import {toast} from '../components/ToastContainer';
+import { toast } from '../components/ToastContainer';
 
 const LoginPage: React.FC = () => {
   const navigate = useNavigate();
@@ -12,6 +14,22 @@ const LoginPage: React.FC = () => {
   const [loginName, setLoginName] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [providers, setProviders] = useState<OAuth2Provider[]>([]);
+
+  // 加载第三方登录平台列表
+  useEffect(() => {
+    const loadProviders = async () => {
+      try {
+        const response = await oauthApi.getProviders();
+        if (response.success && response.data) {
+          setProviders(response.data);
+        }
+      } catch (error) {
+        console.error('加载第三方登录平台失败:', error);
+      }
+    };
+    loadProviders();
+  }, []);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -46,6 +64,34 @@ const LoginPage: React.FC = () => {
       // 错误提示已在request拦截器中统一处理，不需要重复提示
     } finally {
       setLoading(false);
+    }
+  };
+
+  // 处理第三方登录
+  const handleOAuthLogin = async (providerType: string) => {
+    try {
+      // 生成随机 state 并保存到 localStorage
+      const state = Math.random().toString(36).substring(2, 15);
+      localStorage.setItem('oauth_state', state);
+      localStorage.setItem('oauth_provider', providerType);
+
+      // 保存 redirect 参数
+      localStorage.setItem('oauth_redirect', redirect);
+
+      // 构造回调地址 (指向前端页面)
+      const redirectUri = window.location.origin + '/oauth/callback';
+
+      // 获取授权 URL (传入 state 和 redirectUri)
+      const response = await oauthApi.getAuthorizeUrl(providerType, state, redirectUri);
+      if (response.success && response.data) {
+        // 跳转到第三方授权页面
+        window.location.href = response.data;
+      } else {
+        toast.error('生成授权链接失败');
+      }
+    } catch (error) {
+      console.error('第三方登录失败:', error);
+      toast.error('第三方登录失败，请稍后重试');
     }
   };
 
@@ -107,14 +153,36 @@ const LoginPage: React.FC = () => {
           </button>
         </form>
 
-        {/* 提示信息 */}
-        {/*<div className="mt-6 p-3 bg-gray-50 rounded-lg border border-gray-200">*/}
-        {/*  <p className="text-xs text-gray-600 mb-1">演示账号:</p>*/}
-        {/*  <p className="text-xs text-gray-700">用户名: admin / 密码: admin</p>*/}
-        {/*</div>*/}
+        {/* 第三方登录 */}
+        {providers.length > 0 && (
+          <>
+            {/* 分隔线 */}
+            <div className="flex items-center my-6">
+              <div className="flex-1 border-t border-gray-300"></div>
+              <span className="px-4 text-sm text-gray-500">或使用第三方账号登录</span>
+              <div className="flex-1 border-t border-gray-300"></div>
+            </div>
+
+            {/* 第三方登录按钮 */}
+            <div className="grid grid-cols-2 gap-3">
+              {providers.map(provider => (
+                <button
+                  key={provider.type}
+                  onClick={() => handleOAuthLogin(provider.type)}
+                  className="flex items-center justify-center gap-2 px-4 py-2.5 border border-gray-300 rounded-lg hover:bg-gray-50 transition"
+                >
+                  {provider.iconUrl && (
+                    <img src={provider.iconUrl} alt={provider.name} className="w-5 h-5" />
+                  )}
+                  <span className="text-sm">{provider.name}</span>
+                </button>
+              ))}
+            </div>
+          </>
+        )}
 
         {/* 注册链接 */}
-        <div className="mt-4 text-center">
+        <div className="mt-6 text-center">
           <p className="text-sm text-gray-600">
             还没有账号?{' '}
             <Link to="/register" className="text-blue-600 hover:text-blue-700 font-medium">

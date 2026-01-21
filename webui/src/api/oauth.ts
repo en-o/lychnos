@@ -9,7 +9,7 @@ export const oauthApi = {
    * 获取启用的第三方平台列表
    */
   getProviders: async () => {
-    return request.get<Result<OAuth2Provider>>('/oauth/providers');
+    return request.get<Result<OAuth2Provider[]>>('/oauth/providers');
   },
 
   /**
@@ -43,7 +43,7 @@ export const oauthApi = {
    * 获取用户已绑定的第三方账户列表
    */
   getUserBindings: async () => {
-    return request.get<Result<UserThirdPartyBinding>>('/user/third-party/bindings');
+    return request.get<Result<UserThirdPartyBinding[]>>('/user/third-party/bindings');
   },
 
   /**
