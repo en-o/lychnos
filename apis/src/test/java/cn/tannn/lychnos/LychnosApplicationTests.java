@@ -90,11 +90,11 @@ class LychnosApplicationTests {
         config.setClientId(clientId);
         config.setClientSecret(clientSecret);
         // 注意：请根据 LinuxDo 官方文档确认最新的 OAuth2 端点
-        config.setAuthorizeUrl("https://connect.linuxdo.org/oauth2/authorize");
-        config.setTokenUrl("https://connect.linuxdo.org/oauth2/token");
-        config.setUserInfoUrl("https://connect.linuxdo.org/api/user");
-        config.setScope("read");
-        config.setIconUrl("https://connect.linuxdo.org/uploads/default/optimized/4X/c/c/d/ccd8c210609d498cbeb3d5201d4c259348447562_2_32x32.png"); // 示例图标
+        config.setAuthorizeUrl("https://connect.linux.do/oauth2/authorize");
+        config.setTokenUrl("https://connect.linux.do/oauth2/token");
+        config.setUserInfoUrl("https://connect.linux.do/api/user");
+        config.setScope("read:user user:email");
+        config.setIconUrl("https://linux.do/uploads/default/optimized/4X/c/c/d/ccd8c210609d498cbeb3d5201d4c259348447562_2_32x32.png"); // 示例图标
         config.setSortOrder(2);
         config.setEnabled(true);
 
