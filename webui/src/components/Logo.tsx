@@ -1,5 +1,5 @@
 import React from 'react';
-import { getAssetUrl } from '../utils/assets';
+import {getAssetUrl} from '../utils/assets';
 
 interface LogoProps {
   className?: string;

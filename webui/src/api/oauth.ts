@@ -1,6 +1,7 @@
-import { request } from '../utils/request';
-import type { OAuth2Provider, UserThirdPartyBinding } from "../models/OAuth2.ts";
-import { type Result } from '../models';
+import {request} from '../utils/request';
+import type {OAuth2Provider, UserThirdPartyBinding} from "../models/OAuth2.ts";
+import {type Result} from '../models';
+
 /**
  * OAuth2 第三方登录 API
  */

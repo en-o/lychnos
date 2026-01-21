@@ -1,8 +1,8 @@
-import React, { useEffect } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
-import { oauthApi } from '../api/oauth';
-import { authApi } from '../api/auth';
-import { toast } from '../components/ToastContainer';
+import React, {useEffect} from 'react';
+import {useNavigate, useSearchParams} from 'react-router-dom';
+import {oauthApi} from '../api/oauth';
+import {authApi} from '../api/auth';
+import {toast} from '../components/ToastContainer';
 import Logo from '../components/Logo';
 
 /**

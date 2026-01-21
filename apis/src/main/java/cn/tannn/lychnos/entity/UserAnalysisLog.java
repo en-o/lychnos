@@ -1,7 +1,6 @@
 package cn.tannn.lychnos.entity;
 
 import cn.tannn.lychnos.common.constant.ModelType;
-import cn.tannn.lychnos.common.constant.ShareType;
 import cn.tannn.lychnos.common.constant.UsageType;
 import cn.tannn.lychnos.common.pojo.JpaCommonBean;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;

@@ -1,7 +1,7 @@
 /**
  * Mock数据 - 图书数据
  */
-import { BookAnalysis, UserInterest, UserInterestDetail, BookRecommendItem } from '../../src/models';
+import {BookAnalysis, BookRecommendItem, UserInterest, UserInterestDetail} from '../../src/models';
 
 // Mock书籍分析数据库（平台共享数据）
 export const mockBookAnalysisData: BookAnalysis[] = [

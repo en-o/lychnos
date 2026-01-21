@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { authApi } from '../api/auth';
-import { oauthApi } from '../api/oauth';
-import type { OAuth2Provider } from '../models/OAuth2';
+import React, {useEffect, useState} from 'react';
+import {Link, useNavigate, useSearchParams} from 'react-router-dom';
+import {authApi} from '../api/auth';
+import {oauthApi} from '../api/oauth';
+import type {OAuth2Provider} from '../models/OAuth2';
 import Logo from '../components/Logo';
-import { toast } from '../components/ToastContainer';
+import {toast} from '../components/ToastContainer';
 
 const LoginPage: React.FC = () => {
   const navigate = useNavigate();

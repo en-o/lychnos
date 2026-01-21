@@ -1,6 +1,6 @@
-import React, {useEffect, useState, useRef, useCallback} from 'react';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {useNavigate, useSearchParams} from 'react-router-dom';
-import {ArrowLeft, Eye, ThumbsDown, ThumbsUp, Search, X} from 'lucide-react';
+import {ArrowLeft, Eye, Search, ThumbsDown, ThumbsUp, X} from 'lucide-react';
 import {bookApi} from '../api/book';
 import type {AnalysisHistory} from '../models';
 import Logo from '../components/Logo';

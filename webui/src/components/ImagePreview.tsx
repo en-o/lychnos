@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { X, ZoomIn, ZoomOut, RotateCw } from 'lucide-react';
+import React, {useEffect, useState} from 'react';
+import {RotateCw, X, ZoomIn, ZoomOut} from 'lucide-react';
 
 interface ImagePreviewProps {
   src: string;

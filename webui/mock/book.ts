@@ -4,26 +4,25 @@
  * ⚠️ 注意：Mock接口已停止维护，存在数据不一致问题
  * 请使用真实后端接口进行开发和测试
  */
-import { MockMethod } from 'vite-plugin-mock';
+import {MockMethod} from 'vite-plugin-mock';
 import {
-  getMockBookAnalysis,
-  getMockUserInterestDetail,
-  getMockUserInterests,
-  addOrUpdateUserInterest,
-  getRandomBookForAnalysis,
-  mockBookAnalysisData,
-  mockBookRecommendList,
+    addOrUpdateUserInterest,
+    getMockBookAnalysis,
+    getMockUserInterestDetail,
+    getMockUserInterests,
+    getRandomBookForAnalysis,
+    mockBookAnalysisData,
+    mockBookRecommendList,
 } from './data/book.data';
 import type {
-  AnalysisHistory,
-  BookAnalysis,
-  BookRecommendItem,
-  UserInterest,
-  UserInterestDetail,
-  FeedbackHistory,
-  PageResult,
-  Result,
-  UserPreference,
+    AnalysisHistory,
+    BookAnalysis,
+    BookRecommendItem,
+    PageResult,
+    Result,
+    UserInterest,
+    UserInterestDetail,
+    UserPreference,
 } from '../src/models';
 
 // 使用内存存储模拟持久化

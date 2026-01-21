@@ -6,8 +6,8 @@ import {
   type BookRecommendItem,
   type PageResult,
   type Result,
-  type UserPreference,
   type UserInterest,
+  type UserPreference,
 } from '../models';
 import type {InterestFeedback} from "../models/interest.model.ts";
 

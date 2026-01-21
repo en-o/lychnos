@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { Eye, EyeOff } from 'lucide-react';
+import React, {useState} from 'react';
+import {Link, useNavigate} from 'react-router-dom';
+import {Eye, EyeOff} from 'lucide-react';
 import Logo from '../components/Logo';
-import { toast } from '../components/ToastContainer';
-import { authApi } from '../api/auth';
-import { oauthApi } from '../api/oauth';
-import type { OAuth2Provider } from '../models/OAuth2';
+import {toast} from '../components/ToastContainer';
+import {authApi} from '../api/auth';
+import {oauthApi} from '../api/oauth';
+import type {OAuth2Provider} from '../models/OAuth2';
 
 
 const RegisterPage: React.FC = () => {

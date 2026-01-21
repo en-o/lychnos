@@ -1,12 +1,12 @@
-import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Save } from 'lucide-react';
-import type { UserProfile } from '../models';
+import React, {useEffect, useState} from 'react';
+import {useNavigate} from 'react-router-dom';
+import {ArrowLeft, Save} from 'lucide-react';
+import type {UserProfile} from '../models';
 import Logo from '../components/Logo';
-import { toast } from '../components/ToastContainer';
-import { authApi } from '../api/auth';
-import { oauthApi } from '../api/oauth';
-import type { OAuth2Provider, UserThirdPartyBinding } from '../models/OAuth2';
+import {toast} from '../components/ToastContainer';
+import {authApi} from '../api/auth';
+import {oauthApi} from '../api/oauth';
+import type {OAuth2Provider, UserThirdPartyBinding} from '../models/OAuth2';
 
 
 const ProfilePage: React.FC = () => {
