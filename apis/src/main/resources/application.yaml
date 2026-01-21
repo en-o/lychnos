@@ -26,6 +26,10 @@ app:
   oauth:
     # 线上改为域名，第三方登录授权回调当前项目的地址
     callback-base-url: ${CALLBACK_BASE_URL:http://localhost:1250}
+  proxy:
+    enabled: ${HTTP_PROXY_ENABLED:true}
+    host: 127.0.0.1
+    port: 7890  # 改成你的代理端口
 
 jdevelops:
   swagger:
