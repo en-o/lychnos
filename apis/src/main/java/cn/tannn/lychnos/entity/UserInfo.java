@@ -29,12 +29,10 @@ import static cn.tannn.jdevelops.utils.jwt.exception.UserCode.USER_PASSWORD_ERRO
  * @date 2026/1/8 21:54
  */
 @Entity
-@Table(name = "tb_user_info",
-        indexes = {
-                @Index(name = "idx_loginName", columnList = "loginName", unique = true),
-                @Index(name = "idx_email", columnList = "email")
-        }
-)
+@Table(name = "tb_user_info", indexes = {
+        @Index(name = "idx_loginName", columnList = "loginName", unique = true),
+        @Index(name = "idx_email", columnList = "email")
+})
 @Comment("账户基础信息表")
 @Getter
 @Setter
@@ -42,7 +40,7 @@ import static cn.tannn.jdevelops.utils.jwt.exception.UserCode.USER_PASSWORD_ERRO
 @DynamicUpdate
 @DynamicInsert
 @Schema(description = "账户基础信息表")
-@JsonView({Views.Public.class})
+@JsonView({ Views.Public.class })
 public class UserInfo extends JpaCommonBean<UserInfo> {
 
     /**
@@ -76,8 +74,6 @@ public class UserInfo extends JpaCommonBean<UserInfo> {
     @Schema(description = "邮箱")
     private String email;
 
-
-
     /**
      * 用户输入跟数据库密码对比
      *
@@ -90,7 +86,6 @@ public class UserInfo extends JpaCommonBean<UserInfo> {
             throw new UserException(USER_PASSWORD_ERROR);
         }
     }
-
 
     /**
      * 获取md5密码（用户密码）
