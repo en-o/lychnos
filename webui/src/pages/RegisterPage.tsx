@@ -6,44 +6,15 @@ import { toast } from '../components/ToastContainer';
 import { authApi } from '../api/auth';
 import { oauthApi } from '../api/oauth';
 import type { OAuth2Provider } from '../models/OAuth2';
+import { generateRandomString } from '../utils/random';
 
 const RegisterPage: React.FC = () => {
-  const navigate = useNavigate();
-  const [formData, setFormData] = useState({
-    loginName: '',
-    password: '',
-    confirmPassword: '',
-    email: '',
-    nickname: '',
-  });
-  const [showPasswords, setShowPasswords] = useState({
-    password: false,
-    confirm: false,
-  });
-  const [errors, setErrors] = useState<Record<string, string>>({});
-  const [loading, setLoading] = useState(false);
-  const [providers, setProviders] = useState<OAuth2Provider[]>([]);
-
-  // 加载第三方登录平台列表
-  React.useEffect(() => {
-    const loadProviders = async () => {
-      try {
-        const response = await oauthApi.getProviders();
-        if (response.success && response.data) {
-          setProviders(response.data);
-        }
-      } catch (error) {
-        console.error('加载第三方登录平台失败:', error);
-      }
-    };
-    loadProviders();
-  }, []);
-
+  // ...
   // 处理第三方登录
   const handleOAuthLogin = async (providerType: string) => {
     try {
       // 生成随机 state 并保存到 localStorage
-      const state = Math.random().toString(36).substring(2, 15);
+      const state = generateRandomString();
       localStorage.setItem('oauth_state', state);
       localStorage.setItem('oauth_provider', providerType);
       localStorage.setItem('oauth_action', 'login'); // 明确标记为登录动作
