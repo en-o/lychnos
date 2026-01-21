@@ -53,7 +53,10 @@ public class OAuth2Service {
     // Provider 映射
     private final Map<String, OAuth2Provider> providerMap = new HashMap<>();
 
-    @Value("${app.oauth.callback-base-url:http://localhost:5173}")
+    /**
+     * 第三方登录授权回调当前项目的地址
+     */
+    @Value("${app.oauth.callback-base-url:http://localhost:1250}")
     private String callbackBaseUrl;
 
     /**
