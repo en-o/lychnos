@@ -45,7 +45,7 @@ public class OAuth2LoginController {
     @Operation(summary = "获取所有第三方登录平台")
     @ApiMapping(value = "/providers", checkToken = false, method = RequestMethod.GET)
     public ResultVO<List<OAuth2ProviderVO>> getProviders() {
-        List<OAuthConfig> configs = oauthConfigService.getAllConfigs();
+        List<OAuthConfig> configs = oauthConfigService.getEnabledConfigs();
 
         List<OAuth2ProviderVO> providers = configs.stream()
                 .map(config -> {
