@@ -27,7 +27,7 @@ class LychnosApplicationTests {
      * https://github.com/settings/applications/new
      * </p>
      */
-//    @Test
+    // @Test
     void addGithubConfig() {
         // 1. 准备配置数据 (请在此处填入真实的 Client ID 和 Client Secret)
         String clientId = "your_github_client_id";
@@ -49,6 +49,7 @@ class LychnosApplicationTests {
         config.setScope("read:user user:email");
         config.setIconUrl("https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png");
         config.setSortOrder(1);
+        config.setEnabled(true);
 
         // 2. 检查是否存在，存在则更新
         Optional<OAuthConfig> existing = oauthConfigService.getConfigByType(ProviderType.GITHUB);
@@ -71,7 +72,7 @@ class LychnosApplicationTests {
      * https://connect.linux.do/dash/sso
      * </p>
      */
-//    @Test
+    // @Test
     void addLinuxDoConfig() {
         // 1. 准备配置数据 (请在此处填入真实的 Client ID 和 Client Secret)
         String clientId = "your_linuxdo_client_id";
@@ -93,6 +94,7 @@ class LychnosApplicationTests {
         config.setScope("read");
         config.setIconUrl("https://linux.do/uploads/default/original/3X/9/d/9dd497313d118893779d729a43a75e3c79212.png"); // 示例图标
         config.setSortOrder(2);
+        config.setEnabled(true);
 
         // 2. 检查是否存在
         Optional<OAuthConfig> existing = oauthConfigService.getConfigByType(ProviderType.LINUXDO);
@@ -114,7 +116,7 @@ class LychnosApplicationTests {
      * 修改方法内的 typeToDelete 变量来指定要删除的平台
      * </p>
      */
-//    @Test
+    // @Test
     void deleteConfig() {
         // 修改这里来指定要删除的平台，例如 ProviderType.GITHUB
         ProviderType typeToDelete = null;
