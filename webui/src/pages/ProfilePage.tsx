@@ -1,10 +1,13 @@
-import React, {useEffect, useState} from 'react';
-import {useNavigate} from 'react-router-dom';
-import {ArrowLeft, Save} from 'lucide-react';
-import type {UserProfile} from '../models';
+import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { ArrowLeft, Save } from 'lucide-react';
+import type { UserProfile } from '../models';
 import Logo from '../components/Logo';
-import {toast} from '../components/ToastContainer';
-import {authApi} from '../api/auth';
+import { toast } from '../components/ToastContainer';
+import { authApi } from '../api/auth';
+import { oauthApi } from '../api/oauth';
+import type { OAuth2Provider, UserThirdPartyBinding } from '../models/OAuth2';
+import { generateRandomString } from '../utils/random';
 
 const ProfilePage: React.FC = () => {
   const navigate = useNavigate();
@@ -16,6 +19,9 @@ const ProfilePage: React.FC = () => {
     avatar: '',
     createTime: '',
   });
+
+  const [bindings, setBindings] = useState<UserThirdPartyBinding[]>([]);
+  const [providers, setProviders] = useState<OAuth2Provider[]>([]);
 
   const [formData, setFormData] = useState<UserProfile>(profile);
 
@@ -31,7 +37,68 @@ const ProfilePage: React.FC = () => {
     };
     setProfile(userProfile);
     setFormData(userProfile);
+
+    // 加载绑定列表和可用平台
+    loadBindingsAndProviders();
   }, []);
+
+  const loadBindingsAndProviders = async () => {
+    try {
+      const [bindingsRes, providersRes] = await Promise.all([
+        oauthApi.getUserBindings(),
+        oauthApi.getProviders()
+      ]);
+
+      if (bindingsRes.success) {
+        setBindings(bindingsRes.data || []);
+      }
+      if (providersRes.success) {
+        setProviders(providersRes.data || []);
+      }
+    } catch (error) {
+      console.error('加载第三方绑定信息失败', error);
+    }
+  };
+
+  const handleBind = async (providerType: string) => {
+    try {
+      // 生成随机 state 并保存
+      const state = generateRandomString();
+      localStorage.setItem('oauth_state', state);
+      localStorage.setItem('oauth_provider', providerType);
+      localStorage.setItem('oauth_action', 'bind'); // 标记为绑定操作
+      localStorage.setItem('oauth_redirect', '/profile'); // 绑定后回跳个人中心
+
+      // 构造回调地址
+      const redirectUri = window.location.origin + '/oauth/callback';
+
+      // 获取授权 URL
+      const response = await oauthApi.getAuthorizeUrl(providerType, state, redirectUri);
+      if (response.success && response.data) {
+        window.location.href = response.data;
+      }
+    } catch (error) {
+      toast.error('启动绑定失败');
+    }
+  };
+
+  const handleUnbind = async (providerType: string) => {
+    if (!window.confirm('确定要解绑该账号吗？')) {
+      return;
+    }
+
+    try {
+      const response = await oauthApi.unbindAccount(providerType);
+      if (response.success) {
+        toast.success('解绑成功');
+        loadBindingsAndProviders(); // 刷新列表
+      } else {
+        toast.error(response.message || '解绑失败');
+      }
+    } catch (error) {
+      toast.error('解绑失败');
+    }
+  };
 
   const handleSave = () => {
     // 保存到 localStorage
@@ -142,9 +209,8 @@ const ProfilePage: React.FC = () => {
                   value={formData.nickname}
                   onChange={(e) => setFormData({ ...formData, nickname: e.target.value })}
                   disabled={!isEditing}
-                  className={`w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                    !isEditing ? 'bg-gray-50' : ''
-                  }`}
+                  className={`w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${!isEditing ? 'bg-gray-50' : ''
+                    }`}
                   placeholder="请输入昵称"
                 />
               </div>
@@ -158,9 +224,8 @@ const ProfilePage: React.FC = () => {
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                   disabled={!isEditing}
-                  className={`w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                    !isEditing ? 'bg-gray-50' : ''
-                  }`}
+                  className={`w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${!isEditing ? 'bg-gray-50' : ''
+                    }`}
                   placeholder="请输入邮箱"
                 />
               </div>
@@ -194,6 +259,60 @@ const ProfilePage: React.FC = () => {
                 <span className="text-gray-900">修改密码</span>
                 <span className="text-gray-400">→</span>
               </button>
+            </div>
+          </div>
+
+          {/* 第三方绑定设置 */}
+          <div className="mt-6 bg-white rounded-xl border border-gray-200 p-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">第三方账号绑定</h3>
+
+            <div className="space-y-4">
+              {providers.map(provider => {
+                const isBound = bindings.some(b => b.providerType === provider.type);
+                const bindInfo = bindings.find(b => b.providerType === provider.type);
+
+                return (
+                  <div key={provider.type} className="flex items-center justify-between p-3 border border-gray-100 rounded-lg">
+                    <div className="flex items-center gap-3">
+                      {provider.iconUrl ? (
+                        <img src={provider.iconUrl} alt={provider.name} className="w-8 h-8 rounded-full" />
+                      ) : (
+                        <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-xs">
+                          {provider.name[0]}
+                        </div>
+                      )}
+                      <div>
+                        <div className="font-medium text-gray-900">{provider.name}</div>
+                        {isBound ? (
+                          <div className="text-xs text-gray-500">已绑定: {bindInfo?.nickname}</div>
+                        ) : (
+                          <div className="text-xs text-gray-400">未绑定</div>
+                        )}
+                      </div>
+                    </div>
+
+                    {isBound ? (
+                      <button
+                        onClick={() => handleUnbind(provider.type)}
+                        className="px-3 py-1.5 text-xs text-red-600 border border-red-200 rounded hover:bg-red-50 transition"
+                      >
+                        解绑
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => handleBind(provider.type)}
+                        className="px-3 py-1.5 text-xs text-blue-600 border border-blue-200 rounded hover:bg-blue-50 transition"
+                      >
+                        绑定
+                      </button>
+                    )}
+                  </div>
+                );
+              })}
+
+              {providers.length === 0 && (
+                <div className="text-gray-500 text-sm text-center py-2">暂无支持的第三方平台</div>
+              )}
             </div>
           </div>
         </div>
