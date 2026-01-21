@@ -3,8 +3,7 @@ package cn.tannn.lychnos.service;
 import cn.tannn.jdevelops.exception.built.BusinessException;
 import cn.tannn.jdevelops.exception.built.UserException;
 import cn.tannn.jdevelops.jwt.standalone.service.LoginService;
-import cn.tannn.jdevelops.utils.jwt.module.LoginJwtExtendInfo;
-import cn.tannn.jdevelops.utils.jwt.module.SignEntity;
+import cn.tannn.lychnos.common.util.UserUtil;
 import cn.tannn.lychnos.controller.vo.LoginVO;
 import cn.tannn.lychnos.dao.UserThirdPartyBindDao;
 import cn.tannn.lychnos.entity.OAuthConfig;
@@ -155,7 +154,7 @@ public class OAuth2Service {
         }
 
         // 4. 生成 JWT Token 返回
-        String token = generateLoginToken(userInfo);
+        String token = UserUtil.generateLoginToken(loginService, userInfo);
         return new LoginVO(token);
     }
 
@@ -347,31 +346,12 @@ public class OAuth2Service {
     }
 
     /**
-     * 生成登录Token
-     *
-     * @param userInfo 用户信息
-     * @return JWT Token
-     */
-    private String generateLoginToken(UserInfo userInfo) {
-        SignEntity<LoginJwtExtendInfo<String>> init = SignEntity.init(userInfo.getLoginName());
-
-        // 拓展信息
-        LoginJwtExtendInfo<String> loginJwtExtendInfo = new LoginJwtExtendInfo<>();
-        loginJwtExtendInfo.setUserId(userInfo.getId() + "");
-        loginJwtExtendInfo.setUserNo(userInfo.getId() + "");
-        loginJwtExtendInfo.setUserName(userInfo.getNickname());
-        loginJwtExtendInfo.setLoginName(userInfo.getLoginName());
-        init.setMap(loginJwtExtendInfo);
-
-        return loginService.login(init).getSign();
-    }
-
-    /**
      * 生成安全的随机密码
      * 包含大小写字母、数字和特殊字符，长度24位
      *
      * @return 随机密码
      */
+
     private String generateSecureRandomPassword() {
         String upperCase = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
         String lowerCase = "abcdefghijklmnopqrstuvwxyz";
