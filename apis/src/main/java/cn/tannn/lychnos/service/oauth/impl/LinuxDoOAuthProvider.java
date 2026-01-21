@@ -82,6 +82,8 @@ public class LinuxDoOAuthProvider implements OAuth2Provider {
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
             headers.set("Accept", "application/json");
+            headers.set("User-Agent",
+                    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36");
 
             HttpEntity<MultiValueMap<String, String>> requestEntity = new HttpEntity<>(params, headers);
 
@@ -119,6 +121,8 @@ public class LinuxDoOAuthProvider implements OAuth2Provider {
             HttpHeaders headers = new HttpHeaders();
             headers.set("Authorization", "Bearer " + accessToken);
             headers.set("Accept", "application/json");
+            headers.set("User-Agent",
+                    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36");
 
             HttpEntity<Void> requestEntity = new HttpEntity<>(headers);
 
