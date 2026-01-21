@@ -13,6 +13,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * LinuxDo OAuth2 Provider 实现
@@ -57,7 +58,7 @@ public class LinuxDoOAuthProvider implements OAuth2Provider {
                 .queryParam("client_id", config.getClientId())
                 .queryParam("redirect_uri", redirectUri)
                 .queryParam("response_type", "code")
-                .queryParam("scope", config.getScope())
+                .queryParam("scope", StringUtils.isNotBlank(config.getScope()) ? config.getScope() : "read")
                 .queryParam("state", state)
                 .build()
                 .toUriString();

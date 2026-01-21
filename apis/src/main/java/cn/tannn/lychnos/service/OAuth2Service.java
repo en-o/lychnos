@@ -107,7 +107,8 @@ public class OAuth2Service {
         OAuth2Provider provider = getProvider(providerType);
 
         // 构造回调地址
-        String redirectUri = callbackBaseUrl + "/oauth/callback/" + providerType.getValue().toLowerCase();
+        String redirectUri = StringUtils.stripEnd(callbackBaseUrl, "/") + "/oauth/callback/"
+                + providerType.getValue().toLowerCase();
 
         return provider.getAuthorizeUrl(state, redirectUri);
     }
@@ -125,7 +126,8 @@ public class OAuth2Service {
         OAuth2Provider provider = getProvider(providerType);
 
         // 1. 获取 Access Token
-        String redirectUri = callbackBaseUrl + "/oauth/callback/" + providerType.getValue().toLowerCase();
+        String redirectUri = StringUtils.stripEnd(callbackBaseUrl, "/") + "/oauth/callback/"
+                + providerType.getValue().toLowerCase();
         String accessToken = provider.getAccessToken(code, redirectUri);
 
         // 2. 获取第三方用户信息
@@ -181,7 +183,8 @@ public class OAuth2Service {
         }
 
         // 3. 获取 Access Token
-        String redirectUri = callbackBaseUrl + "/oauth/callback/" + providerTypeEnum.getValue().toLowerCase();
+        String redirectUri = StringUtils.stripEnd(callbackBaseUrl, "/") + "/oauth/callback/"
+                + providerTypeEnum.getValue().toLowerCase();
         String accessToken = provider.getAccessToken(code, redirectUri);
 
         // 4. 获取第三方用户信息

@@ -13,6 +13,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * GitHub OAuth2 Provider 实现
@@ -54,7 +55,8 @@ public class GitHubOAuthProvider implements OAuth2Provider {
         return UriComponentsBuilder.fromUriString(config.getAuthorizeUrl())
                 .queryParam("client_id", config.getClientId())
                 .queryParam("redirect_uri", redirectUri)
-                .queryParam("scope", config.getScope())
+                .queryParam("scope",
+                        StringUtils.isNotBlank(config.getScope()) ? config.getScope() : "read:user user:email")
                 .queryParam("state", state)
                 .build()
                 .toUriString();
