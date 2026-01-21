@@ -22,7 +22,7 @@ app:
     # AES 加密密钥（用于 API Key 等敏感信息加密存储）
     # 生成方式：AESUtil.generateSecretKey("Lychnos2026SecretKey")
     # 注意：生产环境请务必修改此密钥，并妥善保管
-    aes-secret-key: ${AES_SECRET_KEY:kZXQiOjE3MzczOTY3}
+    aes-secret-key: ${AES_SECRET_KEY:jERYIHInCbSY0sfa+KoAow==}
   oauth:
     # 线上改为域名，第三方登录授权回调当前项目的地址
     callback-base-url: ${CALLBACK_BASE_URL:http://localhost:1250}
