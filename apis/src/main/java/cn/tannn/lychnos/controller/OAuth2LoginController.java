@@ -62,7 +62,13 @@ public class OAuth2LoginController {
 
     /**
      * 生成第三方登录授权URL
+     * <p>
+     *     https://github.com/settings/applications/3348764
+     *     http://localhost:1250/oauth/callback/github 注意github这个大小写敏感
      *
+     *     https://connect.linux.do/dash/sso
+     *     http://localhost:1250/oauth/callback/LINUXDO
+     * </p>
      * @param providerType 平台类型（GITHUB, LINUXDO 等）
      * @param loginName    当前登录用户名（可选，用于绑定）
      * @return 授权URL
