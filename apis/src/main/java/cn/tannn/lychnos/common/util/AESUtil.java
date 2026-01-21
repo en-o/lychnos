@@ -92,9 +92,13 @@ public class AESUtil {
             byte[] keyBytes = Base64.getDecoder().decode(secretKey);
             // 确保是 16 字节（AES-128）
             return Arrays.copyOf(keyBytes, 16);
-        } catch (Exception e) {
-            log.error("密钥格式错误，尝试使用 UTF-8 编码", e);
+        } catch (IllegalArgumentException e) {
+            log.warn("配置的密钥不是有效的 Base64 格式，将使用原始字符串的 UTF-8 编码。错误信息: {}", e.getMessage());
             // 如果不是 Base64，则使用原始字符串的 UTF-8 编码
+            byte[] keyBytes = secretKey.getBytes(StandardCharsets.UTF_8);
+            return Arrays.copyOf(keyBytes, 16);
+        } catch (Exception e) {
+            log.error("处理密钥时发生未知错误，尝试使用 UTF-8 编码", e);
             byte[] keyBytes = secretKey.getBytes(StandardCharsets.UTF_8);
             return Arrays.copyOf(keyBytes, 16);
         }
@@ -162,7 +166,7 @@ public class AESUtil {
      * 解密字符串
      *
      * @param encryptedText 加密后的 Base64 编码字符串
-     * @param secretKey 密钥
+     * @param secretKey     密钥
      * @return 解密后的明文
      */
     public static String decrypt(String encryptedText, String secretKey) {
