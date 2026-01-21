@@ -53,6 +53,7 @@ public class OAuth2LoginController {
                     vo.setType(config.getProviderType().getValue());
                     vo.setName(config.getProviderType().getDisplayName());
                     vo.setIconUrl(config.getIconUrl());
+                    vo.setAuthorizeUrl(config.getAuthorizeUrl());
                     vo.setSortOrder(config.getSortOrder());
                     return vo;
                 })

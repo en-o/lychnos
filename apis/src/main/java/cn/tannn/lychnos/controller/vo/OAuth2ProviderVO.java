@@ -23,6 +23,10 @@ public class OAuth2ProviderVO {
     @Schema(description = "平台图标URL")
     private String iconUrl;
 
+    @Schema(description = "授权端点")
+    private String authorizeUrl;
+
+
     @Schema(description = "排序顺序")
     private Integer sortOrder;
 }
