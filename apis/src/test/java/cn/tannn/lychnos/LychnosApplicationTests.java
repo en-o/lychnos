@@ -92,7 +92,7 @@ class LychnosApplicationTests {
         config.setTokenUrl("https://connect.linux.do/oauth2/token");
         config.setUserInfoUrl("https://connect.linux.do/api/user");
         config.setScope("read");
-        config.setIconUrl("https://linux.do/uploads/default/original/4X/d/1/4/d146c68151340881c884d95e0da4acdf369258c6.png"); // 示例图标
+        config.setIconUrl("https://linux.do/uploads/default/optimized/4X/c/c/d/ccd8c210609d498cbeb3d5201d4c259348447562_2_32x32.png"); // 示例图标
         config.setSortOrder(2);
         config.setEnabled(true);
 
