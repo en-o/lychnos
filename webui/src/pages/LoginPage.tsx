@@ -5,6 +5,7 @@ import { oauthApi } from '../api/oauth';
 import type { OAuth2Provider } from '../models/OAuth2';
 import Logo from '../components/Logo';
 import { toast } from '../components/ToastContainer';
+import { generateRandomString } from '../utils/random';
 
 const LoginPage: React.FC = () => {
   const navigate = useNavigate();
@@ -71,7 +72,7 @@ const LoginPage: React.FC = () => {
   const handleOAuthLogin = async (providerType: string) => {
     try {
       // 生成随机 state 并保存到 localStorage
-      const state = Math.random().toString(36).substring(2, 15);
+      const state = generateRandomString();
       localStorage.setItem('oauth_state', state);
       localStorage.setItem('oauth_provider', providerType);
 
