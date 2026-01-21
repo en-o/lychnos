@@ -5,7 +5,6 @@ import { oauthApi } from '../api/oauth';
 import type { OAuth2Provider } from '../models/OAuth2';
 import Logo from '../components/Logo';
 import { toast } from '../components/ToastContainer';
-import { generateRandomString } from '../utils/random';
 
 const LoginPage: React.FC = () => {
   const navigate = useNavigate();
@@ -71,22 +70,28 @@ const LoginPage: React.FC = () => {
   // 处理第三方登录
   const handleOAuthLogin = async (providerType: string) => {
     try {
-      // 生成随机 state 并保存到 localStorage
-      const state = generateRandomString();
-      localStorage.setItem('oauth_state', state);
-      localStorage.setItem('oauth_provider', providerType);
+      // 1. 获取授权 URL (不传参数，由后端生成 state)
+      const response = await oauthApi.getAuthorizeUrl(providerType);
 
-      // 保存 redirect 参数
-      localStorage.setItem('oauth_redirect', redirect);
-
-      // 构造回调地址 (指向前端页面)
-      const redirectUri = window.location.origin + '/oauth/callback';
-
-      // 获取授权 URL (传入 state 和 redirectUri)
-      const response = await oauthApi.getAuthorizeUrl(providerType, state, redirectUri);
       if (response.success && response.data) {
-        // 跳转到第三方授权页面
-        window.location.href = response.data;
+        const authorizeUrl = response.data;
+
+        // 2. 解析 URL 获取后端生成的 state
+        const urlObj = new URL(authorizeUrl);
+        const state = urlObj.searchParams.get('state');
+
+        if (state) {
+          // 3. 保存 state 到 localStorage 用于回调验证
+          localStorage.setItem('oauth_state', state);
+          localStorage.setItem('oauth_provider', providerType);
+          localStorage.setItem('oauth_action', 'login');
+          localStorage.setItem('oauth_redirect', redirect);
+
+          // 4. 跳转到第三方授权页面
+          window.location.href = authorizeUrl;
+        } else {
+          toast.error('授权链接异常：缺少state');
+        }
       } else {
         toast.error('生成授权链接失败');
       }

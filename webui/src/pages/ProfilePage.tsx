@@ -7,7 +7,7 @@ import { toast } from '../components/ToastContainer';
 import { authApi } from '../api/auth';
 import { oauthApi } from '../api/oauth';
 import type { OAuth2Provider, UserThirdPartyBinding } from '../models/OAuth2';
-import { generateRandomString } from '../utils/random';
+
 
 const ProfilePage: React.FC = () => {
   const navigate = useNavigate();
@@ -62,20 +62,28 @@ const ProfilePage: React.FC = () => {
 
   const handleBind = async (providerType: string) => {
     try {
-      // 生成随机 state 并保存
-      const state = generateRandomString();
-      localStorage.setItem('oauth_state', state);
-      localStorage.setItem('oauth_provider', providerType);
-      localStorage.setItem('oauth_action', 'bind'); // 标记为绑定操作
-      localStorage.setItem('oauth_redirect', '/profile'); // 绑定后回跳个人中心
+      // 1. 获取授权 URL (不传参数，由后端生成 state)
+      const response = await oauthApi.getAuthorizeUrl(providerType);
 
-      // 构造回调地址
-      const redirectUri = window.location.origin + '/oauth/callback';
-
-      // 获取授权 URL
-      const response = await oauthApi.getAuthorizeUrl(providerType, state, redirectUri);
       if (response.success && response.data) {
-        window.location.href = response.data;
+        const authorizeUrl = response.data;
+
+        // 2. 解析 URL 获取后端生成的 state
+        const urlObj = new URL(authorizeUrl);
+        const state = urlObj.searchParams.get('state');
+
+        if (state) {
+          // 3. 保存 state 到 localStorage
+          localStorage.setItem('oauth_state', state);
+          localStorage.setItem('oauth_provider', providerType);
+          localStorage.setItem('oauth_action', 'bind'); // 标记为绑定操作
+          localStorage.setItem('oauth_redirect', '/profile'); // 绑定后回跳个人中心
+
+          // 4. 跳转到第三方授权页面
+          window.location.href = authorizeUrl;
+        } else {
+          toast.error('授权链接异常：缺少state');
+        }
       }
     } catch (error) {
       toast.error('启动绑定失败');

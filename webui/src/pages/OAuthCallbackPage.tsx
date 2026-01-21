@@ -37,12 +37,12 @@ const OAuthCallbackPage: React.FC = () => {
                 return;
             }
 
-            // 简化的 state 验证（可选）
-            // if (state && savedState && state !== savedState) {
-            //   toast.error('授权失败：安全验证未通过');
-            //   navigate('/login');
-            //   return;
-            // }
+            // 简化的 state 验证
+            if (state && savedState && state !== savedState) {
+                toast.error('授权失败：安全验证未通过');
+                navigate('/login');
+                return;
+            }
 
             try {
                 const action = localStorage.getItem('oauth_action') || 'login';
@@ -52,7 +52,7 @@ const OAuthCallbackPage: React.FC = () => {
                     const bindingData = {
                         providerType: providerType,
                         code: code,
-                        state: state
+                        state: state || undefined
                     };
 
                     const response = await oauthApi.bindAccount(bindingData);
