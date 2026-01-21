@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 /**
@@ -65,21 +64,20 @@ public class OAuth2LoginController {
      * 生成第三方登录授权URL
      *
      * @param providerType 平台类型（GITHUB, LINUXDO 等）
+     * @param loginName    当前登录用户名（可选，用于绑定）
      * @return 授权URL
      */
     @Operation(summary = "生成第三方登录授权URL")
     @ApiMapping(value = "/authorize/{providerType}", checkToken = false, method = RequestMethod.GET)
-    public ResultVO<String> getAuthorizeUrl(@PathVariable String providerType) {
-        // 生成随机 state（用于防CSRF攻击）
-        String state = UUID.randomUUID().toString();
-
+    public ResultVO<String> getAuthorizeUrl(@PathVariable String providerType,
+            @RequestParam(required = false) String loginName) {
         // 转换为枚举
         ProviderType providerTypeEnum = ProviderType.fromValue(providerType);
 
-        // 生成授权URL
-        String authorizeUrl = oauth2Service.generateAuthorizeUrl(providerTypeEnum, state);
+        // 生成授权URL (state 由 service 内部生成和加密)
+        String authorizeUrl = oauth2Service.generateAuthorizeUrl(providerTypeEnum, loginName);
 
-        log.info("生成授权URL成功：平台={}, state={}", providerType, state);
+        log.info("生成授权URL成功：平台={}, 绑定用户={}", providerType, loginName);
         return ResultVO.success(authorizeUrl);
     }
 

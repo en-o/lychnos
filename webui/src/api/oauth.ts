@@ -1,6 +1,6 @@
-import {request} from '../utils/request';
-import type {OAuth2Provider, UserThirdPartyBinding} from "../models/OAuth2.ts";
-import {type Result} from '../models';
+import { request } from '../utils/request';
+import type { OAuth2Provider, UserThirdPartyBinding } from "../models/OAuth2.ts";
+import { type Result } from '../models';
 
 /**
  * OAuth2 第三方登录 API
@@ -16,9 +16,14 @@ export const oauthApi = {
   /**
    * 获取授权URL
    * @param providerType 平台类型（如 'github', 'linuxdo'）
+   * @param loginName 绑定时必传，当前登录用户的登录名
    */
-  getAuthorizeUrl: async (providerType: string) => {
-    return request.get(`/oauth/authorize/${providerType}`);
+  getAuthorizeUrl: async (providerType: string, loginName?: string) => {
+    const params: any = {};
+    if (loginName) {
+      params.loginName = loginName;
+    }
+    return request.get<Result<string>>(`/oauth/authorize/${providerType}`, { params });
   },
 
   /**

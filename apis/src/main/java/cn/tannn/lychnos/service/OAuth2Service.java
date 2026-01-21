@@ -3,6 +3,7 @@ package cn.tannn.lychnos.service;
 import cn.tannn.jdevelops.exception.built.BusinessException;
 import cn.tannn.jdevelops.exception.built.UserException;
 import cn.tannn.jdevelops.jwt.standalone.service.LoginService;
+import cn.tannn.lychnos.common.util.AESUtil;
 import cn.tannn.lychnos.common.util.UserUtil;
 import cn.tannn.lychnos.controller.vo.LoginVO;
 import cn.tannn.lychnos.dao.UserThirdPartyBindDao;
@@ -103,8 +104,29 @@ public class OAuth2Service {
      * @param state        状态码（用于防CSRF攻击）
      * @return 授权URL
      */
-    public String generateAuthorizeUrl(ProviderType providerType, String state) {
+    /**
+     * 生成授权URL
+     *
+     * @param providerType 平台类型
+     * @param loginName    当前登录用户名（可选，用于绑定）
+     * @return 授权URL
+     */
+    public String generateAuthorizeUrl(ProviderType providerType, String loginName) {
         OAuth2Provider provider = getProvider(providerType);
+
+        // 构造状态码 (State)
+        // 格式: Action|Data|UUID
+        // - 登录: LOGIN||UUID
+        // - 绑定: BIND|loginName|UUID
+        String rawState;
+        if (StringUtils.isNotBlank(loginName)) {
+            rawState = "BIND|" + loginName + "|" + UUID.randomUUID().toString();
+        } else {
+            rawState = "LOGIN||" + UUID.randomUUID().toString();
+        }
+
+        // 加密 State 防止篡改
+        String state = AESUtil.encrypt(rawState);
 
         // 构造回调地址
         String redirectUri = StringUtils.stripEnd(callbackBaseUrl, "/") + "/oauth/callback/"
@@ -114,26 +136,104 @@ public class OAuth2Service {
     }
 
     /**
-     * 处理OAuth2回调，完成登录流程
+     * 处理OAuth2回调，完成登录或绑定
      *
      * @param providerType 平台类型
      * @param code         授权码
-     * @param state        状态码（用于验CSRF）
+     * @param state        状态码（用于验CSRF和传递上下文）
      * @return 登录Token
      */
     @Transactional(rollbackFor = Exception.class)
     public LoginVO handleCallback(ProviderType providerType, String code, String state) {
+        // 1. 解析 State
+        String action = "LOGIN";
+        String targetLoginName = null;
+
+        try {
+            if (StringUtils.isNotBlank(state)) {
+                String decryptedState = AESUtil.decrypt(state);
+                String[] parts = decryptedState.split("\\|");
+                if (parts.length >= 1) {
+                    action = parts[0];
+                }
+                if (parts.length >= 2) {
+                    targetLoginName = parts[1];
+                }
+            }
+        } catch (Exception e) {
+            log.warn("OAuth State 解密失败或格式错误，降级为普通登录流程。State: {}", state);
+        }
+
         OAuth2Provider provider = getProvider(providerType);
 
-        // 1. 获取 Access Token
+        // 2. 获取 Access Token
         String redirectUri = StringUtils.stripEnd(callbackBaseUrl, "/") + "/oauth/callback/"
                 + providerType.getValue().toLowerCase();
         String accessToken = provider.getAccessToken(code, redirectUri);
 
-        // 2. 获取第三方用户信息
+        // 3. 获取第三方用户信息
         OAuth2UserInfo oauthUserInfo = provider.getUserInfo(accessToken);
 
-        // 3. 检查该第三方账号是否已绑定系统账户
+        // 4. 根据 Action 执行不同逻辑
+        if ("BIND".equals(action) && StringUtils.isNotBlank(targetLoginName)) {
+            return handleBindCallback(targetLoginName, oauthUserInfo, providerType);
+        } else {
+            return handleLoginCallback(oauthUserInfo, providerType);
+        }
+    }
+
+    /**
+     * 处理绑定回调
+     */
+    private LoginVO handleBindCallback(String loginName, OAuth2UserInfo oauthUserInfo, ProviderType providerType) {
+        // 1. 查找目标用户
+        UserInfo userInfo = userInfoService.findByLoginName(loginName)
+                .orElseThrow(() -> new UserException("绑定目标用户不存在: " + loginName));
+
+        // 2. 检查该第三方账号是否已被其他用户绑定
+        Optional<UserThirdPartyBind> existingBind = bindDao.findByProviderTypeAndOpenId(
+                providerType,
+                oauthUserInfo.getOpenId());
+
+        if (existingBind.isPresent()) {
+            if (!existingBind.get().getUserId().equals(userInfo.getId())) {
+                throw new BusinessException("该第三方账号已被其他用户绑定，无法绑定当前账号");
+            } else {
+                // 已经是当前用户绑定的，更新信息即可
+                updateBindInfo(existingBind.get(), oauthUserInfo);
+            }
+        } else {
+            // 3. 检查该用户是否已绑定过此同类平台 (防止重复绑定同个平台账号，虽然UI限制了，但后端要兜底)
+            // 允许一个用户绑定多个同平台账号？通常不允许。检查 existsByUserIdAndProviderType
+            // 但这里我们是在 OAuth 回调中，如果是 switch account 场景...
+            // 简单起见，如果该用户已经绑定了 GITHUB，则解绑旧的？或者报错？
+            // 现在的逻辑是 ProfilePage 显示 "已绑定/未绑定"。
+            // 如果已绑定，前端显示"解绑"。 handleBind 应该是用于"未绑定"状态。
+            // 检查是否已绑定:
+            Optional<UserThirdPartyBind> userBind = bindDao.findByUserIdAndProviderType(userInfo.getId(), providerType);
+            if (userBind.isPresent()) {
+                // 可能是重复操作，或者换绑？这里我们认为是更新
+                // 但前面检查了 openId。如果 openId 不同，说明用户在第三方平台换了个号登录。
+                // 这种情况下，应该报错"您已绑定过一个GitHub账号，请先解绑"。
+                if (!userBind.get().getOpenId().equals(oauthUserInfo.getOpenId())) {
+                    throw new BusinessException("您已绑定过该平台账号，请先解绑原账号");
+                }
+            } else {
+                // 创建新绑定
+                createBind(userInfo.getId(), providerType, oauthUserInfo);
+            }
+        }
+
+        // 绑定成功，自动登录该用户
+        String token = UserUtil.generateLoginToken(loginService, userInfo);
+        return new LoginVO(token);
+    }
+
+    /**
+     * 处理登录回调
+     */
+    private LoginVO handleLoginCallback(OAuth2UserInfo oauthUserInfo, ProviderType providerType) {
+        // 检查该第三方账号是否已绑定系统账户
         Optional<UserThirdPartyBind> bindOpt = bindDao.findByProviderTypeAndOpenId(
                 providerType,
                 oauthUserInfo.getOpenId());
@@ -147,7 +247,7 @@ public class OAuth2Service {
 
             log.info("第三方账号已绑定，用户ID：{}，第三方平台：{}", userInfo.getId(), providerType);
 
-            // 更新绑定信息（如昵称、头像可能变化）
+            // 更新绑定信息
             updateBindInfo(bind, oauthUserInfo);
         } else {
             // 未绑定，创建新系统账户并绑定
@@ -155,9 +255,31 @@ public class OAuth2Service {
             log.info("第三方账号首次登录，创建新用户：{}，第三方平台：{}", userInfo.getId(), providerType);
         }
 
-        // 4. 生成 JWT Token 返回
+        // 生成 JWT Token 返回
         String token = UserUtil.generateLoginToken(loginService, userInfo);
         return new LoginVO(token);
+    }
+
+    private void createBind(Long userId, ProviderType providerType, OAuth2UserInfo oauthUserInfo) {
+        UserThirdPartyBind bind = new UserThirdPartyBind();
+        bind.setUserId(userId);
+        bind.setProviderType(providerType);
+        bind.setOpenId(oauthUserInfo.getOpenId());
+        bind.setUnionId(oauthUserInfo.getUnionId());
+        bind.setNickname(oauthUserInfo.getNickname());
+        bind.setAvatarUrl(oauthUserInfo.getAvatarUrl());
+        bind.setEmail(oauthUserInfo.getEmail());
+
+        try {
+            if (oauthUserInfo.getExtraInfo() != null && !oauthUserInfo.getExtraInfo().isEmpty()) {
+                bind.setExtraInfo(oauthUserInfo.getExtraInfo());
+            }
+        } catch (Exception e) {
+            log.warn("转换 extraInfo 为 JSON 失败", e);
+        }
+
+        bindDao.save(bind);
+        log.info("绑定第三方账号成功：用户ID={}, 平台={}, OpenID={}", userId, providerType, oauthUserInfo.getOpenId());
     }
 
     /**

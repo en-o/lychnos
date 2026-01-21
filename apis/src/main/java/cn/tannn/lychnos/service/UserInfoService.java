@@ -27,19 +27,18 @@ import static cn.tannn.lychnos.entity.UserInfo.getMd5Password;
  */
 @Service
 @Slf4j
-public class UserInfoService extends J2ServiceImpl<UserInfoDao, UserInfo,Long> {
+public class UserInfoService extends J2ServiceImpl<UserInfoDao, UserInfo, Long> {
     public UserInfoService() {
         super(UserInfo.class);
     }
 
-
     /**
      * 用户登录校验，校验成功返回用户信息
      *
-     * @param login     login
+     * @param login login
      * @return Account
      */
-    public UserInfo authenticateUser(LoginPassword login){
+    public UserInfo authenticateUser(LoginPassword login) {
 
         Optional<UserInfo> byLoginName = getJpaBasicsDao().findByLoginName(login.getLoginName());
         if (byLoginName.isEmpty()) {
@@ -57,6 +56,7 @@ public class UserInfoService extends J2ServiceImpl<UserInfoDao, UserInfo,Long> {
 
     /**
      * 注册用户
+     *
      * @param register 注册
      * @return UserInfo
      */
@@ -75,9 +75,9 @@ public class UserInfoService extends J2ServiceImpl<UserInfoDao, UserInfo,Long> {
         return getJpaBasicsDao().save(register);
     }
 
-
     /**
      * 用户是否存在
+     *
      * @param loginName 登录名
      * @return true 存在 false 不存在
      */
@@ -88,11 +88,12 @@ public class UserInfoService extends J2ServiceImpl<UserInfoDao, UserInfo,Long> {
 
     /**
      * EMAIL用户是否存在
+     *
      * @param email 邮件地址
      * @return true 存在 false 不存在
      */
     public boolean userExistForEmail(String email) {
-        if(email == null || email.trim().isEmpty()){
+        if (email == null || email.trim().isEmpty()) {
             return false;
         }
         Optional<UserInfo> emailRes = getJpaBasicsDao().findByEmail(email);
@@ -101,8 +102,9 @@ public class UserInfoService extends J2ServiceImpl<UserInfoDao, UserInfo,Long> {
 
     /**
      * 修改密码
-     * @param loginName   登录名
-     * @param password 新密码
+     *
+     * @param loginName 登录名
+     * @param password  新密码
      */
     public void editPassword(String loginName, PasswordEdit password) {
         UserInfo userInfo = getJpaBasicsDao().findByLoginName(loginName)
@@ -116,9 +118,9 @@ public class UserInfoService extends J2ServiceImpl<UserInfoDao, UserInfo,Long> {
         getJpaBasicsDao().save(userInfo);
     }
 
-
     /**
      * 更新基础信息
+     *
      * @param fix AccountFixInfo
      * @return Account
      */
@@ -130,9 +132,9 @@ public class UserInfoService extends J2ServiceImpl<UserInfoDao, UserInfo,Long> {
         return account;
     }
 
-
     /**
      * 根据登录名查询用户
+     *
      * @param loginName 登录名
      * @return 用户信息
      */
