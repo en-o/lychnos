@@ -109,6 +109,15 @@ public class OAuthConfig extends JpaCommonBean<OAuthConfig> {
     @Schema(description = "排序顺序")
     private Integer sortOrder;
 
+    /**
+     * 是否启用
+     */
+    @Column(columnDefinition = "boolean")
+    @ColumnDefault("false")
+    @Comment("是否启用")
+    @Schema(description = "是否启用")
+    private Boolean enabled = false;
+
     // ============ 加密/解密辅助方法 ============
 
     /**

@@ -32,4 +32,11 @@ public interface OAuthConfigDao extends JpaBasicsRepository<OAuthConfig, Long> {
      * @return 平台配置列表
      */
     List<OAuthConfig> findAllByOrderBySortOrder();
+
+    /**
+     * 获取所有启用的配置，按排序顺序排列
+     *
+     * @return 启用的配置列表
+     */
+    List<OAuthConfig> findAllByEnabledTrueOrderBySortOrder();
 }

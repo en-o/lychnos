@@ -30,8 +30,22 @@ public class OAuthConfigService extends J2ServiceImpl<OAuthConfigDao, OAuthConfi
      *
      * @return 平台配置列表
      */
+    /**
+     * 获取所有平台配置
+     *
+     * @return 平台配置列表
+     */
     public List<OAuthConfig> getAllConfigs() {
         return getJpaBasicsDao().findAllByOrderBySortOrder();
+    }
+
+    /**
+     * 获取所有启用的平台配置
+     *
+     * @return 启用的平台配置列表
+     */
+    public List<OAuthConfig> getEnabledConfigs() {
+        return getJpaBasicsDao().findAllByEnabledTrueOrderBySortOrder();
     }
 
     /**
