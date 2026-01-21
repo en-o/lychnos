@@ -94,7 +94,8 @@ class LychnosApplicationTests {
         config.setTokenUrl("https://connect.linux.do/oauth2/token");
         config.setUserInfoUrl("https://connect.linux.do/api/user");
         config.setScope("read:user user:email");
-        config.setIconUrl("https://linux.do/uploads/default/optimized/4X/c/c/d/ccd8c210609d498cbeb3d5201d4c259348447562_2_32x32.png"); // 示例图标
+        config.setIconUrl(
+                "https://linux.do/uploads/default/optimized/4X/c/c/d/ccd8c210609d498cbeb3d5201d4c259348447562_2_32x32.png"); // 示例图标
         config.setSortOrder(2);
         config.setEnabled(true);
 
@@ -138,9 +139,46 @@ class LychnosApplicationTests {
     }
 
     /**
+     * 根据 ID 更新配置的 ClientId 和 ClientSecret
+     * <p>
+     * 请替换 updateId, newClientId, newClientSecret 为实际值后运行
+     * </p>
+     */
+     @Test
+    void updateConfigById() {
+        // 1. 准备更新数据
+        Long updateId = null; // 替换为要更新的配置ID，例如 1L
+        String newClientId = "your_new_client_id";
+        String newClientSecret = "your_new_client_secret";
+
+        if (updateId == null || newClientId.contains("your_")) {
+            System.err.println("❌ 请先在 updateConfigById 方法中填写有效的 ID, ClientId 和 ClientSecret");
+            return;
+        }
+
+        // 2. 查找配置
+        Optional<OAuthConfig> optional = oauthConfigService.getJpaBasicsDao().findById(updateId);
+        if (optional.isPresent()) {
+            OAuthConfig config = optional.get();
+            System.out.println("🔄 找到配置: " + config.getProviderType() + " (ID: " + config.getId() + ")");
+            System.out.println("   旧 ClientId: " + config.getClientId());
+
+            // 3. 更新字段
+            config.setClientId(newClientId);
+            config.setClientSecret(newClientSecret);
+
+            // 4. 保存 (会自动触发 AttributeConverter 加密)
+            oauthConfigService.saveConfig(config);
+            System.out.println("✅ 配置更新并加密保存成功！");
+        } else {
+            System.err.println("❌ 未找到 ID 为 " + updateId + " 的配置");
+        }
+    }
+
+    /**
      * 列出所有配置
      */
-    @Test
+//    @Test
     void listConfigs() {
         List<OAuthConfig> configs = oauthConfigService.getAllConfigs();
         System.out.println("\n📋 当前 OAuth2 配置列表 (" + configs.size() + "):");
