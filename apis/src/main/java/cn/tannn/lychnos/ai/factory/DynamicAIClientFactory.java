@@ -36,7 +36,11 @@ import org.springframework.web.client.RestTemplate;
 @Component
 public class DynamicAIClientFactory {
 
-    private final RestTemplate restTemplate = new RestTemplate();
+    private final RestTemplate restTemplate;
+
+    public DynamicAIClientFactory(RestTemplate restTemplate) {
+        this.restTemplate = restTemplate;
+    }
 
     /**
      * 创建文本聊天模型

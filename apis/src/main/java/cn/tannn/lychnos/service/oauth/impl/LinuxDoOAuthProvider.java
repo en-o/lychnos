@@ -16,7 +16,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 /**
  * LinuxDo OAuth2 Provider 实现
- * 
+ *
  * 注意：LinuxDo 的具体 OAuth2 端点待确认
  *
  * @author <a href="https://t.tannn.cn/">tan</a>
@@ -28,7 +28,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 @RequiredArgsConstructor
 public class LinuxDoOAuthProvider implements OAuth2Provider {
 
-    private final RestTemplate restTemplate = new RestTemplate();
+    private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     private OAuthConfig config;
