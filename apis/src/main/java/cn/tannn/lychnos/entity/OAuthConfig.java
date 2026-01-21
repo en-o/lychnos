@@ -1,7 +1,7 @@
 package cn.tannn.lychnos.entity;
 
+import cn.tannn.lychnos.common.config.converter.AESAttributeConverter;
 import cn.tannn.lychnos.common.pojo.JpaCommonBean;
-import cn.tannn.lychnos.common.util.AESUtil;
 import cn.tannn.lychnos.enums.ProviderType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
@@ -48,6 +48,7 @@ public class OAuthConfig extends JpaCommonBean<OAuthConfig> {
      * 客户端ID（数据库存储加密后的值）
      */
     @Column(columnDefinition = "varchar(500) not null")
+    @Convert(converter = AESAttributeConverter.class)
     @Comment("客户端ID（加密存储）")
     @Schema(description = "客户端ID")
     private String clientId;
@@ -56,6 +57,7 @@ public class OAuthConfig extends JpaCommonBean<OAuthConfig> {
      * 客户端密钥（数据库存储加密后的值）
      */
     @Column(columnDefinition = "varchar(500) not null")
+    @Convert(converter = AESAttributeConverter.class)
     @Comment("客户端密钥（加密存储）")
     @Schema(description = "客户端密钥")
     private String clientSecret;
@@ -117,46 +119,4 @@ public class OAuthConfig extends JpaCommonBean<OAuthConfig> {
     @Comment("是否启用")
     @Schema(description = "是否启用")
     private Boolean enabled = false;
-
-    // ============ 加密/解密辅助方法 ============
-
-    /**
-     * 持久化之前自动加密敏感字段
-     * 注意：从数据库加载后，实体对象中的值已被@PostLoad解密为明文
-     * 因此这里直接加密即可，不需要判断是否已加密
-     */
-    @PrePersist
-    @PreUpdate
-    private void encryptSensitiveFields() {
-        try {
-            if (this.clientId != null && !this.clientId.isEmpty()) {
-                this.clientId = AESUtil.encrypt(this.clientId);
-            }
-            if (this.clientSecret != null && !this.clientSecret.isEmpty()) {
-                this.clientSecret = AESUtil.encrypt(this.clientSecret);
-            }
-        } catch (Exception e) {
-            log.error("加密 OAuth2 配置敏感字段失败", e);
-            throw new RuntimeException("加密失败", e);
-        }
-    }
-
-    /**
-     * 加载后自动解密敏感字段
-     * 注意：从数据库加载的值是密文，需要解密为明文供业务层使用
-     */
-    @PostLoad
-    private void decryptSensitiveFields() {
-        try {
-            if (this.clientId != null && !this.clientId.isEmpty()) {
-                this.clientId = AESUtil.decrypt(this.clientId);
-            }
-            if (this.clientSecret != null && !this.clientSecret.isEmpty()) {
-                this.clientSecret = AESUtil.decrypt(this.clientSecret);
-            }
-        } catch (Exception e) {
-            log.error("解密 OAuth2 配置敏感字段失败", e);
-            throw new RuntimeException("解密失败", e);
-        }
-    }
 }
