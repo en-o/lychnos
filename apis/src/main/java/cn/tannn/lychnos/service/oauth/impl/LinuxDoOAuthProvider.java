@@ -12,6 +12,7 @@ import org.springframework.http.*;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.apache.commons.lang3.StringUtils;
@@ -74,28 +75,22 @@ public class LinuxDoOAuthProvider implements OAuth2Provider {
         try {
             // 构建请求参数
             MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
-//            params.add("client_id", config.getClientId());
-//            params.add("client_secret", config.getClientSecret());
+            params.add("client_id", config.getClientId());
+            params.add("client_secret", config.getClientSecret());
             params.add("code", code);
             params.add("grant_type", "authorization_code");
             params.add("redirect_uri", redirectUri);
 
             // Debug Logging
-            log.info("LinuxDo Token Request - ClientID: {}, SecretLength: {}",
+            log.info("LinuxDo Token Request - ClientID: {}, SecretLength: {}, RedirectURI: {}",
                     AESUtil.maskText(config.getClientId()),
-                    (config.getClientSecret() != null ? config.getClientSecret().length() : 0));
+                    (config.getClientSecret() != null ? config.getClientSecret().length() : 0),
+                    redirectUri);
 
-            // 设置请求头
+            // 设置请求头 - 不使用 Basic Auth
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
             headers.set("Accept", "application/json");
-
-            // 使用 Basic Auth
-            String auth = config.getClientId() + ":" + config.getClientSecret();
-            String encodedAuth = java.util.Base64.getEncoder()
-                    .encodeToString(auth.getBytes(java.nio.charset.StandardCharsets.UTF_8));
-            headers.set("Authorization", "Basic " + encodedAuth);
-
             headers.set("User-Agent",
                     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36");
 
@@ -110,14 +105,20 @@ public class LinuxDoOAuthProvider implements OAuth2Provider {
 
             // 解析响应
             if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null) {
+                log.info("LinuxDo Token Response: {}", response.getBody());
                 JsonNode jsonNode = objectMapper.readTree(response.getBody());
                 String accessToken = jsonNode.get("access_token").asText();
                 log.info("LinuxDo 获取 Access Token 成功");
                 return accessToken;
             } else {
-                log.error("LinuxDo 获取 Access Token 失败: {}", response.getBody());
+                log.error("LinuxDo 获取 Access Token 失败 - Status: {}, Body: {}",
+                        response.getStatusCode(), response.getBody());
                 throw new RuntimeException("获取 LinuxDo Access Token 失败");
             }
+        } catch (HttpClientErrorException e) {
+            log.error("LinuxDo HTTP 错误 - Status: {}, Response: {}",
+                    e.getStatusCode(), e.getResponseBodyAsString());
+            throw new RuntimeException("获取 LinuxDo Access Token 异常: " + e.getMessage(), e);
         } catch (Exception e) {
             log.error("LinuxDo 获取 Access Token 异常", e);
             throw new RuntimeException("获取 LinuxDo Access Token 异常", e);
