@@ -298,7 +298,7 @@ const RegisterPage: React.FC = () => {
             </div>
 
             {/* 第三方登录按钮 */}
-            <div className="grid grid-cols-2 gap-3">
+            <div className={`grid gap-3 ${providers.length > 1 ? 'grid-cols-2' : 'grid-cols-1'}`}>
               {providers.map(provider => (
                 <button
                   key={provider.type}
