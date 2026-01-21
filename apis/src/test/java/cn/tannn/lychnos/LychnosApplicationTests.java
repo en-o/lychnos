@@ -24,6 +24,7 @@ class LychnosApplicationTests {
      * 添加或更新 GitHub 配置
      * <p>
      * 请替换 "your_xxx" 为实际值后运行
+     * https://github.com/settings/applications/new
      * </p>
      */
 //    @Test
@@ -67,6 +68,7 @@ class LychnosApplicationTests {
      * 添加或更新 LinuxDo 配置
      * <p>
      * 请替换 "your_xxx" 为实际值后运行
+     * https://connect.linux.do/dash/sso
      * </p>
      */
 //    @Test
