@@ -1,10 +1,11 @@
 package cn.tannn.lychnos.common.util;
 
-
+import cn.tannn.jdevelops.jwt.standalone.service.LoginService;
 import cn.tannn.jdevelops.jwt.standalone.util.JwtWebUtil;
 import cn.tannn.jdevelops.utils.http.IpUtil;
 import cn.tannn.jdevelops.utils.jwt.core.JwtService;
 import cn.tannn.jdevelops.utils.jwt.module.LoginJwtExtendInfo;
+import cn.tannn.jdevelops.utils.jwt.module.SignEntity;
 import cn.tannn.lychnos.common.pojo.UserRequestInfo;
 import cn.tannn.lychnos.controller.LoginController;
 import cn.tannn.lychnos.entity.UserInfo;
@@ -44,19 +45,17 @@ public class UserUtil extends cn.tannn.jdevelops.jwt.standalone.util.UserUtil {
             }
             var request = ((ServletRequestAttributes) attributes).getRequest();
             var jwtInfo = UserUtil.getLoginJwtExtendInfoExpires(request);
-            return new UserRequestInfo(IpUtil.getPoxyIpEnhance(request)
-                    ,jwtInfo.getUserName()
-                    ,jwtInfo.getLoginName()
-                    ,jwtInfo.getUserId());
+            return new UserRequestInfo(IpUtil.getPoxyIpEnhance(request), jwtInfo.getUserName(), jwtInfo.getLoginName(),
+                    jwtInfo.getUserId());
         } catch (Exception e) {
             log.warn("从JWT获取用户信息失败", e);
             return null;
         }
     }
 
-
     /**
      * 获得 userId
+     * 
      * @param request HttpServletRequest
      * @return userId
      */
@@ -64,9 +63,9 @@ public class UserUtil extends cn.tannn.jdevelops.jwt.standalone.util.UserUtil {
         return getLoginJwtExtendInfoExpires(request).getUserId();
     }
 
-
     /**
      * 获得 userId
+     * 
      * @param request HttpServletRequest
      * @return userId
      */
@@ -76,7 +75,11 @@ public class UserUtil extends cn.tannn.jdevelops.jwt.standalone.util.UserUtil {
 
     /**
      * 获得 loginName
-     * <p> jwt subject = loginName   {@link LoginController#loginUserSign(UserInfo, HttpServletRequest)}</p>
+     * <p>
+     * jwt subject = loginName
+     * {@link LoginController#loginUserSign(UserInfo, HttpServletRequest)}
+     * </p>
+     * 
      * @param request HttpServletRequest
      * @return loginName
      */
@@ -84,6 +87,22 @@ public class UserUtil extends cn.tannn.jdevelops.jwt.standalone.util.UserUtil {
         return JwtWebUtil.getTokenSubjectExpires(request);
     }
 
-
-
+    /**
+     * 生成登录Token
+     *
+     * @param loginService 登录服务
+     * @param userInfo     用户信息
+     * @return token
+     */
+    public static String generateLoginToken(LoginService loginService, UserInfo userInfo) {
+        SignEntity<LoginJwtExtendInfo<String>> init = SignEntity.init(userInfo.getLoginName());
+        // 拓展信息
+        LoginJwtExtendInfo<String> loginJwtExtendInfo = new LoginJwtExtendInfo<>();
+        loginJwtExtendInfo.setUserId(userInfo.getId() + "");
+        loginJwtExtendInfo.setUserNo(userInfo.getId() + "");
+        loginJwtExtendInfo.setUserName(userInfo.getNickname());
+        loginJwtExtendInfo.setLoginName(userInfo.getLoginName());
+        init.setMap(loginJwtExtendInfo);
+        return loginService.login(init).getSign();
+    }
 }

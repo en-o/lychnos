@@ -5,8 +5,9 @@ import cn.tannn.jdevelops.annotations.web.mapping.PathRestController;
 import cn.tannn.jdevelops.jwt.standalone.service.LoginService;
 import cn.tannn.jdevelops.jwt.standalone.util.JwtWebUtil;
 import cn.tannn.jdevelops.result.response.ResultVO;
-import cn.tannn.jdevelops.utils.jwt.module.LoginJwtExtendInfo;
+
 import cn.tannn.jdevelops.utils.jwt.module.SignEntity;
+import cn.tannn.lychnos.common.util.UserUtil;
 import cn.tannn.lychnos.controller.dto.LoginPassword;
 import cn.tannn.lychnos.controller.vo.LoginVO;
 import cn.tannn.lychnos.entity.UserInfo;
@@ -36,6 +37,7 @@ public class LoginController {
 
     private final UserInfoService userInfoService;
     private final LoginService loginService;
+
     /**
      * 登录-管理端登录
      *
@@ -44,13 +46,13 @@ public class LoginController {
      */
     @Operation(summary = "账户密码登录")
     @ApiMapping(value = "/login", checkToken = false, method = RequestMethod.POST)
-    public ResultVO<LoginVO> login(@RequestBody @Valid LoginPassword login, HttpServletRequest request) throws IllegalAccessException {
+    public ResultVO<LoginVO> login(@RequestBody @Valid LoginPassword login, HttpServletRequest request)
+            throws IllegalAccessException {
         log.info("登录请求，登录名：{}", login.getLoginName());
         UserInfo userInfo = userInfoService.authenticateUser(login);
-        String sign = loginUserSign(userInfo, request);
+        String sign = UserUtil.generateLoginToken(loginService, userInfo);
         return ResultVO.success("登录成功", new LoginVO(sign));
     }
-
 
     /**
      * 退出
@@ -65,32 +67,10 @@ public class LoginController {
         return ResultVO.successMessage("成功退出");
     }
 
-
     @Operation(summary = "解析当前登录者的token")
     @ApiMapping(value = "parse")
     public ResultVO<SignEntity<String>> parseToken(HttpServletRequest request) {
         return ResultVO.success(JwtWebUtil.getTokenBySignEntity(request));
     }
-
-
-    /**
-     * 构造登录信息
-     *
-     * @param account  UserInfo
-     * @param request  HttpServletRequest
-     * @return token
-     */
-    private String loginUserSign(UserInfo account, HttpServletRequest request) {
-        SignEntity<LoginJwtExtendInfo<String>> init = SignEntity.init(account.getLoginName());
-        // 拓展信息
-        LoginJwtExtendInfo<String> loginJwtExtendInfo = new LoginJwtExtendInfo<>();
-        loginJwtExtendInfo.setUserId(account.getId() + "");
-        loginJwtExtendInfo.setUserNo(account.getId() + "");
-        loginJwtExtendInfo.setUserName(account.getNickname());
-        loginJwtExtendInfo.setLoginName(account.getLoginName());
-        init.setMap(loginJwtExtendInfo);
-        return loginService.login(init).getSign();
-    }
-
 
 }
