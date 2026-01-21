@@ -1,6 +1,7 @@
 package cn.tannn.lychnos.service.oauth.impl;
 
 import cn.tannn.lychnos.entity.OAuthConfig;
+import cn.tannn.lychnos.common.util.AESUtil;
 import cn.tannn.lychnos.service.oauth.OAuth2Provider;
 import cn.tannn.lychnos.service.oauth.OAuth2UserInfo;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -73,16 +74,28 @@ public class LinuxDoOAuthProvider implements OAuth2Provider {
         try {
             // 构建请求参数
             MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
-            params.add("client_id", config.getClientId());
-            params.add("client_secret", config.getClientSecret());
+//            params.add("client_id", config.getClientId());
+//            params.add("client_secret", config.getClientSecret());
             params.add("code", code);
             params.add("grant_type", "authorization_code");
             params.add("redirect_uri", redirectUri);
+
+            // Debug Logging
+            log.info("LinuxDo Token Request - ClientID: {}, SecretLength: {}",
+                    AESUtil.maskText(config.getClientId()),
+                    (config.getClientSecret() != null ? config.getClientSecret().length() : 0));
 
             // 设置请求头
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
             headers.set("Accept", "application/json");
+
+            // 使用 Basic Auth
+            String auth = config.getClientId() + ":" + config.getClientSecret();
+            String encodedAuth = java.util.Base64.getEncoder()
+                    .encodeToString(auth.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+            headers.set("Authorization", "Basic " + encodedAuth);
+
             headers.set("User-Agent",
                     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36");
 
