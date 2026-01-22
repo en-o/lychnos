@@ -11,13 +11,12 @@ function AdminAIModelPage() {
     const [pageSize, setPageSize] = useState(10);
     const [total, setTotal] = useState(0);
     const [loginName, setLoginName] = useState('');
-    const [nickname, setNickname] = useState('');
     const [model, setModel] = useState('');
 
     // 修复：添加搜索条件到依赖项，这样搜索后会自动加载数据
     useEffect(() => {
         loadModels();
-    }, [pageIndex, pageSize, loginName, nickname, model]);
+    }, [pageIndex, pageSize, loginName, model]);
 
     const loadModels = async () => {
         try {
@@ -25,7 +24,6 @@ function AdminAIModelPage() {
             const params: AIModelPageRequest = {
                 page: { pageIndex, pageSize },
                 loginName: loginName || undefined,
-                nickname: nickname || undefined,
                 model: model || undefined,
             };
             const res = await adminApi.aiModel.list(params);
@@ -140,13 +138,6 @@ function AdminAIModelPage() {
                         />
                         <input
                             type="text"
-                            placeholder="昵称"
-                            value={nickname}
-                            onChange={(e) => setNickname(e.target.value)}
-                            className="px-3 py-2 border rounded"
-                        />
-                        <input
-                            type="text"
                             placeholder="模型名"
                             value={model}
                             onChange={(e) => setModel(e.target.value)}
@@ -166,8 +157,8 @@ function AdminAIModelPage() {
                         <thead className="bg-gray-50">
                         <tr>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">模型归属(登录名)</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">配置名</th>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">模型名称</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">模型</th>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">厂家</th>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">类型</th>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">分享状态</th>
