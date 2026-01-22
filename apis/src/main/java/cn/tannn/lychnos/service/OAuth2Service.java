@@ -137,10 +137,24 @@ public class OAuth2Service {
 
     /**
      * 处理OAuth2回调，完成登录或绑定
+     * <p>
+     * 此方法统一处理第三方平台的授权回调，支持两种场景：
+     * 1. 第三方登录（LOGIN）：
+     *    - 如果第三方账号已绑定系统用户，直接登录
+     *    - 如果第三方账号未绑定，创建新用户并自动绑定
+     * 2. 绑定第三方账户（BIND）：
+     *    - 将第三方账号绑定到指定的系统用户
+     *    - 绑定成功后自动登录该用户
+     * </p>
+     * <p>
+     * 注意：绑定操作统一由此方法处理，不再使用独立的 bindThirdPartyAccount 方法。
+     * 前端应通过 OAuth2LoginController#getAuthorizeUrl 生成授权URL（携带loginName参数表示绑定），
+     * 然后第三方平台回调到 OAuth2LoginController#handleCallback，由此方法统一处理。
+     * </p>
      *
      * @param providerType 平台类型
      * @param code         授权码
-     * @param state        状态码（用于验CSRF和传递上下文）
+     * @param state        状态码（用于验CSRF和传递上下文，格式：ACTION|loginName|UUID）
      * @return 登录Token
      */
     @Transactional(rollbackFor = Exception.class)
@@ -270,67 +284,6 @@ public class OAuth2Service {
         bind.setAvatarUrl(oauthUserInfo.getAvatarUrl());
         bind.setEmail(oauthUserInfo.getEmail());
 
-        try {
-            if (oauthUserInfo.getExtraInfo() != null && !oauthUserInfo.getExtraInfo().isEmpty()) {
-                bind.setExtraInfo(oauthUserInfo.getExtraInfo());
-            }
-        } catch (Exception e) {
-            log.warn("转换 extraInfo 为 JSON 失败", e);
-        }
-
-        bindDao.save(bind);
-        log.info("绑定第三方账号成功：用户ID={}, 平台={}, OpenID={}", userId, providerType, oauthUserInfo.getOpenId());
-    }
-
-    /**
-     * 绑定第三方账户（用户已登录状态下）
-     *
-     * @param userId       用户ID
-     * @param providerType 平台类型
-     * @param code         授权码
-     */
-    @Transactional(rollbackFor = Exception.class)
-    public void bindThirdPartyAccount(Long userId, String providerType, String code) {
-        // 转换为Enum
-        ProviderType providerTypeEnum = ProviderType.fromValue(providerType);
-        OAuth2Provider provider = getProvider(providerTypeEnum);
-
-        // 1. 检查用户是否存在
-        UserInfo userInfo = userInfoService.getJpaBasicsDao().findById(userId)
-                .orElseThrow(() -> new UserException("用户不存在"));
-
-        // 2. 检查该用户是否已绑定此平台
-        if (bindDao.existsByUserIdAndProviderType(userId, providerTypeEnum)) {
-            throw new BusinessException("您已绑定过该平台账号，请先解绑");
-        }
-
-        // 3. 获取 Access Token
-        String redirectUri = StringUtils.stripEnd(callbackBaseUrl, "/") + "/oauth/callback/"
-                + providerTypeEnum.getValue().toLowerCase();
-        String accessToken = provider.getAccessToken(code, redirectUri);
-
-        // 4. 获取第三方用户信息
-        OAuth2UserInfo oauthUserInfo = provider.getUserInfo(accessToken);
-
-        // 5. 检查该第三方账号是否已被其他用户绑定
-        Optional<UserThirdPartyBind> existingBind = bindDao.findByProviderTypeAndOpenId(
-                providerTypeEnum,
-                oauthUserInfo.getOpenId());
-        if (existingBind.isPresent()) {
-            throw new BusinessException("该第三方账号已被其他用户绑定");
-        }
-
-        // 6. 创建绑定记录
-        UserThirdPartyBind bind = new UserThirdPartyBind();
-        bind.setUserId(userId);
-        bind.setProviderType(providerTypeEnum);
-        bind.setOpenId(oauthUserInfo.getOpenId());
-        bind.setUnionId(oauthUserInfo.getUnionId());
-        bind.setNickname(oauthUserInfo.getNickname());
-        bind.setAvatarUrl(oauthUserInfo.getAvatarUrl());
-        bind.setEmail(oauthUserInfo.getEmail());
-
-        // 将额外信息转换为 JSON 字符串
         try {
             if (oauthUserInfo.getExtraInfo() != null && !oauthUserInfo.getExtraInfo().isEmpty()) {
                 bind.setExtraInfo(oauthUserInfo.getExtraInfo());

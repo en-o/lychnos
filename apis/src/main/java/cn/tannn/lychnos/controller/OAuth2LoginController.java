@@ -64,14 +64,20 @@ public class OAuth2LoginController {
     /**
      * 生成第三方登录授权URL
      * <p>
-     *     https://github.com/settings/applications/3348764
-     *     http://localhost:1250/oauth/callback/github 注意github这个大小写敏感
-     *
-     *     https://connect.linux.do/dash/sso
-     *     http://localhost:1250/oauth/callback/LINUXDO
+     * 此接口支持两种场景：
+     * 1. 第三方登录：不传 loginName 参数，用户通过第三方平台登录系统
+     * 2. 绑定第三方账户：传入 loginName 参数，将第三方账户绑定到指定用户
      * </p>
+     * <p>
+     * 配置示例：
+     * - GitHub: https://github.com/settings/applications/3348764
+     *   回调地址: http://localhost:1250/oauth/callback/github (注意大小写敏感)
+     * - LinuxDo: https://connect.linux.do/dash/sso
+     *   回调地址: http://localhost:1250/oauth/callback/LINUXDO
+     * </p>
+     *
      * @param providerType 平台类型（GITHUB, LINUXDO 等）
-     * @param loginName    当前登录用户名（可选，用于绑定）
+     * @param loginName    当前登录用户名（可选，用于绑定场景）
      * @return 授权URL
      */
     @Operation(summary = "生成第三方登录授权URL")
@@ -90,10 +96,28 @@ public class OAuth2LoginController {
 
     /**
      * 处理第三方登录回调
+     * <p>
+     * 此接口统一处理第三方平台的授权回调，支持两种场景：
+     * 1. 第三方登录：创建新用户或登录已有用户
+     * 2. 绑定第三方账户：将第三方账户绑定到指定用户
+     * </p>
+     * <p>
+     * 场景判断：通过解析 state 参数中的加密信息判断是登录还是绑定操作
+     * - LOGIN: 第三方登录场景
+     * - BIND: 绑定第三方账户场景
+     * </p>
+     * <p>
+     * 回调流程：
+     * 1. 第三方平台验证用户授权后，携带 code 和 state 参数回调此接口
+     * 2. 后端使用 code 换取 access_token
+     * 3. 使用 access_token 获取第三方用户信息
+     * 4. 根据 state 判断执行登录或绑定操作
+     * 5. 重定向到前端页面，携带 token 参数
+     * </p>
      *
      * @param providerType 平台类型
      * @param code         授权码
-     * @param state        状态码（防CSRF）
+     * @param state        状态码（防CSRF，包含操作类型和用户信息）
      * @return 重定向到Web主页
      */
     @Operation(summary = "处理第三方登录回调")

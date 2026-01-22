@@ -66,20 +66,19 @@ public class UserThirdPartyController {
 
     /**
      * 绑定第三方账户
+     * <p>
+     * 注意：此接口已废弃，绑定操作统一由 OAuth2LoginController#handleCallback 处理。
+     * 前端应通过 OAuth2LoginController#getAuthorizeUrl 生成授权URL（携带loginName参数），
+     * 然后第三方平台回调到 OAuth2LoginController#handleCallback 完成绑定。
+     * </p>
      *
-     * @param dto         绑定请求参数
-     * @param httpRequest HTTP请求
-     * @return 绑定结果
+     * @deprecated 使用 OAuth2LoginController#handleCallback 替代
      */
-    @Operation(summary = "绑定第三方账户")
+    @Deprecated
+    @Operation(summary = "绑定第三方账户（已废弃）", description = "请使用OAuth2统一回调接口")
     @ApiMapping(value = "/bind", method = RequestMethod.POST)
-    public ResultVO<Void> bindAccount(@RequestBody BindAccountDTO dto, HttpServletRequest httpRequest) {
-        Long userId = UserUtil.userId2(httpRequest);
-
-        oauth2Service.bindThirdPartyAccount(userId, dto.getProviderType(), dto.getCode());
-
-        log.info("绑定第三方账户成功：用户ID={}, 平台={}", userId, dto.getProviderType());
-        return ResultVO.successMessage("绑定成功");
+    public ResultVO<String> bindAccount(@RequestBody BindAccountDTO dto, HttpServletRequest httpRequest) {
+        return ResultVO.failMessage("此接口已废弃，请使用OAuth2统一回调流程进行绑定");
     }
 
     /**
