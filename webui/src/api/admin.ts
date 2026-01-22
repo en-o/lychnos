@@ -58,6 +58,7 @@ export interface ThirdPartyBind {
 export interface AIModelDetail {
     id: number;
     userId: number;
+    loginName: string;
     name: string;
     model: string;
     factory: string;
@@ -68,6 +69,24 @@ export interface AIModelDetail {
     share: number;
     createTime: string;
     updateTime: string;
+}
+
+// 分页结果
+export interface PageResult<T> {
+    page: number;
+    size: number;
+    totalPages: number;
+    total: number;
+    rows: T[];
+}
+
+// 分页请求参数
+export interface PageRequest {
+    page?: {
+        pageNum?: number;
+        pageSize?: number;
+    };
+    loginName?: string;
 }
 
 // 管理员API
@@ -125,9 +144,9 @@ export const adminApi = {
 
     // AI模型管理
     aiModel: {
-        // 获取所有AI模型列表
-        list: () => {
-            return request.get<Result<AIModelDetail[]>>('/sys-manage/ai-model/list');
+        // 获取所有AI模型列表（分页）
+        list: (params: PageRequest) => {
+            return request.post<Result<PageResult<AIModelDetail>>>('/sys-manage/ai-model/list', params);
         },
 
         // 设置模型为官方
