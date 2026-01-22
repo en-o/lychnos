@@ -40,6 +40,6 @@ public class UserPageDTO {
         if (page == null) {
             return new PagingSorteds().fixSort(1, "createTime");
         }
-        return page.append(1, "createTime");
+        return page;
     }
 }
