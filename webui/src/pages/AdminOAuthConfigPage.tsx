@@ -42,6 +42,7 @@ function AdminOAuthConfigPage() {
     const [editingConfig, setEditingConfig] = useState<OAuthConfigDetail | null>(null);
     const [showEditDialog, setShowEditDialog] = useState(false);
     const [isCreateMode, setIsCreateMode] = useState(false);
+    const [showCallbackHelp, setShowCallbackHelp] = useState(false);
     const [formData, setFormData] = useState<OAuthConfigUpdate>({
         id: 0,
         providerType: '',
@@ -140,6 +141,40 @@ function AdminOAuthConfigPage() {
     };
 
     const handleSave = async () => {
+        // 前端验证必填字段
+        if (isCreateMode) {
+            if (!formData.providerType) {
+                toast.error('请选择平台类型');
+                return;
+            }
+            if (!formData.clientSecret?.trim()) {
+                toast.error('请输入 Client Secret');
+                return;
+            }
+        }
+
+        // 新增和编辑都需要验证的必填字段
+        if (!formData.clientId?.trim()) {
+            toast.error('请输入 Client ID');
+            return;
+        }
+        if (!formData.authorizeUrl?.trim()) {
+            toast.error('请输入授权端点');
+            return;
+        }
+        if (!formData.tokenUrl?.trim()) {
+            toast.error('请输入 Token 端点');
+            return;
+        }
+        if (!formData.userInfoUrl?.trim()) {
+            toast.error('请输入用户信息端点');
+            return;
+        }
+        if (!formData.webCallbackUrl?.trim()) {
+            toast.error('请输入 Web 回调地址前缀');
+            return;
+        }
+
         try {
             const res = isCreateMode
                 ? await adminApi.oauth.create(formData)
@@ -159,6 +194,28 @@ function AdminOAuthConfigPage() {
             const res = await adminApi.oauth.updateSort(id, newSort);
             if (res.success) {
                 toast.success('排序更新成功');
+                loadConfigs();
+            }
+        } catch (error: any) {
+            // 错误已在拦截器中统一处理，这里只需要捕获异常
+        }
+    };
+
+    const handleDelete = async (config: OAuthConfigDetail) => {
+        // 检查是否为启用状态
+        if (config.enabled) {
+            toast.error('启用状态的配置不允许删除，请先停用');
+            return;
+        }
+
+        if (!window.confirm(`确定要删除 ${config.providerName} 的配置吗？`)) {
+            return;
+        }
+
+        try {
+            const res = await adminApi.oauth.delete(config.id);
+            if (res.success) {
+                toast.success('删除成功');
                 loadConfigs();
             }
         } catch (error: any) {
@@ -243,9 +300,21 @@ function AdminOAuthConfigPage() {
                                         </button>
                                         <button
                                             onClick={() => handleToggle(config.id)}
-                                            className={`px-3 py-1 rounded ${config.enabled ? 'bg-red-100 text-red-700 hover:bg-red-200' : 'bg-green-100 text-green-700 hover:bg-green-200'}`}
+                                            className={`px-3 py-1 rounded mr-2 ${config.enabled ? 'bg-red-100 text-red-700 hover:bg-red-200' : 'bg-green-100 text-green-700 hover:bg-green-200'}`}
                                         >
                                             {config.enabled ? '停用' : '启用'}
+                                        </button>
+                                        <button
+                                            onClick={() => handleDelete(config)}
+                                            disabled={config.enabled}
+                                            className={`px-3 py-1 rounded ${
+                                                config.enabled
+                                                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                                                    : 'bg-red-100 text-red-700 hover:bg-red-200'
+                                            }`}
+                                            title={config.enabled ? '请先停用后再删除' : '删除配置'}
+                                        >
+                                            删除
                                         </button>
                                     </td>
                                 </tr>
@@ -294,7 +363,7 @@ function AdminOAuthConfigPage() {
                                 {/* Client ID */}
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                                        Client ID
+                                        Client ID <span className="text-red-500">*</span>
                                     </label>
                                     <input
                                         type="text"
@@ -322,7 +391,7 @@ function AdminOAuthConfigPage() {
                                 {/* 授权端点 */}
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                                        授权端点 (Authorize URL)
+                                        授权端点 (Authorize URL) <span className="text-red-500">*</span>
                                     </label>
                                     <input
                                         type="text"
@@ -336,7 +405,7 @@ function AdminOAuthConfigPage() {
                                 {/* Token端点 */}
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                                        Token端点 (Token URL)
+                                        Token端点 (Token URL) <span className="text-red-500">*</span>
                                     </label>
                                     <input
                                         type="text"
@@ -350,7 +419,7 @@ function AdminOAuthConfigPage() {
                                 {/* 用户信息端点 */}
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                                        用户信息端点 (User Info URL)
+                                        用户信息端点 (User Info URL) <span className="text-red-500">*</span>
                                     </label>
                                     <input
                                         type="text"
@@ -364,7 +433,7 @@ function AdminOAuthConfigPage() {
                                 {/* Web回调地址 */}
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                                        Web回调地址前缀
+                                        Web回调地址前缀 <span className="text-red-500">*</span>
                                     </label>
                                     <input
                                         type="text"
@@ -400,21 +469,49 @@ function AdminOAuthConfigPage() {
                                         </button>
                                     </div>
 
-                                    <div className="mt-2 p-3 bg-blue-50 border border-blue-200 rounded text-sm text-gray-700">
-                                        <p className="font-semibold mb-2">📝 配置说明：</p>
-                                        <ul className="space-y-1 list-disc list-inside">
-                                            <li>此字段只需填写<strong>域名+路径前缀</strong>，后端会自动拼接 <code className="bg-gray-200 px-1">#/oauth/callback</code></li>
-                                            <li>末尾的斜杠会被自动移除</li>
-                                            <li>可以为空，表示使用相对路径</li>
-                                        </ul>
-                                        <p className="font-semibold mt-3 mb-1">示例：</p>
-                                        <ul className="space-y-1 text-xs">
-                                            <li>• <code className="bg-gray-200 px-1">http://localhost:3000/lychnos</code> → <code className="bg-gray-200 px-1">http://localhost:3000/lychnos#/oauth/callback?token=xxx</code></li>
-                                            <li>• <code className="bg-gray-200 px-1">http://localhost:3000</code> → <code className="bg-gray-200 px-1">http://localhost:3000#/oauth/callback?token=xxx</code></li>
-                                            <li>• <code className="bg-gray-200 px-1">https://example.com</code> → <code className="bg-gray-200 px-1">https://example.com#/oauth/callback?token=xxx</code></li>
-                                            <li>• 留空 → <code className="bg-gray-200 px-1">#/oauth/callback?token=xxx</code></li>
-                                        </ul>
+                                    <div className="mt-2 border border-blue-200 rounded overflow-hidden">
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowCallbackHelp(!showCallbackHelp)}
+                                            className="w-full px-3 py-2 bg-blue-50 text-left flex items-center justify-between hover:bg-blue-100 transition"
+                                        >
+                                            <span className="font-semibold text-sm text-gray-700">📝 配置说明</span>
+                                            <span className="text-gray-500 text-xs">
+                                                {showCallbackHelp ? '▲ 收起' : '▼ 展开'}
+                                            </span>
+                                        </button>
+                                        {showCallbackHelp && (
+                                            <div className="p-3 bg-blue-50 text-sm text-gray-700 border-t border-blue-200">
+                                                <ul className="space-y-1 list-disc list-inside">
+                                                    <li>此字段只需填写<strong>域名+路径前缀</strong>，后端会自动拼接 <code className="bg-gray-200 px-1">#/oauth/callback</code></li>
+                                                    <li>末尾的斜杠会被自动移除</li>
+                                                    <li>可以为空，表示使用相对路径</li>
+                                                </ul>
+                                                <p className="font-semibold mt-3 mb-1">示例：</p>
+                                                <ul className="space-y-1 text-xs">
+                                                    <li>• <code className="bg-gray-200 px-1">http://localhost:3000/lychnos</code> → <code className="bg-gray-200 px-1">http://localhost:3000/lychnos#/oauth/callback?token=xxx</code></li>
+                                                    <li>• <code className="bg-gray-200 px-1">http://localhost:3000</code> → <code className="bg-gray-200 px-1">http://localhost:3000#/oauth/callback?token=xxx</code></li>
+                                                    <li>• <code className="bg-gray-200 px-1">https://example.com</code> → <code className="bg-gray-200 px-1">https://example.com#/oauth/callback?token=xxx</code></li>
+                                                    <li>• 留空 → <code className="bg-gray-200 px-1">#/oauth/callback?token=xxx</code></li>
+                                                </ul>
+                                            </div>
+                                        )}
                                     </div>
+                                </div>
+
+                                {/* 平台图标URL */}
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        平台图标URL (Icon URL)
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={formData.iconUrl}
+                                        onChange={(e) => setFormData({...formData, iconUrl: e.target.value})}
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                                        placeholder="https://example.com/icon.png"
+                                    />
+                                    <p className="mt-1 text-xs text-gray-500">可选字段，留空时登录页面将使用平台名称作为图标</p>
                                 </div>
 
                                 {/* Scope */}

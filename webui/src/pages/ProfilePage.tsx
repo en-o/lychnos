@@ -283,7 +283,14 @@ const ProfilePage: React.FC = () => {
                   <div key={provider.type} className="flex items-center justify-between p-3 border border-gray-100 rounded-lg">
                     <div className="flex items-center gap-3">
                       {provider.iconUrl ? (
-                        <img src={provider.iconUrl} alt={provider.name} className="w-8 h-8 rounded-full" />
+                        <img
+                          src={provider.iconUrl}
+                          alt={provider.name}
+                          className="w-8 h-8 rounded-full"
+                          onError={(e) => {
+                            e.currentTarget.style.display = 'none';
+                          }}
+                        />
                       ) : (
                         <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-xs">
                           {provider.name[0]}

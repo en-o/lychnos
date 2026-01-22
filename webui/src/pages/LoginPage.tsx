@@ -177,8 +177,20 @@ const LoginPage: React.FC = () => {
                   onClick={() => handleOAuthLogin(provider.type)}
                   className="flex items-center justify-center gap-2 px-4 py-2.5 border border-gray-300 rounded-lg hover:bg-gray-50 transition"
                 >
-                  {provider.iconUrl && (
-                    <img src={provider.iconUrl} alt={provider.name} className="w-5 h-5" />
+                  {provider.iconUrl ? (
+                    <img
+                      src={provider.iconUrl}
+                      alt={provider.name}
+                      className="w-5 h-5"
+                      onError={(e) => {
+                        // 图标加载失败时隐藏图片，显示文字
+                        e.currentTarget.style.display = 'none';
+                      }}
+                    />
+                  ) : (
+                    <span className="w-5 h-5 flex items-center justify-center text-xs font-bold text-blue-600">
+                      {provider.name.charAt(0)}
+                    </span>
                   )}
                   <span className="text-sm">{provider.name}</span>
                 </button>

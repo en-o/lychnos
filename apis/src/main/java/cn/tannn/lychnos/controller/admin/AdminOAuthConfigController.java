@@ -73,6 +73,18 @@ public class AdminOAuthConfigController {
         if (StringUtils.isBlank(dto.getClientSecret())) {
             throw new RuntimeException("Client Secret不能为空");
         }
+        if (StringUtils.isBlank(dto.getAuthorizeUrl())) {
+            throw new RuntimeException("授权端点不能为空");
+        }
+        if (StringUtils.isBlank(dto.getTokenUrl())) {
+            throw new RuntimeException("Token端点不能为空");
+        }
+        if (StringUtils.isBlank(dto.getUserInfoUrl())) {
+            throw new RuntimeException("用户信息端点不能为空");
+        }
+        if (StringUtils.isBlank(dto.getWebCallbackUrl())) {
+            throw new RuntimeException("Web回调地址前缀不能为空");
+        }
 
         OAuthConfig config = new OAuthConfig();
         config.setProviderType(cn.tannn.lychnos.enums.ProviderType.fromValue(dto.getProviderType().trim()));
@@ -81,13 +93,12 @@ public class AdminOAuthConfigController {
         config.setAuthorizeUrl(dto.getAuthorizeUrl().trim());
         config.setTokenUrl(dto.getTokenUrl().trim());
         config.setUserInfoUrl(dto.getUserInfoUrl().trim());
-        config.setScope(dto.getScope().trim());
-
         config.setWebCallbackUrl(dto.getWebCallbackUrl().trim());
+        config.setScope(StringUtils.isNotBlank(dto.getScope()) ? dto.getScope().trim() : "");
         config.setSortOrder(dto.getSortOrder() != null ? dto.getSortOrder() : 0);
         config.setEnabled(false); // 默认停用
 
-        // 可选字段，使用 isNotBlank 判断并 trim
+        // 可选字段：iconUrl
         if (StringUtils.isNotBlank(dto.getIconUrl())) {
             config.setIconUrl(dto.getIconUrl().trim());
         }
@@ -109,33 +120,48 @@ public class AdminOAuthConfigController {
         OAuthConfig config = oauthConfigService.getJpaBasicsDao().findById(dto.getId())
                 .orElseThrow(() -> new RuntimeException("配置不存在"));
 
-        // 更新字段（使用 StringUtils.isNotBlank 判断非空字符串）
-        if (StringUtils.isNotBlank(dto.getClientId())) {
-            config.setClientId(dto.getClientId().trim());
+        // 验证必填字段（编辑时这些字段也必须提供）
+        if (StringUtils.isBlank(dto.getClientId())) {
+            throw new RuntimeException("Client ID不能为空");
         }
+        if (StringUtils.isBlank(dto.getAuthorizeUrl())) {
+            throw new RuntimeException("授权端点不能为空");
+        }
+        if (StringUtils.isBlank(dto.getTokenUrl())) {
+            throw new RuntimeException("Token端点不能为空");
+        }
+        if (StringUtils.isBlank(dto.getUserInfoUrl())) {
+            throw new RuntimeException("用户信息端点不能为空");
+        }
+        if (StringUtils.isBlank(dto.getWebCallbackUrl())) {
+            throw new RuntimeException("Web回调地址前缀不能为空");
+        }
+
+        // 更新必填字段
+        config.setClientId(dto.getClientId().trim());
+        config.setAuthorizeUrl(dto.getAuthorizeUrl().trim());
+        config.setTokenUrl(dto.getTokenUrl().trim());
+        config.setUserInfoUrl(dto.getUserInfoUrl().trim());
+        config.setWebCallbackUrl(dto.getWebCallbackUrl().trim());
+
+        // Client Secret：留空则不修改
         if (StringUtils.isNotBlank(dto.getClientSecret())) {
             config.setClientSecret(dto.getClientSecret().trim());
         }
-        if (StringUtils.isNotBlank(dto.getAuthorizeUrl())) {
-            config.setAuthorizeUrl(dto.getAuthorizeUrl().trim());
-        }
-        if (StringUtils.isNotBlank(dto.getTokenUrl())) {
-            config.setTokenUrl(dto.getTokenUrl().trim());
-        }
-        if (StringUtils.isNotBlank(dto.getUserInfoUrl())) {
-            config.setUserInfoUrl(dto.getUserInfoUrl().trim());
-        }
+
+        // Scope：可选字段
         if (StringUtils.isNotBlank(dto.getScope())) {
             config.setScope(dto.getScope().trim());
         }
+
+        // IconUrl：可选字段
         if (StringUtils.isNotBlank(dto.getIconUrl())) {
             config.setIconUrl(dto.getIconUrl().trim());
         }
+
+        // SortOrder：可选字段
         if (dto.getSortOrder() != null) {
             config.setSortOrder(dto.getSortOrder());
-        }
-        if (StringUtils.isNotBlank(dto.getWebCallbackUrl())) {
-            config.setWebCallbackUrl(dto.getWebCallbackUrl().trim());
         }
 
         oauthConfigService.saveConfig(config);

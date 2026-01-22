@@ -82,6 +82,11 @@ export const adminApi = {
         updateSort: (id: number, sortOrder: number) => {
             return request.put<Result<void>>(`/sys-manage/oauth-config/update-sort/${id}/${sortOrder}`);
         },
+
+        // 删除OAuth配置
+        delete: (id: number) => {
+            return request.delete<Result<void>>(`/sys-manage/oauth-config/delete/${id}`);
+        },
     },
 
     // 用户管理
