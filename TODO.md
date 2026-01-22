@@ -6,3 +6,9 @@
   - [x] 后端实现完成（实体、Service、Controller、SQL 迁移）
   - [x] 前端 API 层完成（模型类、API 接口）
   - [x] 前端 UI 实现（HomePage.tsx 用户流程）
+
+
+- [ ] 第三方登录的授权
+  - [x] 解绑之后删除关联信息，真实的解绑由用户自己去第三方账号内进行处理
+  - [x] linxdo - 存在墙的所以只在测试用
+  - [x] github
