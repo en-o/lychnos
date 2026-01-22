@@ -80,13 +80,25 @@ export interface PageResult<T> {
     rows: T[];
 }
 
-// 分页请求参数
-export interface PageRequest {
+// AI模型分页请求参数
+export interface AIModelPageRequest {
     page?: {
-        pageNum?: number;
+        pageIndex?: number;
         pageSize?: number;
     };
     loginName?: string;
+    nickname?: string;
+    model?: string;
+}
+
+// 用户分页请求参数
+export interface UserPageRequest {
+    page?: {
+        pageIndex?: number;
+        pageSize?: number;
+    };
+    loginName?: string;
+    nickname?: string;
 }
 
 // 管理员API
@@ -126,9 +138,9 @@ export const adminApi = {
 
     // 用户管理
     user: {
-        // 获取所有用户列表
-        list: () => {
-            return request.get<Result<UserDetail[]>>('/sys-manage/user/list');
+        // 获取所有用户列表（分页）
+        list: (params: UserPageRequest) => {
+            return request.post<Result<PageResult<UserDetail>>>('/sys-manage/user/list', params);
         },
 
         // 获取用户详情
@@ -145,7 +157,7 @@ export const adminApi = {
     // AI模型管理
     aiModel: {
         // 获取所有AI模型列表（分页）
-        list: (params: PageRequest) => {
+        list: (params: AIModelPageRequest) => {
             return request.post<Result<PageResult<AIModelDetail>>>('/sys-manage/ai-model/list', params);
         },
 

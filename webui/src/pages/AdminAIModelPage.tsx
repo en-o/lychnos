@@ -1,29 +1,47 @@
 import {useEffect, useState} from 'react';
 import {useNavigate} from 'react-router-dom';
-import {adminApi, type AIModelDetail} from '../api/admin';
+import {adminApi, type AIModelDetail, type AIModelPageRequest} from '../api/admin';
 import {toast} from '../components/ToastContainer';
 
 function AdminAIModelPage() {
     const navigate = useNavigate();
     const [models, setModels] = useState<AIModelDetail[]>([]);
     const [loading, setLoading] = useState(true);
+    const [pageIndex, setPageIndex] = useState(0);
+    const [pageSize, setPageSize] = useState(10);
+    const [total, setTotal] = useState(0);
+    const [loginName, setLoginName] = useState('');
+    const [nickname, setNickname] = useState('');
+    const [model, setModel] = useState('');
 
     useEffect(() => {
         loadModels();
-    }, []);
+    }, [pageIndex, pageSize]);
 
     const loadModels = async () => {
         try {
             setLoading(true);
-            const res = await adminApi.aiModel.list();
-            if (res.success) {
-                setModels(res.data);
+            const params: AIModelPageRequest = {
+                page: { pageIndex, pageSize },
+                loginName: loginName || undefined,
+                nickname: nickname || undefined,
+                model: model || undefined,
+            };
+            const res = await adminApi.aiModel.list(params);
+            if (res.success && res.data) {
+                setModels(res.data.rows);
+                setTotal(res.data.total);
             }
         } catch (error: any) {
             // 错误已在拦截器中统一处理
         } finally {
             setLoading(false);
         }
+    };
+
+    const handleSearch = () => {
+        setPageIndex(0);
+        loadModels();
     };
 
     const handleSetOfficial = async (model: AIModelDetail) => {
@@ -109,10 +127,44 @@ function AdminAIModelPage() {
                     </button>
                 </div>
 
+                {/* 搜索栏 */}
+                <div className="bg-white rounded-lg shadow p-4 mb-4">
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <input
+                            type="text"
+                            placeholder="用户名"
+                            value={loginName}
+                            onChange={(e) => setLoginName(e.target.value)}
+                            className="px-3 py-2 border rounded"
+                        />
+                        <input
+                            type="text"
+                            placeholder="昵称"
+                            value={nickname}
+                            onChange={(e) => setNickname(e.target.value)}
+                            className="px-3 py-2 border rounded"
+                        />
+                        <input
+                            type="text"
+                            placeholder="模型名"
+                            value={model}
+                            onChange={(e) => setModel(e.target.value)}
+                            className="px-3 py-2 border rounded"
+                        />
+                        <button
+                            onClick={handleSearch}
+                            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                        >
+                            搜索
+                        </button>
+                    </div>
+                </div>
+
                 <div className="bg-white rounded-lg shadow overflow-hidden">
                     <table className="min-w-full divide-y divide-gray-200">
                         <thead className="bg-gray-50">
                             <tr>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">用户登录名</th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">模型名称</th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">模型</th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">厂家</th>
@@ -125,6 +177,7 @@ function AdminAIModelPage() {
                         <tbody className="bg-white divide-y divide-gray-200">
                             {models.map((model) => (
                                 <tr key={model.id}>
+                                    <td className="px-6 py-4 text-sm text-gray-500">{model.loginName}</td>
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         <span className="text-sm font-medium text-gray-900">{model.name}</span>
                                     </td>
@@ -170,6 +223,50 @@ function AdminAIModelPage() {
                         </div>
                     )}
                 </div>
+
+                {/* 分页 */}
+                {total > 0 && (
+                    <div className="mt-4 flex items-center justify-between bg-white px-4 py-3 rounded-lg shadow">
+                        <div className="flex items-center gap-4">
+                            <div className="text-sm text-gray-700">
+                                共 {total} 条记录，第 {pageIndex + 1} / {Math.ceil(total / pageSize)} 页
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <label className="text-sm text-gray-700">每页</label>
+                                <select
+                                    value={pageSize}
+                                    onChange={(e) => {
+                                        setPageSize(Number(e.target.value));
+                                        setPageIndex(0);
+                                    }}
+                                    className="px-2 py-1 border rounded"
+                                >
+                                    <option value={1}>1</option>
+                                    <option value={10}>10</option>
+                                    <option value={20}>20</option>
+                                    <option value={30}>30</option>
+                                </select>
+                                <label className="text-sm text-gray-700">条</label>
+                            </div>
+                        </div>
+                        <div className="flex gap-2">
+                            <button
+                                onClick={() => setPageIndex(Math.max(0, pageIndex - 1))}
+                                disabled={pageIndex === 0}
+                                className="px-3 py-1 border rounded disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                上一页
+                            </button>
+                            <button
+                                onClick={() => setPageIndex(pageIndex + 1)}
+                                disabled={pageIndex >= Math.ceil(total / pageSize) - 1}
+                                className="px-3 py-1 border rounded disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                下一页
+                            </button>
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
     );

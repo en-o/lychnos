@@ -1,6 +1,6 @@
 import {useEffect, useState} from 'react';
 import {useNavigate} from 'react-router-dom';
-import {adminApi, type UserDetail, type ThirdPartyBind} from '../api/admin';
+import {adminApi, type UserDetail, type ThirdPartyBind, type UserPageRequest} from '../api/admin';
 
 function AdminUserPage() {
     const navigate = useNavigate();
@@ -9,23 +9,39 @@ function AdminUserPage() {
     const [selectedUser, setSelectedUser] = useState<UserDetail | null>(null);
     const [bindings, setBindings] = useState<ThirdPartyBind[]>([]);
     const [showBindings, setShowBindings] = useState(false);
+    const [pageIndex, setPageIndex] = useState(0);
+    const [pageSize, setPageSize] = useState(10);
+    const [total, setTotal] = useState(0);
+    const [loginName, setLoginName] = useState('');
+    const [nickname, setNickname] = useState('');
 
     useEffect(() => {
         loadUsers();
-    }, []);
+    }, [pageIndex, pageSize]);
 
     const loadUsers = async () => {
         try {
             setLoading(true);
-            const res = await adminApi.user.list();
-            if (res.success) {
-                setUsers(res.data);
+            const params: UserPageRequest = {
+                page: { pageIndex, pageSize },
+                loginName: loginName || undefined,
+                nickname: nickname || undefined,
+            };
+            const res = await adminApi.user.list(params);
+            if (res.success && res.data) {
+                setUsers(res.data.rows);
+                setTotal(res.data.total);
             }
         } catch (error: any) {
             // 错误已在拦截器中统一处理，这里只需要捕获异常
         } finally {
             setLoading(false);
         }
+    };
+
+    const handleSearch = () => {
+        setPageIndex(0);
+        loadUsers();
     };
 
     const handleViewBindings = async (user: UserDetail) => {
@@ -60,6 +76,32 @@ function AdminUserPage() {
                     >
                         返回
                     </button>
+                </div>
+
+                {/* 搜索栏 */}
+                <div className="bg-white rounded-lg shadow p-4 mb-4">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <input
+                            type="text"
+                            placeholder="登录名"
+                            value={loginName}
+                            onChange={(e) => setLoginName(e.target.value)}
+                            className="px-3 py-2 border rounded"
+                        />
+                        <input
+                            type="text"
+                            placeholder="昵称"
+                            value={nickname}
+                            onChange={(e) => setNickname(e.target.value)}
+                            className="px-3 py-2 border rounded"
+                        />
+                        <button
+                            onClick={handleSearch}
+                            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                        >
+                            搜索
+                        </button>
+                    </div>
                 </div>
 
                 <div className="bg-white rounded-lg shadow overflow-hidden">
@@ -106,7 +148,57 @@ function AdminUserPage() {
                             ))}
                         </tbody>
                     </table>
+
+                    {users.length === 0 && (
+                        <div className="text-center py-12 text-gray-500">
+                            暂无用户数据
+                        </div>
+                    )}
                 </div>
+
+                {/* 分页 */}
+                {total > 0 && (
+                    <div className="mt-4 flex items-center justify-between bg-white px-4 py-3 rounded-lg shadow">
+                        <div className="flex items-center gap-4">
+                            <div className="text-sm text-gray-700">
+                                共 {total} 条记录，第 {pageIndex + 1} / {Math.ceil(total / pageSize)} 页
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <label className="text-sm text-gray-700">每页</label>
+                                <select
+                                    value={pageSize}
+                                    onChange={(e) => {
+                                        setPageSize(Number(e.target.value));
+                                        setPageIndex(0);
+                                    }}
+                                    className="px-2 py-1 border rounded"
+                                >
+                                    <option value={1}>1</option>
+                                    <option value={10}>10</option>
+                                    <option value={20}>20</option>
+                                    <option value={30}>30</option>
+                                </select>
+                                <label className="text-sm text-gray-700">条</label>
+                            </div>
+                        </div>
+                        <div className="flex gap-2">
+                            <button
+                                onClick={() => setPageIndex(Math.max(0, pageIndex - 1))}
+                                disabled={pageIndex === 0}
+                                className="px-3 py-1 border rounded disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                上一页
+                            </button>
+                            <button
+                                onClick={() => setPageIndex(pageIndex + 1)}
+                                disabled={pageIndex >= Math.ceil(total / pageSize) - 1}
+                                className="px-3 py-1 border rounded disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                下一页
+                            </button>
+                        </div>
+                    </div>
+                )}
 
                 {/* 第三方绑定弹窗 */}
                 {showBindings && selectedUser && (
