@@ -21,8 +21,14 @@ import lombok.ToString;
 public class AIModelPageDTO {
 
     @Schema(description = "用户名（模糊查询）")
-    @JpaSelectIgnoreField
     private String loginName;
+
+    @Schema(description = "昵称（模糊查询）")
+    private String nickname;
+
+    @Schema(description = "模型名（模糊查询）")
+    @JpaSelectIgnoreField
+    private String model;
 
     @Schema(description = "分页排序")
     @JpaSelectIgnoreField
