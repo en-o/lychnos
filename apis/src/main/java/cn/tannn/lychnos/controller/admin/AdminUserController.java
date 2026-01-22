@@ -45,7 +45,6 @@ public class AdminUserController {
 
     private final UserInfoService userInfoService;
     private final UserThirdPartyBindDao userThirdPartyBindDao;
-    private final UserInfoDao userInfoDao;
 
     /**
      * 分页查询用户列表
@@ -54,33 +53,9 @@ public class AdminUserController {
     @ApiMapping(value = "/list", method = RequestMethod.POST)
     public ResultPageVO<UserDetailVO, JpaPageResult<UserDetailVO>> listUsers(@RequestBody UserPageDTO dto, HttpServletRequest request) {
         userInfoService.checkAdmin(request);
-
-        Pageable pageable = dto.getPage().pageable();
-
-        // 构建查询条件
-        Specification<UserInfo> spec = (root, query, cb) -> {
-            if (StringUtils.isNotBlank(dto.getLoginName())) {
-                return cb.like(root.get("loginName"), "%" + dto.getLoginName() + "%");
-            }
-            return cb.conjunction();
-        };
-
-        Page<UserInfo> userPage = userInfoDao.findAll(spec, pageable);
-
-        // 转换为VO
-        List<UserDetailVO> voList = userPage.getContent().stream()
-                .map(this::convertToDetailVO)
-                .collect(Collectors.toList());
-
-        JpaPageResult<UserDetailVO> result = new JpaPageResult<>(
-                userPage.getNumber() + 1,
-                userPage.getSize(),
-                userPage.getTotalPages(),
-                userPage.getTotalElements(),
-                voList
-        );
-
-        return ResultPageVO.success(result);
+        Page<UserInfo> userPage = userInfoService.findPage(dto, dto.getPage());
+        JpaPageResult<UserDetailVO> pageResult = JpaPageResult.toPage(userPage, UserDetailVO.class);
+        return ResultPageVO.success(pageResult);
     }
 
     /**
@@ -93,8 +68,8 @@ public class AdminUserController {
 
         UserInfo userInfo = userInfoService.getJpaBasicsDao().findById(id)
                 .orElseThrow(() -> new RuntimeException("用户不存在"));
-
-        return ResultVO.success(convertToDetailVO(userInfo));
+        UserDetailVO userDetailVO = userInfo.to(UserDetailVO.class);
+        return ResultVO.success(userDetailVO);
     }
 
     /**
@@ -109,18 +84,4 @@ public class AdminUserController {
         return ResultVO.success(bindings);
     }
 
-    /**
-     * 转换为用户详情VO
-     */
-    private UserDetailVO convertToDetailVO(UserInfo userInfo) {
-        UserDetailVO vo = new UserDetailVO();
-        vo.setId(userInfo.getId());
-        vo.setLoginName(userInfo.getLoginName());
-        vo.setNickname(userInfo.getNickname());
-        vo.setEmail(userInfo.getEmail());
-        vo.setRoles(userInfo.getRoles());
-        vo.setCreateTime(userInfo.getCreateTime() != null ? userInfo.getCreateTime().toString() : null);
-        vo.setUpdateTime(userInfo.getUpdateTime() != null ? userInfo.getUpdateTime().toString() : null);
-        return vo;
-    }
 }
