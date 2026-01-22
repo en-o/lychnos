@@ -337,41 +337,56 @@ public class OAuth2Service {
     // ============ 私有辅助方法 ============
 
     /**
-     * 为第三方登录创建新用户
+     * 为第三方登录创建新用户或绑定到已有用户
+     * <p>
+     * 处理场景：
+     * 1. 用户首次通过第三方登录 → 创建新用户并绑定
+     * 2. 用户曾通过第三方登录创建账户，后来解绑，再次登录 → 直接绑定到原账户
+     * </p>
      *
      * @param oauthUserInfo 第三方用户信息
      * @param providerType  平台类型
-     * @return 新创建的用户
+     * @return 用户信息（新创建或已存在）
      */
     private UserInfo createUserForOAuth(OAuth2UserInfo oauthUserInfo, ProviderType providerType) {
-        // 创建用户信息
-        UserInfo userInfo = new UserInfo();
-
-        // 生成唯一的登录名（使用平台类型 + OpenID）
+        // 生成登录名（使用平台类型 + OpenID）
         String loginName = providerType.getValue().toLowerCase() + "_" + oauthUserInfo.getOpenId();
-        userInfo.setLoginName(loginName);
 
-        // 昵称（优先使用 nickname，如果为空则使用 loginName）
-        String nickname = StringUtils.isNotBlank(oauthUserInfo.getNickname())
-                ? oauthUserInfo.getNickname()
-                : "用户" + oauthUserInfo.getOpenId().substring(0, Math.min(6, oauthUserInfo.getOpenId().length()));
-        userInfo.setNickname(nickname);
+        // 检查该登录名是否已存在（可能是用户解绑后重新登录）
+        Optional<UserInfo> existingUser = userInfoService.findByLoginName(loginName);
 
-        // 邮箱
-        userInfo.setEmail(oauthUserInfo.getEmail());
+        UserInfo userInfo;
+        if (existingUser.isPresent()) {
+            // 用户已存在，直接使用（可能是解绑后重新登录）
+            userInfo = existingUser.get();
+            log.info("检测到已存在的用户，直接绑定：用户名={}, 用户ID={}", loginName, userInfo.getId());
+        } else {
+            // 用户不存在，创建新用户
+            userInfo = new UserInfo();
+            userInfo.setLoginName(loginName);
 
-        // 为第三方登录用户生成随机强密码（用户可后续修改）
-        String randomPassword = generateSecureRandomPassword();
-        userInfo.setPassword(UserInfo.getMd5Password(loginName, randomPassword));
+            // 昵称（优先使用 nickname，如果为空则使用 loginName）
+            String nickname = StringUtils.isNotBlank(oauthUserInfo.getNickname())
+                    ? oauthUserInfo.getNickname()
+                    : "用户" + oauthUserInfo.getOpenId().substring(0, Math.min(6, oauthUserInfo.getOpenId().length()));
+            userInfo.setNickname(nickname);
 
-        log.info("为第三方登录用户生成随机密码，用户名：{}", loginName);
+            // 邮箱
+            userInfo.setEmail(oauthUserInfo.getEmail());
 
-        // 保存用户
-        UserInfo savedUser = userInfoService.getJpaBasicsDao().save(userInfo);
+            // 为第三方登录用户生成随机强密码（用户可后续修改）
+            String randomPassword = generateSecureRandomPassword();
+            userInfo.setPassword(UserInfo.getMd5Password(loginName, randomPassword));
+
+            log.info("为第三方登录用户生成随机密码，用户名：{}", loginName);
+
+            // 保存用户
+            userInfo = userInfoService.getJpaBasicsDao().save(userInfo);
+        }
 
         // 创建绑定关系
         UserThirdPartyBind bind = new UserThirdPartyBind();
-        bind.setUserId(savedUser.getId());
+        bind.setUserId(userInfo.getId());
         bind.setProviderType(providerType);
         bind.setOpenId(oauthUserInfo.getOpenId());
         bind.setUnionId(oauthUserInfo.getUnionId());
@@ -390,7 +405,7 @@ public class OAuth2Service {
 
         bindDao.save(bind);
 
-        return savedUser;
+        return userInfo;
     }
 
     /**
