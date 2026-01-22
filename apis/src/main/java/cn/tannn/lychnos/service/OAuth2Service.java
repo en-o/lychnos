@@ -374,6 +374,9 @@ public class OAuth2Service {
             // 邮箱
             userInfo.setEmail(oauthUserInfo.getEmail());
 
+            // 设置默认角色
+            userInfo.setRoles(UserInfoService.createDefaultRoles());
+
             // 为第三方登录用户生成随机强密码（用户可后续修改）
             String randomPassword = generateSecureRandomPassword();
             userInfo.setPassword(UserInfo.getMd5Password(loginName, randomPassword));
