@@ -41,7 +41,6 @@ function AdminUserPage() {
 
     const handleSearch = () => {
         setPageIndex(0);
-        loadUsers();
     };
 
     const handleViewBindings = async (user: UserDetail) => {
@@ -183,14 +182,14 @@ function AdminUserPage() {
                         </div>
                         <div className="flex gap-2">
                             <button
-                                onClick={() => setPageIndex(Math.max(0, pageIndex - 1))}
+                                onClick={() => setPageIndex(prev => Math.max(0, prev - 1))}
                                 disabled={pageIndex === 0}
                                 className="px-3 py-1 border rounded disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 上一页
                             </button>
                             <button
-                                onClick={() => setPageIndex(pageIndex + 1)}
+                                onClick={() => setPageIndex(prev => prev + 1)}
                                 disabled={pageIndex >= Math.ceil(total / pageSize) - 1}
                                 className="px-3 py-1 border rounded disabled:opacity-50 disabled:cursor-not-allowed"
                             >
