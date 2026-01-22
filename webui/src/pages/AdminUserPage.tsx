@@ -9,7 +9,7 @@ function AdminUserPage() {
     const [selectedUser, setSelectedUser] = useState<UserDetail | null>(null);
     const [bindings, setBindings] = useState<ThirdPartyBind[]>([]);
     const [showBindings, setShowBindings] = useState(false);
-    const [pageIndex, setPageIndex] = useState(0);
+    const [pageIndex, setPageIndex] = useState(1);
     const [pageSize, setPageSize] = useState(10);
     const [total, setTotal] = useState(0);
     const [loginName, setLoginName] = useState('');
@@ -40,7 +40,7 @@ function AdminUserPage() {
     };
 
     const handleSearch = () => {
-        setPageIndex(0);
+        setPageIndex(1);
     };
 
     const handleViewBindings = async (user: UserDetail) => {
@@ -160,7 +160,7 @@ function AdminUserPage() {
                     <div className="mt-4 flex items-center justify-between bg-white px-4 py-3 rounded-lg shadow">
                         <div className="flex items-center gap-4">
                             <div className="text-sm text-gray-700">
-                                共 {total} 条记录，第 {pageIndex + 1} / {Math.ceil(total / pageSize)} 页
+                                共 {total} 条记录，第 {pageIndex} / {Math.ceil(total / pageSize)} 页
                             </div>
                             <div className="flex items-center gap-2">
                                 <label className="text-sm text-gray-700">每页</label>
@@ -182,15 +182,15 @@ function AdminUserPage() {
                         </div>
                         <div className="flex gap-2">
                             <button
-                                onClick={() => setPageIndex(prev => Math.max(0, prev - 1))}
-                                disabled={pageIndex === 0}
+                                onClick={() => setPageIndex(prev => Math.max(1, prev - 1))}
+                                disabled={pageIndex === 1}
                                 className="px-3 py-1 border rounded disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 上一页
                             </button>
                             <button
                                 onClick={() => setPageIndex(prev => prev + 1)}
-                                disabled={pageIndex >= Math.ceil(total / pageSize) - 1}
+                                disabled={pageIndex >= Math.ceil(total / pageSize)}
                                 className="px-3 py-1 border rounded disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 下一页

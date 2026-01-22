@@ -7,7 +7,7 @@ function AdminAIModelPage() {
     const navigate = useNavigate();
     const [models, setModels] = useState<AIModelDetail[]>([]);
     const [loading, setLoading] = useState(true);
-    const [pageIndex, setPageIndex] = useState(0);
+    const [pageIndex, setPageIndex] = useState(1);
     const [pageSize, setPageSize] = useState(10);
     const [total, setTotal] = useState(0);
     const [loginName, setLoginName] = useState('');
@@ -40,7 +40,7 @@ function AdminAIModelPage() {
     };
 
     const handleSearch = () => {
-        setPageIndex(0);
+        setPageIndex(1);
     };
 
     const handleSetOfficial = async (model: AIModelDetail) => {
@@ -131,7 +131,7 @@ function AdminAIModelPage() {
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                         <input
                             type="text"
-                            placeholder="用户名"
+                            placeholder="模型归属(登录名)"
                             value={loginName}
                             onChange={(e) => setLoginName(e.target.value)}
                             className="px-3 py-2 border rounded"
@@ -163,7 +163,7 @@ function AdminAIModelPage() {
                     <table className="min-w-full divide-y divide-gray-200">
                         <thead className="bg-gray-50">
                             <tr>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">用户登录名</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">模型归属(登录名)</th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">模型名称</th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">模型</th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">厂家</th>
@@ -228,7 +228,7 @@ function AdminAIModelPage() {
                     <div className="mt-4 flex items-center justify-between bg-white px-4 py-3 rounded-lg shadow">
                         <div className="flex items-center gap-4">
                             <div className="text-sm text-gray-700">
-                                共 {total} 条记录，第 {pageIndex + 1} / {Math.ceil(total / pageSize)} 页
+                                共 {total} 条记录，第 {pageIndex} / {Math.ceil(total / pageSize)} 页
                             </div>
                             <div className="flex items-center gap-2">
                                 <label className="text-sm text-gray-700">每页</label>
@@ -250,15 +250,15 @@ function AdminAIModelPage() {
                         </div>
                         <div className="flex gap-2">
                             <button
-                                onClick={() => setPageIndex(prev => Math.max(0, prev - 1))}
-                                disabled={pageIndex === 0}
+                                onClick={() => setPageIndex(prev => Math.max(1, prev - 1))}
+                                disabled={pageIndex === 1}
                                 className="px-3 py-1 border rounded disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 上一页
                             </button>
                             <button
                                 onClick={() => setPageIndex(prev => prev + 1)}
-                                disabled={pageIndex >= Math.ceil(total / pageSize) - 1}
+                                disabled={pageIndex >= Math.ceil(total / pageSize)}
                                 className="px-3 py-1 border rounded disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 下一页
