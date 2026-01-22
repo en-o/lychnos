@@ -21,6 +21,9 @@ public class OAuthConfigDTO {
     @Schema(description = "配置ID", requiredMode = Schema.RequiredMode.REQUIRED)
     private Long id;
 
+    @Schema(description = "第三方平台类型")
+    private String providerType;
+
     @Schema(description = "客户端ID")
     private String clientId;
 

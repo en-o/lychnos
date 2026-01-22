@@ -3,16 +3,56 @@ import {useNavigate} from 'react-router-dom';
 import {adminApi, type OAuthConfigDetail, type OAuthConfigUpdate} from '../api/admin';
 import {toast} from '../components/ToastContainer';
 
+// OAuth 平台默认配置
+const OAUTH_DEFAULTS: Record<string, Partial<OAuthConfigUpdate>> = {
+    GITHUB: {
+        authorizeUrl: 'https://github.com/login/oauth/authorize',
+        tokenUrl: 'https://github.com/login/oauth/access_token',
+        userInfoUrl: 'https://api.github.com/user',
+        scope: 'read:user user:email',
+        iconUrl: 'https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png',
+    },
+    LINUXDO: {
+        authorizeUrl: 'https://connect.linux.do/oauth2/authorize',
+        tokenUrl: 'https://connect.linux.do/oauth2/token',
+        userInfoUrl: 'https://connect.linux.do/api/user',
+        scope: 'read',
+        iconUrl: 'https://linux.do/uploads/default/optimized/4X/c/c/d/ccd8c210609d498cbeb3d5201d4c259348447562_2_32x32.png',
+    },
+    QQ: {
+        authorizeUrl: 'https://graph.qq.com/oauth2.0/authorize',
+        tokenUrl: 'https://graph.qq.com/oauth2.0/token',
+        userInfoUrl: 'https://graph.qq.com/user/get_user_info',
+        scope: 'get_user_info',
+        iconUrl: '',
+    },
+    WECHAT: {
+        authorizeUrl: 'https://open.weixin.qq.com/connect/qrconnect',
+        tokenUrl: 'https://api.weixin.qq.com/sns/oauth2/access_token',
+        userInfoUrl: 'https://api.weixin.qq.com/sns/userinfo',
+        scope: 'snsapi_login',
+        iconUrl: '',
+    },
+};
+
 function AdminOAuthConfigPage() {
     const navigate = useNavigate();
     const [configs, setConfigs] = useState<OAuthConfigDetail[]>([]);
     const [loading, setLoading] = useState(true);
     const [editingConfig, setEditingConfig] = useState<OAuthConfigDetail | null>(null);
     const [showEditDialog, setShowEditDialog] = useState(false);
+    const [isCreateMode, setIsCreateMode] = useState(false);
     const [formData, setFormData] = useState<OAuthConfigUpdate>({
         id: 0,
+        providerType: '',
         clientId: '',
         clientSecret: '',
+        authorizeUrl: '',
+        tokenUrl: '',
+        userInfoUrl: '',
+        scope: '',
+        iconUrl: '',
+        sortOrder: 0,
         webCallbackUrl: '',
     });
 
@@ -46,12 +86,54 @@ function AdminOAuthConfigPage() {
         }
     };
 
+    const handleCreate = () => {
+        setIsCreateMode(true);
+        setEditingConfig(null);
+        const defaultProvider = 'GITHUB';
+        const defaults = OAUTH_DEFAULTS[defaultProvider] || {};
+        setFormData({
+            id: 0,
+            providerType: defaultProvider,
+            clientId: '',
+            clientSecret: '',
+            authorizeUrl: defaults.authorizeUrl || '',
+            tokenUrl: defaults.tokenUrl || '',
+            userInfoUrl: defaults.userInfoUrl || '',
+            scope: defaults.scope || '',
+            iconUrl: defaults.iconUrl || '',
+            sortOrder: 0,
+            webCallbackUrl: '',
+        });
+        setShowEditDialog(true);
+    };
+
+    const handleProviderTypeChange = (providerType: string) => {
+        const defaults = OAUTH_DEFAULTS[providerType] || {};
+        setFormData({
+            ...formData,
+            providerType,
+            authorizeUrl: defaults.authorizeUrl || '',
+            tokenUrl: defaults.tokenUrl || '',
+            userInfoUrl: defaults.userInfoUrl || '',
+            scope: defaults.scope || '',
+            iconUrl: defaults.iconUrl || '',
+        });
+    };
+
     const handleEdit = (config: OAuthConfigDetail) => {
+        setIsCreateMode(false);
         setEditingConfig(config);
         setFormData({
             id: config.id,
+            providerType: config.providerType,
             clientId: config.clientId,
             clientSecret: '',
+            authorizeUrl: config.authorizeUrl,
+            tokenUrl: config.tokenUrl,
+            userInfoUrl: config.userInfoUrl,
+            scope: config.scope,
+            iconUrl: config.iconUrl,
+            sortOrder: config.sortOrder,
             webCallbackUrl: config.webCallbackUrl || '',
         });
         setShowEditDialog(true);
@@ -59,10 +141,24 @@ function AdminOAuthConfigPage() {
 
     const handleSave = async () => {
         try {
-            const res = await adminApi.oauth.update(formData);
+            const res = isCreateMode
+                ? await adminApi.oauth.create(formData)
+                : await adminApi.oauth.update(formData);
             if (res.success) {
-                toast.success('保存成功');
+                toast.success(isCreateMode ? '新增成功' : '保存成功');
                 setShowEditDialog(false);
+                loadConfigs();
+            }
+        } catch (error: any) {
+            // 错误已在拦截器中统一处理，这里只需要捕获异常
+        }
+    };
+
+    const handleSortChange = async (id: number, newSort: number) => {
+        try {
+            const res = await adminApi.oauth.updateSort(id, newSort);
+            if (res.success) {
+                toast.success('排序更新成功');
                 loadConfigs();
             }
         } catch (error: any) {
@@ -83,12 +179,20 @@ function AdminOAuthConfigPage() {
             <div className="max-w-7xl mx-auto px-4 py-8">
                 <div className="mb-6 flex items-center justify-between">
                     <h1 className="text-2xl font-bold text-gray-900">OAuth配置管理</h1>
-                    <button
-                        onClick={() => navigate(-1)}
-                        className="px-4 py-2 text-gray-600 hover:text-gray-900"
-                    >
-                        返回
-                    </button>
+                    <div className="flex gap-3">
+                        <button
+                            onClick={() => handleCreate()}
+                            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                        >
+                            新增配置
+                        </button>
+                        <button
+                            onClick={() => navigate(-1)}
+                            className="px-4 py-2 text-gray-600 hover:text-gray-900"
+                        >
+                            返回
+                        </button>
+                    </div>
                 </div>
 
                 <div className="bg-white rounded-lg shadow overflow-hidden">
@@ -116,7 +220,15 @@ function AdminOAuthConfigPage() {
                                     </td>
                                     <td className="px-6 py-4 text-sm text-gray-500">{config.clientId}</td>
                                     <td className="px-6 py-4 text-sm text-gray-500">{config.webCallbackUrl || '-'}</td>
-                                    <td className="px-6 py-4 text-sm text-gray-500">{config.sortOrder}</td>
+                                    <td className="px-6 py-4 text-sm">
+                                        <input
+                                            type="number"
+                                            value={config.sortOrder}
+                                            onChange={(e) => handleSortChange(config.id, parseInt(e.target.value) || 0)}
+                                            className="w-16 px-2 py-1 border border-gray-300 rounded text-center"
+                                            min="0"
+                                        />
+                                    </td>
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         <span className={`px-2 py-1 text-xs rounded-full ${config.enabled ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
                                             {config.enabled ? '已启用' : '已停用'}
@@ -142,12 +254,14 @@ function AdminOAuthConfigPage() {
                     </table>
                 </div>
 
-                {/* 编辑对话框 */}
-                {showEditDialog && editingConfig && (
+                {/* 编辑/新增对话框 */}
+                {showEditDialog && (
                     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
                         <div className="bg-white rounded-lg p-6 max-w-3xl w-full mx-4 max-h-[90vh] overflow-y-auto">
                             <div className="flex justify-between items-center mb-4">
-                                <h2 className="text-xl font-bold">编辑 {editingConfig.providerName} 配置</h2>
+                                <h2 className="text-xl font-bold">
+                                    {isCreateMode ? '新增 OAuth 配置' : `编辑 ${editingConfig?.providerName} 配置`}
+                                </h2>
                                 <button
                                     onClick={() => setShowEditDialog(false)}
                                     className="text-gray-500 hover:text-gray-700"
@@ -157,6 +271,26 @@ function AdminOAuthConfigPage() {
                             </div>
 
                             <div className="space-y-4">
+                                {/* 平台类型 - 仅新增时显示 */}
+                                {isCreateMode && (
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            平台类型 <span className="text-red-500">*</span>
+                                        </label>
+                                        <select
+                                            value={formData.providerType}
+                                            onChange={(e) => handleProviderTypeChange(e.target.value)}
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                                        >
+                                            <option value="GITHUB">GitHub</option>
+                                            <option value="LINUXDO">LinuxDo</option>
+                                            <option value="QQ">QQ（支持中）</option>
+                                            <option value="WECHAT">微信（支持中）</option>
+                                        </select>
+                                        <p className="mt-1 text-xs text-gray-500">切换平台类型会自动填充默认端点配置</p>
+                                    </div>
+                                )}
+
                                 {/* Client ID */}
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -173,14 +307,57 @@ function AdminOAuthConfigPage() {
                                 {/* Client Secret */}
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                                        Client Secret（留空则不修改）
+                                        Client Secret {isCreateMode && <span className="text-red-500">*</span>}
+                                        {!isCreateMode && <span className="text-gray-500 text-xs">（留空则不修改）</span>}
                                     </label>
                                     <input
                                         type="password"
                                         value={formData.clientSecret}
                                         onChange={(e) => setFormData({...formData, clientSecret: e.target.value})}
                                         className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                                        placeholder="留空则不修改"
+                                        placeholder={isCreateMode ? '请输入 Client Secret' : '留空则不修改'}
+                                    />
+                                </div>
+
+                                {/* 授权端点 */}
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        授权端点 (Authorize URL)
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={formData.authorizeUrl}
+                                        onChange={(e) => setFormData({...formData, authorizeUrl: e.target.value})}
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                                        placeholder="https://example.com/oauth/authorize"
+                                    />
+                                </div>
+
+                                {/* Token端点 */}
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        Token端点 (Token URL)
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={formData.tokenUrl}
+                                        onChange={(e) => setFormData({...formData, tokenUrl: e.target.value})}
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                                        placeholder="https://example.com/oauth/token"
+                                    />
+                                </div>
+
+                                {/* 用户信息端点 */}
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        用户信息端点 (User Info URL)
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={formData.userInfoUrl}
+                                        onChange={(e) => setFormData({...formData, userInfoUrl: e.target.value})}
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                                        placeholder="https://example.com/api/user"
                                     />
                                 </div>
 
@@ -236,6 +413,29 @@ function AdminOAuthConfigPage() {
                                             <li>• <code className="bg-gray-200 px-1">http://localhost:3000</code> → <code className="bg-gray-200 px-1">http://localhost:3000#/oauth/callback?token=xxx</code></li>
                                             <li>• <code className="bg-gray-200 px-1">https://example.com</code> → <code className="bg-gray-200 px-1">https://example.com#/oauth/callback?token=xxx</code></li>
                                             <li>• 留空 → <code className="bg-gray-200 px-1">#/oauth/callback?token=xxx</code></li>
+                                        </ul>
+                                    </div>
+                                </div>
+
+                                {/* Scope */}
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        权限范围 (Scope)
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={formData.scope}
+                                        onChange={(e) => setFormData({...formData, scope: e.target.value})}
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                                        placeholder="read:user user:email"
+                                    />
+                                    <div className="mt-2 p-2 bg-gray-50 border border-gray-200 rounded text-xs text-gray-600">
+                                        <p className="font-semibold mb-1">📖 Scope 文档参考：</p>
+                                        <ul className="space-y-1">
+                                            <li>• GitHub: <a href="https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/scopes-for-oauth-apps" target="_blank" className="text-blue-600 hover:underline">OAuth Scopes</a></li>
+                                            <li>• LinuxDo: <a href="https://connect.linux.do/dash/sso" target="_blank" className="text-blue-600 hover:underline">OAuth2 文档</a></li>
+                                            <li>• QQ: <a href="https://wiki.connect.qq.com/oauth2-0%e7%ae%80%e4%bb%8b" target="_blank" className="text-blue-600 hover:underline">QQ互联文档</a></li>
+                                            <li>• 微信: <a href="https://developers.weixin.qq.com/doc/oplatform/Website_App/WeChat_Login/Wechat_Login.html" target="_blank" className="text-blue-600 hover:underline">微信开放平台</a></li>
                                         </ul>
                                     </div>
                                 </div>

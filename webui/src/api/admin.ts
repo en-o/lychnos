@@ -22,6 +22,7 @@ export interface OAuthConfigDetail {
 // OAuth配置更新DTO
 export interface OAuthConfigUpdate {
     id: number;
+    providerType?: string;
     clientId?: string;
     clientSecret?: string;
     authorizeUrl?: string;
@@ -62,6 +63,11 @@ export const adminApi = {
             return request.get<Result<OAuthConfigDetail[]>>('/sys-manage/oauth-config/list');
         },
 
+        // 新增OAuth配置
+        create: (data: OAuthConfigUpdate) => {
+            return request.post<Result<void>>('/sys-manage/oauth-config/create', data);
+        },
+
         // 更新OAuth配置
         update: (data: OAuthConfigUpdate) => {
             return request.put<Result<void>>('/sys-manage/oauth-config/update', data);
@@ -70,6 +76,11 @@ export const adminApi = {
         // 启用/停用OAuth配置
         toggle: (id: number) => {
             return request.put<Result<void>>(`/sys-manage/oauth-config/toggle/${id}`);
+        },
+
+        // 更新OAuth配置排序
+        updateSort: (id: number, sortOrder: number) => {
+            return request.put<Result<void>>(`/sys-manage/oauth-config/update-sort/${id}/${sortOrder}`);
         },
     },
 

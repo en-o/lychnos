@@ -55,6 +55,33 @@ public class AdminOAuthConfigController {
     }
 
     /**
+     * 新增OAuth配置
+     */
+    @Operation(summary = "新增OAuth配置")
+    @ApiMapping(value = "/create", method = RequestMethod.POST)
+    public ResultVO<Void> createConfig(@RequestBody OAuthConfigDTO dto, HttpServletRequest request) {
+        userInfoService.checkAdmin(request);
+
+        OAuthConfig config = new OAuthConfig();
+        config.setProviderType(cn.tannn.lychnos.enums.ProviderType.fromValue(dto.getProviderType()));
+        config.setClientId(dto.getClientId());
+        config.setClientSecret(dto.getClientSecret());
+        config.setAuthorizeUrl(dto.getAuthorizeUrl());
+        config.setTokenUrl(dto.getTokenUrl());
+        config.setUserInfoUrl(dto.getUserInfoUrl());
+        config.setScope(dto.getScope());
+        config.setIconUrl(dto.getIconUrl());
+        config.setSortOrder(dto.getSortOrder() != null ? dto.getSortOrder() : 0);
+        config.setWebCallbackUrl(dto.getWebCallbackUrl());
+        config.setEnabled(false); // 默认停用
+
+        oauthConfigService.saveConfig(config);
+        log.info("管理员新增OAuth配置：{}", config.getProviderType());
+
+        return ResultVO.successMessage("新增成功");
+    }
+
+    /**
      * 更新OAuth配置
      */
     @Operation(summary = "更新OAuth配置")
@@ -116,6 +143,24 @@ public class AdminOAuthConfigController {
 
         log.info("管理员{}OAuth配置：{}", config.getEnabled() ? "启用" : "停用", config.getProviderType());
         return ResultVO.successMessage(config.getEnabled() ? "已启用" : "已停用");
+    }
+
+    /**
+     * 更新OAuth配置排序
+     */
+    @Operation(summary = "更新OAuth配置排序")
+    @ApiMapping(value = "/update-sort/{id}/{sortOrder}", method = RequestMethod.PUT)
+    public ResultVO<Void> updateSortOrder(@PathVariable Long id, @PathVariable Integer sortOrder, HttpServletRequest request) {
+        userInfoService.checkAdmin(request);
+
+        OAuthConfig config = oauthConfigService.getJpaBasicsDao().findById(id)
+                .orElseThrow(() -> new RuntimeException("配置不存在"));
+
+        config.setSortOrder(sortOrder);
+        oauthConfigService.saveConfig(config);
+
+        log.info("管理员更新OAuth配置排序：{} -> {}", config.getProviderType(), sortOrder);
+        return ResultVO.successMessage("排序更新成功");
     }
 
     /**

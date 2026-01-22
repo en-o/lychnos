@@ -1,5 +1,7 @@
 package cn.tannn.lychnos.controller.vo;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
@@ -19,6 +21,7 @@ import lombok.ToString;
 public class OAuthConfigDetailVO {
 
     @Schema(description = "配置ID")
+    @JsonSerialize(using = ToStringSerializer.class)
     private Long id;
 
     @Schema(description = "平台类型")

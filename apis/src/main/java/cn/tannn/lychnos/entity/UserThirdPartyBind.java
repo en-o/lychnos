@@ -18,6 +18,8 @@ import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
+import java.time.LocalDateTime;
+
 /**
  * 用户第三方账户绑定表
  *
@@ -116,4 +118,24 @@ public class UserThirdPartyBind extends JpaCommonBean<UserThirdPartyBind> {
         @Schema(description = "其他额外信息（JSON格式）")
         @JdbcTypeCode(SqlTypes.JSON)
         private JSONObject extraInfo;
+
+        /**
+         * 重写 createTime 的 getter，添加 @JsonView 注解
+         * 使其在 ThirdPartyBindAdmin 视图中可见
+         */
+        @Override
+        @JsonView(Views.ThirdPartyBindAdmin.class)
+        public LocalDateTime getCreateTime() {
+                return super.getCreateTime();
+        }
+
+        /**
+         * 重写 updateTime 的 getter，添加 @JsonView 注解
+         * 使其在 ThirdPartyBindAdmin 视图中可见
+         */
+        @Override
+        @JsonView(Views.ThirdPartyBindAdmin.class)
+        public LocalDateTime getUpdateTime() {
+                return super.getUpdateTime();
+        }
 }
