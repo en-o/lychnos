@@ -15,7 +15,8 @@ const OAuthCallbackPage: React.FC = () => {
 
     useEffect(() => {
         const handleCallback = async () => {
-            // 从 URL 获取参数
+            // 从 URL Query 获取参数
+            const tokenFromQuery = searchParams.get('token');
             const code = searchParams.get('code');
             const state = searchParams.get('state');
 
@@ -23,6 +24,41 @@ const OAuthCallbackPage: React.FC = () => {
             const savedState = localStorage.getItem('oauth_state');
             const providerType = localStorage.getItem('oauth_provider');
             const redirect = localStorage.getItem('oauth_redirect') || '/';
+
+            // === 新流程：后端直接重定向并携带 token ===
+            if (tokenFromQuery) {
+                try {
+                    // 保存 token
+                    localStorage.setItem('token', tokenFromQuery);
+
+                    // 获取用户信息
+                    try {
+                        const userInfoRes = await authApi.getUserInfo();
+                        if (userInfoRes.success) {
+                            localStorage.setItem('userInfo', JSON.stringify(userInfoRes.data));
+                        }
+                    } catch (error) {
+                        console.error('获取用户信息失败:', error);
+                    }
+
+                    toast.success('登录成功');
+
+                    // 清理 localStorage 中的临时数据
+                    localStorage.removeItem('oauth_state');
+                    localStorage.removeItem('oauth_provider');
+                    localStorage.removeItem('oauth_redirect');
+                    localStorage.removeItem('oauth_action');
+
+                    // 跳转到主页
+                    navigate(redirect);
+                    return;
+                } catch (error: any) {
+                    console.error('OAuth2 登录失败:', error);
+                    toast.error('登录失败，请重试');
+                    navigate('/login');
+                    return;
+                }
+            }
 
             // 验证参数
             if (!code) {

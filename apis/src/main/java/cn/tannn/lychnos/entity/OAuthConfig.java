@@ -122,9 +122,21 @@ public class OAuthConfig extends JpaCommonBean<OAuthConfig> {
 
     /**
      * Web主页回调地址（第三方登录成功后跳转的前端页面）
+     * <p>
+     *     格式：{webCallbackUrl}#/oauth/callback?token={token}
+     *      Web回调地址前缀配置说明：
+     *          - 此字段只需填写域名+路径前缀，后端会自动拼接 #/oauth/callback
+     *          - 示例1：http://localhost:3000/lychnos  -> 最终URL: http://localhost:3000/lychnos#/oauth/callback?token=xxx
+     *          - 示例2：http://localhost:3000/         -> 最终URL: http://localhost:3000#/oauth/callback?token=xxx
+     *          - 示例3：http://localhost:3000          -> 最终URL: http://localhost:3000#/oauth/callback?token=xxx
+     *          - 示例4：https://example.com            -> 最终URL: https://example.com#/oauth/callback?token=xxx
+     *          - 可以为空（相对路径）：""               -> 最终URL: #/oauth/callback?token=xxx
+     *          - 注意：末尾的斜杠会被自动移除，#/oauth/callback 是固定路由不可修改
+     *
+     * </p>
      */
     @Column(columnDefinition = "varchar(500)")
-    @Comment("Web主页回调地址")
-    @Schema(description = "Web主页回调地址")
+    @Comment("Web主页回调地址【格式：{webCallbackUrl}#/oauth/callback?token={token}】")
+    @Schema(description = "Web主页回调地址【格式：{webCallbackUrl}#/oauth/callback?token={token}】")
     private String webCallbackUrl;
 }

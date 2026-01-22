@@ -51,6 +51,16 @@ class LychnosApplicationTests {
         config.setSortOrder(1);
         config.setEnabled(true);
 
+        // Web回调地址前缀配置说明：
+        // - 此字段只需填写域名+路径前缀，后端会自动拼接 #/oauth/callback
+        // - 示例1：http://localhost:3000/lychnos  -> 最终URL: http://localhost:3000/lychnos#/oauth/callback?token=xxx
+        // - 示例2：http://localhost:3000/         -> 最终URL: http://localhost:3000#/oauth/callback?token=xxx
+        // - 示例3：http://localhost:3000          -> 最终URL: http://localhost:3000#/oauth/callback?token=xxx
+        // - 示例4：https://example.com            -> 最终URL: https://example.com#/oauth/callback?token=xxx
+        // - 可以为空（相对路径）：""               -> 最终URL: #/oauth/callback?token=xxx
+        // - 注意：末尾的斜杠会被自动移除，#/oauth/callback 是固定路由不可修改
+        config.setWebCallbackUrl("http://localhost:5173");
+
         // 2. 检查是否存在，存在则更新
         Optional<OAuthConfig> existing = oauthConfigService.getConfigByType(ProviderType.GITHUB);
         if (existing.isPresent()) {
@@ -98,6 +108,16 @@ class LychnosApplicationTests {
                 "https://linux.do/uploads/default/optimized/4X/c/c/d/ccd8c210609d498cbeb3d5201d4c259348447562_2_32x32.png"); // 示例图标
         config.setSortOrder(2);
         config.setEnabled(true);
+
+        // Web回调地址前缀配置说明：
+        // - 此字段只需填写域名+路径前缀，后端会自动拼接 #/oauth/callback
+        // - 示例1：http://localhost:3000/lychnos  -> 最终URL: http://localhost:3000/lychnos#/oauth/callback?token=xxx
+        // - 示例2：http://localhost:3000/         -> 最终URL: http://localhost:3000#/oauth/callback?token=xxx
+        // - 示例3：http://localhost:3000          -> 最终URL: http://localhost:3000#/oauth/callback?token=xxx
+        // - 示例4：https://example.com            -> 最终URL: https://example.com#/oauth/callback?token=xxx
+        // - 可以为空（相对路径）：""               -> 最终URL: #/oauth/callback?token=xxx
+        // - 注意：末尾的斜杠会被自动移除，#/oauth/callback 是固定路由不可修改
+        config.setWebCallbackUrl("http://localhost:5173");
 
         // 2. 检查是否存在
         Optional<OAuthConfig> existing = oauthConfigService.getConfigByType(ProviderType.LINUXDO);
@@ -176,6 +196,39 @@ class LychnosApplicationTests {
     }
 
     /**
+     * 更新所有配置的 webCallbackUrl
+     * <p>
+     * 用于为已有的 OAuth 配置批量添加 webCallbackUrl 字段
+     * </p>
+     */
+    // @Test
+    void updateWebCallbackUrl() {
+        List<OAuthConfig> configs = oauthConfigService.getAllConfigs();
+
+        if (configs.isEmpty()) {
+            System.err.println("⚠️ 没有找到任何 OAuth 配置");
+            return;
+        }
+
+        System.out.println("🔄 开始更新 webCallbackUrl...");
+
+        for (OAuthConfig config : configs) {
+            // Web回调地址前缀配置说明：
+            // - 此字段只需填写域名+路径前缀，后端会自动拼接 #/oauth/callback
+            // - 示例1：http://localhost:3000/lychnos  -> 最终URL: http://localhost:3000/lychnos#/oauth/callback?token=xxx
+            // - 示例2：http://localhost:3000/         -> 最终URL: http://localhost:3000#/oauth/callback?token=xxx
+            // - 示例3：http://localhost:3000          -> 最终URL: http://localhost:3000#/oauth/callback?token=xxx
+            // - 可以为空（相对路径）：""               -> 最终URL: #/oauth/callback?token=xxx
+            // - 注意：末尾的斜杠会被自动移除，#/oauth/callback 是固定路由不可修改
+            config.setWebCallbackUrl("http://localhost:5173");
+            oauthConfigService.saveConfig(config);
+            System.out.println("✅ 已更新 " + config.getProviderType() + " 的 webCallbackUrl");
+        }
+
+        System.out.println("✅ 所有配置更新完成！");
+    }
+
+    /**
      * 列出所有配置
      */
 //    @Test
@@ -190,6 +243,8 @@ class LychnosApplicationTests {
             // 注意：如果配置正确，这里打印的 clientId 应该是解密后的明文
             System.out.println("ClientId: " + config.getClientId());
             System.out.println("AuthUrl: " + config.getAuthorizeUrl());
+            System.out.println("WebCallbackUrl: " + config.getWebCallbackUrl());
+            System.out.println("Enabled: " + config.getEnabled());
         }
         System.out.println("--------------------------------------------------\n");
     }

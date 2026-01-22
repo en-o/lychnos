@@ -16,6 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.view.RedirectView;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -93,24 +94,44 @@ public class OAuth2LoginController {
      * @param providerType 平台类型
      * @param code         授权码
      * @param state        状态码（防CSRF）
-     * @return 登录Token
+     * @return 重定向到Web主页
      */
     @Operation(summary = "处理第三方登录回调")
     @ApiMapping(value = "/callback/{providerType}", checkToken = false, method = RequestMethod.GET)
-    public ResultVO<LoginVO> handleCallback(
+    public RedirectView handleCallback(
             @PathVariable String providerType,
             @RequestParam String code,
             @RequestParam(required = false) String state) {
         log.info("收到OAuth2回调：平台={}, code存在={}, state={}", providerType, (code != null), state);
 
-        // TODO: 验证 state（需要前端将 state 存储到 localStorage 或 SessionStorage）
-        // 当前简化实现，省略 state 验证
-
         // 转换为枚举
         ProviderType providerTypeEnum = ProviderType.fromValue(providerType);
 
+        // 处理OAuth2回调，获取登录信息
         LoginVO loginVO = oauth2Service.handleCallback(providerTypeEnum, code, state);
 
-        return ResultVO.success("登录成功", loginVO);
+        // 获取配置的Web回调地址前缀
+        OAuthConfig config = oauthConfigService.getConfigByProviderType(providerTypeEnum);
+        String webCallbackPrefix = config.getWebCallbackUrl();
+
+        // 如果没有配置Web回调地址前缀，使用空字符串（相对路径）
+        if (webCallbackPrefix == null || webCallbackPrefix.isEmpty()) {
+            webCallbackPrefix = "";
+        }
+
+        // 移除末尾的斜杠（如果有）
+        if (webCallbackPrefix.endsWith("/")) {
+            webCallbackPrefix = webCallbackPrefix.substring(0, webCallbackPrefix.length() - 1);
+        }
+
+        // 构建完整的重定向URL
+        // 格式：{前缀}#/oauth/callback?token={token}
+        // 示例：http://localhost:3000/lychnos#/oauth/callback?token=xxx
+        String redirectUrl = String.format("%s#/oauth/callback?token=%s",
+            webCallbackPrefix,
+            loginVO.getToken());
+
+        log.info("OAuth2登录成功，重定向到：{}", redirectUrl);
+        return new RedirectView(redirectUrl);
     }
 }
