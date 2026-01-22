@@ -59,6 +59,18 @@ public class OAuthConfigService extends J2ServiceImpl<OAuthConfigDao, OAuthConfi
     }
 
     /**
+     * 根据平台类型获取配置（直接返回实体）
+     *
+     * @param providerType 平台类型
+     * @return OAuth2配置
+     * @throws RuntimeException 如果配置不存在
+     */
+    public OAuthConfig getConfigByProviderType(ProviderType providerType) {
+        return getConfigByType(providerType)
+                .orElseThrow(() -> new RuntimeException("未找到平台配置：" + providerType));
+    }
+
+    /**
      * 保存或更新配置
      *
      * @param config OAuth2配置
