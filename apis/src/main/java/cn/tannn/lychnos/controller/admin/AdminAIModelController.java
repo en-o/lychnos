@@ -84,7 +84,8 @@ public class AdminAIModelController {
 
         builder.dynamicLike("u.login_name", dto.getLoginName(), NullHandleStrategy.IGNORE)
                 .dynamicLike("a.model", dto.getModel(), NullHandleStrategy.IGNORE)
-                .dynamicEq("u.nickname", dto.getNickname(), NullHandleStrategy.IGNORE)
+                .dynamicLike("u.nickname", dto.getNickname(), NullHandleStrategy.IGNORE)
+                .dynamicEq("a.type", dto.getType(), NullHandleStrategy.IGNORE)
                 .orderBy("a.create_time DESC")
                 .page(dto.getPage().realPageIndex(), dto.getPage().getPageSize());
 

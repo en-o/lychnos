@@ -27,8 +27,10 @@ public class AIModelPageDTO {
     private String nickname;
 
     @Schema(description = "模型名（模糊查询）")
-    @JpaSelectIgnoreField
     private String model;
+
+    @Schema(description = "模型类型")
+    private String type;
 
     @Schema(description = "分页排序")
     @JpaSelectIgnoreField

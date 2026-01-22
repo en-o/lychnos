@@ -12,11 +12,12 @@ function AdminAIModelPage() {
     const [total, setTotal] = useState(0);
     const [loginName, setLoginName] = useState('');
     const [model, setModel] = useState('');
+    const [type, setType] = useState(''); // 新增：type 检索条件
 
     // 修复：添加搜索条件到依赖项，这样搜索后会自动加载数据
     useEffect(() => {
         loadModels();
-    }, [pageIndex, pageSize, loginName, model]);
+    }, [pageIndex, pageSize, loginName, model, type]);
 
     const loadModels = async () => {
         try {
@@ -25,6 +26,7 @@ function AdminAIModelPage() {
                 page: { pageIndex, pageSize },
                 loginName: loginName || undefined,
                 model: model || undefined,
+                type: type || undefined, // 新增：添加 type 参数
             };
             const res = await adminApi.aiModel.list(params);
             if (res.success && res.data) {
@@ -128,7 +130,7 @@ function AdminAIModelPage() {
 
                 {/* 搜索栏 */}
                 <div className="bg-white rounded-lg shadow p-4 mb-4">
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
                         <input
                             type="text"
                             placeholder="模型归属(登录名)"
@@ -143,6 +145,15 @@ function AdminAIModelPage() {
                             onChange={(e) => setModel(e.target.value)}
                             className="px-3 py-2 border rounded"
                         />
+                        <select
+                            value={type}
+                            onChange={(e) => setType(e.target.value)}
+                            className="px-3 py-2 border rounded"
+                        >
+                            <option value="">全部类型</option>
+                            <option value="TEXT">文本</option>
+                            <option value="IMAGE">图片</option>
+                        </select>
                         <button
                             onClick={handleSearch}
                             className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
@@ -229,7 +240,7 @@ function AdminAIModelPage() {
                                     value={pageSize}
                                     onChange={(e) => {
                                         setPageSize(Number(e.target.value));
-                                        setPageIndex(1); // 修复:改为 1 而不是 0
+                                        setPageIndex(1);
                                     }}
                                     className="px-2 py-1 border rounded"
                                 >

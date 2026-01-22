@@ -89,6 +89,7 @@ export interface AIModelPageRequest {
     loginName?: string;
     nickname?: string;
     model?: string;
+    type?: string;
 }
 
 // 用户分页请求参数
