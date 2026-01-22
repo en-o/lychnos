@@ -1,7 +1,6 @@
 import {useEffect, useState} from 'react';
 import {useNavigate} from 'react-router-dom';
 import {adminApi, type UserDetail, type ThirdPartyBind} from '../api/admin';
-import {toast} from '../components/ToastContainer';
 
 function AdminUserPage() {
     const navigate = useNavigate();
