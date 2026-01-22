@@ -9,6 +9,7 @@ import cn.tannn.lychnos.controller.dto.PasswordEdit;
 import cn.tannn.lychnos.controller.dto.UserInfoFix;
 import cn.tannn.lychnos.dao.UserInfoDao;
 import cn.tannn.lychnos.entity.UserInfo;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
@@ -31,6 +32,19 @@ import static cn.tannn.lychnos.entity.UserInfo.getMd5Password;
 public class UserInfoService extends J2ServiceImpl<UserInfoDao, UserInfo, Long> {
     public UserInfoService() {
         super(UserInfo.class);
+    }
+
+
+    /**
+     * 检查是否是管理员
+     */
+    public void checkAdmin(HttpServletRequest request) {
+        Long userId = UserUtil.userId2(request);
+        UserInfo userInfo = getJpaBasicsDao().findById(userId)
+                .orElseThrow(() -> new RuntimeException("用户不存在"));
+        if (!UserUtil.isAdmin(userInfo.getRoles())) {
+            throw new RuntimeException("无权限访问，仅管理员可访问");
+        }
     }
 
     /**
