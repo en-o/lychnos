@@ -1,6 +1,8 @@
 package cn.tannn.lychnos.controller.vo;
 
 import com.alibaba.fastjson2.JSONArray;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
@@ -20,6 +22,7 @@ import lombok.ToString;
 public class UserDetailVO {
 
     @Schema(description = "用户ID")
+    @JsonSerialize(using = ToStringSerializer.class)
     private Long id;
 
     @Schema(description = "登录名/用户名")
