@@ -1,0 +1,95 @@
+import {request} from '../utils/request';
+import type {Result} from '../models';
+
+// OAuth配置详情
+export interface OAuthConfigDetail {
+    id: number;
+    providerType: string;
+    providerName: string;
+    clientId: string;
+    authorizeUrl: string;
+    tokenUrl: string;
+    userInfoUrl: string;
+    scope: string;
+    iconUrl: string;
+    sortOrder: number;
+    enabled: boolean;
+    webCallbackUrl: string;
+    createTime: string;
+    updateTime: string;
+}
+
+// OAuth配置更新DTO
+export interface OAuthConfigUpdate {
+    id: number;
+    clientId?: string;
+    clientSecret?: string;
+    authorizeUrl?: string;
+    tokenUrl?: string;
+    userInfoUrl?: string;
+    scope?: string;
+    iconUrl?: string;
+    sortOrder?: number;
+    webCallbackUrl?: string;
+}
+
+// 用户详情
+export interface UserDetail {
+    id: number;
+    loginName: string;
+    nickname: string;
+    email: string;
+    roles: string[];
+    createTime: string;
+    updateTime: string;
+}
+
+// 第三方绑定信息
+export interface ThirdPartyBind {
+    id: number;
+    providerType: string;
+    providerName: string;
+    openId: string;
+    nickname: string;
+    avatar: string;
+    createTime: string;
+}
+
+// 管理员API
+export const adminApi = {
+    // OAuth配置管理
+    oauth: {
+        // 获取所有OAuth配置列表
+        list: () => {
+            return request.get<Result<OAuthConfigDetail[]>>('/sys-manage/oauth-config/list');
+        },
+
+        // 更新OAuth配置
+        update: (data: OAuthConfigUpdate) => {
+            return request.put<Result<void>>('/sys-manage/oauth-config/update', data);
+        },
+
+        // 启用/停用OAuth配置
+        toggle: (id: number) => {
+            return request.put<Result<void>>(`/sys-manage/oauth-config/toggle/${id}`);
+        },
+    },
+
+    // 用户管理
+    user: {
+        // 获取所有用户列表
+        list: () => {
+            return request.get<Result<UserDetail[]>>('/sys-manage/user/list');
+        },
+
+        // 获取用户详情
+        detail: (id: number) => {
+            return request.get<Result<UserDetail>>(`/sys-manage/user/detail/${id}`);
+        },
+
+        // 获取用户的第三方绑定列表
+        thirdPartyBindings: (userId: number) => {
+            return request.get<Result<ThirdPartyBind[]>>(`/sys-manage/user/third-party-bindings/${userId}`);
+        },
+    },
+};

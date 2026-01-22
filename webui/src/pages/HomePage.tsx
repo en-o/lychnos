@@ -1,6 +1,6 @@
 import React, {useState} from 'react';
 import {useNavigate} from 'react-router-dom';
-import {Brain, ChevronDown, Heart, History, Key, LogOut, Search, UserCircle} from 'lucide-react';
+import {Brain, ChevronDown, Heart, History, Key, LogOut, Search, Settings, UserCircle} from 'lucide-react';
 import {bookApi} from '../api/book';
 import type {AnalysisHistory, BookAnalysis, BookExtract, BookRecommendItem} from '../models';
 import Logo from '../components/Logo';
@@ -36,6 +36,10 @@ const HomePage: React.FC = () => {
   // 检查是否已登录
   const token = localStorage.getItem('token');
   const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
+
+  // 检查是否是管理员
+  const isAdmin = userInfo.roles && Array.isArray(userInfo.roles) &&
+    userInfo.roles.some((role: string) => role.toUpperCase() === 'ADMIN');
 
   // 加载搜索历史
   React.useEffect(() => {
@@ -417,6 +421,20 @@ const HomePage: React.FC = () => {
                       <Key className="w-4 h-4" />
                       修改密码
                     </button>
+
+                    {/* 管理入口 - 仅管理员可见 */}
+                    {isAdmin && (
+                      <>
+                        <div className="border-t border-gray-100 my-1"></div>
+                        <button
+                          onClick={() => handleMenuClick('/sys-manage')}
+                          className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3"
+                        >
+                          <Settings className="w-4 h-4" />
+                          系统管理
+                        </button>
+                      </>
+                    )}
 
                     <div className="border-t border-gray-100 mt-1 pt-1">
                       <button

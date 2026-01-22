@@ -8,6 +8,9 @@ import PreferencePage from './pages/PreferencePage';
 import ModelSettingsPage from './pages/ModelSettingsPage';
 import ChangePasswordPage from './pages/ChangePasswordPage';
 import OAuthCallbackPage from './pages/OAuthCallbackPage';
+import AdminOAuthConfigPage from './pages/AdminOAuthConfigPage';
+import AdminUserPage from './pages/AdminUserPage';
+import SystemManagePage from './pages/SystemManagePage';
 import PrivateRoute from './components/PrivateRoute';
 import ToastContainer from './components/ToastContainer';
 
@@ -60,6 +63,32 @@ function App() {
           element={
             <PrivateRoute>
               <ChangePasswordPage />
+            </PrivateRoute>
+          }
+        />
+
+        {/* 系统管理页面 */}
+        <Route
+          path="/sys-manage"
+          element={
+            <PrivateRoute>
+              <SystemManagePage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/sys-manage/oauth-config"
+          element={
+            <PrivateRoute>
+              <AdminOAuthConfigPage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/sys-manage/users"
+          element={
+            <PrivateRoute>
+              <AdminUserPage />
             </PrivateRoute>
           }
         />
