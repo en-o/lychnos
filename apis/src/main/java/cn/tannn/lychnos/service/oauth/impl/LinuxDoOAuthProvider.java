@@ -1,13 +1,14 @@
 package cn.tannn.lychnos.service.oauth.impl;
 
-import cn.tannn.lychnos.entity.OAuthConfig;
 import cn.tannn.lychnos.common.util.AESUtil;
+import cn.tannn.lychnos.entity.OAuthConfig;
 import cn.tannn.lychnos.service.oauth.OAuth2Provider;
 import cn.tannn.lychnos.service.oauth.OAuth2UserInfo;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.*;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
@@ -15,7 +16,6 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
-import org.apache.commons.lang3.StringUtils;
 
 /**
  * LinuxDo OAuth2 Provider 实现

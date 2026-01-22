@@ -9,6 +9,7 @@ import cn.tannn.jdevelops.utils.jwt.module.SignEntity;
 import cn.tannn.lychnos.common.pojo.UserRequestInfo;
 import cn.tannn.lychnos.controller.LoginController;
 import cn.tannn.lychnos.entity.UserInfo;
+import com.alibaba.fastjson2.JSONArray;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -55,7 +56,7 @@ public class UserUtil extends cn.tannn.jdevelops.jwt.standalone.util.UserUtil {
 
     /**
      * 获得 userId
-     * 
+     *
      * @param request HttpServletRequest
      * @return userId
      */
@@ -65,7 +66,7 @@ public class UserUtil extends cn.tannn.jdevelops.jwt.standalone.util.UserUtil {
 
     /**
      * 获得 userId
-     * 
+     *
      * @param request HttpServletRequest
      * @return userId
      */
@@ -79,7 +80,7 @@ public class UserUtil extends cn.tannn.jdevelops.jwt.standalone.util.UserUtil {
      * jwt subject = loginName
      * {@link LoginController#loginUserSign(UserInfo, HttpServletRequest)}
      * </p>
-     * 
+     *
      * @param request HttpServletRequest
      * @return loginName
      */
@@ -104,5 +105,17 @@ public class UserUtil extends cn.tannn.jdevelops.jwt.standalone.util.UserUtil {
         loginJwtExtendInfo.setLoginName(userInfo.getLoginName());
         init.setMap(loginJwtExtendInfo);
         return loginService.login(init).getSign();
+    }
+
+
+    /**
+     * 创建默认角色
+     *
+     * @return 默认角色数组 ["USER"]
+     */
+    public static JSONArray createDefaultRoles() {
+        JSONArray roles = new JSONArray();
+        roles.add("USER");
+        return roles;
     }
 }

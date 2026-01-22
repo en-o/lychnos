@@ -5,12 +5,15 @@
 -- 执行日期: 2026-01-22
 -- ============================================
 
--- 添加 roles 字段（JSON类型）
+-- 添加 roles 字段（JSON类型，不设置默认值，因为MySQL JSON类型不支持DEFAULT）
 ALTER TABLE tb_user_info ADD COLUMN roles JSON COMMENT '用户角色列表';
 
--- 为现有用户设置默认角色
-UPDATE tb_user_info SET roles = '["USER"]' WHERE roles IS NULL;
+-- 为所有历史用户设置默认角色 ["USER"]
+UPDATE tb_user_info SET roles = JSON_ARRAY('USER') WHERE roles IS NULL;
 
 -- 示例：为特定用户设置管理员角色
--- UPDATE tb_user_info SET roles = '["USER","ADMIN"]' WHERE login_name = 'admin';
+-- UPDATE tb_user_info SET roles = JSON_ARRAY('USER', 'ADMIN') WHERE login_name = 'admin';
+
+-- 示例：为特定用户设置VIP角色
+-- UPDATE tb_user_info SET roles = JSON_ARRAY('USER', 'VIP') WHERE login_name = 'vip_user';
 

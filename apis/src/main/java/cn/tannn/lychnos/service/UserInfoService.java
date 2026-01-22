@@ -3,12 +3,12 @@ package cn.tannn.lychnos.service;
 import cn.tannn.jdevelops.exception.built.BusinessException;
 import cn.tannn.jdevelops.exception.built.UserException;
 import cn.tannn.jdevelops.jpa.service.J2ServiceImpl;
+import cn.tannn.lychnos.common.util.UserUtil;
 import cn.tannn.lychnos.controller.dto.LoginPassword;
 import cn.tannn.lychnos.controller.dto.PasswordEdit;
 import cn.tannn.lychnos.controller.dto.UserInfoFix;
 import cn.tannn.lychnos.dao.UserInfoDao;
 import cn.tannn.lychnos.entity.UserInfo;
-import com.alibaba.fastjson2.JSONArray;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
@@ -76,7 +76,7 @@ public class UserInfoService extends J2ServiceImpl<UserInfoDao, UserInfo, Long> 
 
         // 设置默认角色
         if (register.getRoles() == null) {
-            register.setRoles(createDefaultRoles());
+            register.setRoles(UserUtil.createDefaultRoles());
         }
 
         return getJpaBasicsDao().save(register);
@@ -149,14 +149,5 @@ public class UserInfoService extends J2ServiceImpl<UserInfoDao, UserInfo, Long> 
         return getJpaBasicsDao().findByLoginName(loginName);
     }
 
-    /**
-     * 创建默认角色
-     *
-     * @return 默认角色数组 ["USER"]
-     */
-    public static JSONArray createDefaultRoles() {
-        JSONArray roles = new JSONArray();
-        roles.add("USER");
-        return roles;
-    }
+
 }
