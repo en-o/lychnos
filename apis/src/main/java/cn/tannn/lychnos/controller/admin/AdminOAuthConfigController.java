@@ -13,6 +13,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -62,17 +63,42 @@ public class AdminOAuthConfigController {
     public ResultVO<Void> createConfig(@RequestBody OAuthConfigDTO dto, HttpServletRequest request) {
         userInfoService.checkAdmin(request);
 
+        // 验证必填字段
+        if (StringUtils.isBlank(dto.getProviderType())) {
+            throw new RuntimeException("平台类型不能为空");
+        }
+        if (StringUtils.isBlank(dto.getClientId())) {
+            throw new RuntimeException("Client ID不能为空");
+        }
+        if (StringUtils.isBlank(dto.getClientSecret())) {
+            throw new RuntimeException("Client Secret不能为空");
+        }
+
         OAuthConfig config = new OAuthConfig();
-        config.setProviderType(cn.tannn.lychnos.enums.ProviderType.fromValue(dto.getProviderType()));
-        config.setClientId(dto.getClientId());
-        config.setClientSecret(dto.getClientSecret());
-        config.setAuthorizeUrl(dto.getAuthorizeUrl());
-        config.setTokenUrl(dto.getTokenUrl());
-        config.setUserInfoUrl(dto.getUserInfoUrl());
-        config.setScope(dto.getScope());
-        config.setIconUrl(dto.getIconUrl());
+        config.setProviderType(cn.tannn.lychnos.enums.ProviderType.fromValue(dto.getProviderType().trim()));
+        config.setClientId(dto.getClientId().trim());
+        config.setClientSecret(dto.getClientSecret().trim());
+
+        // 可选字段，使用 isNotBlank 判断并 trim
+        if (StringUtils.isNotBlank(dto.getAuthorizeUrl())) {
+            config.setAuthorizeUrl(dto.getAuthorizeUrl().trim());
+        }
+        if (StringUtils.isNotBlank(dto.getTokenUrl())) {
+            config.setTokenUrl(dto.getTokenUrl().trim());
+        }
+        if (StringUtils.isNotBlank(dto.getUserInfoUrl())) {
+            config.setUserInfoUrl(dto.getUserInfoUrl().trim());
+        }
+        if (StringUtils.isNotBlank(dto.getScope())) {
+            config.setScope(dto.getScope().trim());
+        }
+        if (StringUtils.isNotBlank(dto.getIconUrl())) {
+            config.setIconUrl(dto.getIconUrl().trim());
+        }
+        if (StringUtils.isNotBlank(dto.getWebCallbackUrl())) {
+            config.setWebCallbackUrl(dto.getWebCallbackUrl().trim());
+        }
         config.setSortOrder(dto.getSortOrder() != null ? dto.getSortOrder() : 0);
-        config.setWebCallbackUrl(dto.getWebCallbackUrl());
         config.setEnabled(false); // 默认停用
 
         oauthConfigService.saveConfig(config);
@@ -92,33 +118,33 @@ public class AdminOAuthConfigController {
         OAuthConfig config = oauthConfigService.getJpaBasicsDao().findById(dto.getId())
                 .orElseThrow(() -> new RuntimeException("配置不存在"));
 
-        // 更新字段
-        if (dto.getClientId() != null) {
-            config.setClientId(dto.getClientId());
+        // 更新字段（使用 StringUtils.isNotBlank 判断非空字符串）
+        if (StringUtils.isNotBlank(dto.getClientId())) {
+            config.setClientId(dto.getClientId().trim());
         }
-        if (dto.getClientSecret() != null) {
-            config.setClientSecret(dto.getClientSecret());
+        if (StringUtils.isNotBlank(dto.getClientSecret())) {
+            config.setClientSecret(dto.getClientSecret().trim());
         }
-        if (dto.getAuthorizeUrl() != null) {
-            config.setAuthorizeUrl(dto.getAuthorizeUrl());
+        if (StringUtils.isNotBlank(dto.getAuthorizeUrl())) {
+            config.setAuthorizeUrl(dto.getAuthorizeUrl().trim());
         }
-        if (dto.getTokenUrl() != null) {
-            config.setTokenUrl(dto.getTokenUrl());
+        if (StringUtils.isNotBlank(dto.getTokenUrl())) {
+            config.setTokenUrl(dto.getTokenUrl().trim());
         }
-        if (dto.getUserInfoUrl() != null) {
-            config.setUserInfoUrl(dto.getUserInfoUrl());
+        if (StringUtils.isNotBlank(dto.getUserInfoUrl())) {
+            config.setUserInfoUrl(dto.getUserInfoUrl().trim());
         }
-        if (dto.getScope() != null) {
-            config.setScope(dto.getScope());
+        if (StringUtils.isNotBlank(dto.getScope())) {
+            config.setScope(dto.getScope().trim());
         }
-        if (dto.getIconUrl() != null) {
-            config.setIconUrl(dto.getIconUrl());
+        if (StringUtils.isNotBlank(dto.getIconUrl())) {
+            config.setIconUrl(dto.getIconUrl().trim());
         }
         if (dto.getSortOrder() != null) {
             config.setSortOrder(dto.getSortOrder());
         }
-        if (dto.getWebCallbackUrl() != null) {
-            config.setWebCallbackUrl(dto.getWebCallbackUrl());
+        if (StringUtils.isNotBlank(dto.getWebCallbackUrl())) {
+            config.setWebCallbackUrl(dto.getWebCallbackUrl().trim());
         }
 
         oauthConfigService.saveConfig(config);
