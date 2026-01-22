@@ -1,5 +1,5 @@
 import {useNavigate} from 'react-router-dom';
-import {Settings, Users, ArrowLeft} from 'lucide-react';
+import {Settings, Users, ArrowLeft, Brain} from 'lucide-react';
 
 function SystemManagePage() {
     const navigate = useNavigate();
@@ -45,6 +45,20 @@ function SystemManagePage() {
                             <h2 className="text-xl font-semibold text-gray-900">用户管理</h2>
                         </div>
                         <p className="text-gray-600">查看所有用户信息、角色和第三方账号绑定情况</p>
+                    </button>
+
+                    {/* AI模型管理 */}
+                    <button
+                        onClick={() => navigate('/sys-manage/ai-model')}
+                        className="bg-white rounded-lg shadow p-6 hover:shadow-lg transition text-left"
+                    >
+                        <div className="flex items-center gap-4 mb-3">
+                            <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                                <Brain className="w-6 h-6 text-purple-600" />
+                            </div>
+                            <h2 className="text-xl font-semibold text-gray-900">AI模型管理</h2>
+                        </div>
+                        <p className="text-gray-600">管理AI模型的分享状态，设置官方或私人模型</p>
                     </button>
                 </div>
             </div>

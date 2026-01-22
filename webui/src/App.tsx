@@ -10,6 +10,7 @@ import ChangePasswordPage from './pages/ChangePasswordPage';
 import OAuthCallbackPage from './pages/OAuthCallbackPage';
 import AdminOAuthConfigPage from './pages/AdminOAuthConfigPage';
 import AdminUserPage from './pages/AdminUserPage';
+import AdminAIModelPage from './pages/AdminAIModelPage';
 import SystemManagePage from './pages/SystemManagePage';
 import PrivateRoute from './components/PrivateRoute';
 import ToastContainer from './components/ToastContainer';
@@ -89,6 +90,14 @@ function App() {
           element={
             <PrivateRoute>
               <AdminUserPage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/sys-manage/ai-model"
+          element={
+            <PrivateRoute>
+              <AdminAIModelPage />
             </PrivateRoute>
           }
         />

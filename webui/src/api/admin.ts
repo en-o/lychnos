@@ -54,6 +54,22 @@ export interface ThirdPartyBind {
     createTime: string;
 }
 
+// AI模型详情
+export interface AIModelDetail {
+    id: number;
+    userId: number;
+    name: string;
+    model: string;
+    factory: string;
+    apiKey: string;
+    apiUrl: string;
+    enabled: boolean;
+    type: string;
+    share: number;
+    createTime: string;
+    updateTime: string;
+}
+
 // 管理员API
 export const adminApi = {
     // OAuth配置管理
@@ -104,6 +120,24 @@ export const adminApi = {
         // 获取用户的第三方绑定列表
         thirdPartyBindings: (userId: number) => {
             return request.get<Result<ThirdPartyBind[]>>(`/sys-manage/user/third-party-bindings/${userId}`);
+        },
+    },
+
+    // AI模型管理
+    aiModel: {
+        // 获取所有AI模型列表
+        list: () => {
+            return request.get<Result<AIModelDetail[]>>('/sys-manage/ai-model/list');
+        },
+
+        // 设置模型为官方
+        setOfficial: (id: number) => {
+            return request.put<Result<void>>(`/sys-manage/ai-model/set-official/${id}`);
+        },
+
+        // 设置模型为私人
+        setPrivate: (id: number) => {
+            return request.put<Result<void>>(`/sys-manage/ai-model/set-private/${id}`);
         },
     },
 };
