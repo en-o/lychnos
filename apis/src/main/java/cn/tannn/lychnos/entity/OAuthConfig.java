@@ -119,4 +119,12 @@ public class OAuthConfig extends JpaCommonBean<OAuthConfig> {
     @Comment("是否启用")
     @Schema(description = "是否启用")
     private Boolean enabled = false;
+
+    /**
+     * Web主页回调地址（第三方登录成功后跳转的前端页面）
+     */
+    @Column(columnDefinition = "varchar(500)")
+    @Comment("Web主页回调地址")
+    @Schema(description = "Web主页回调地址")
+    private String webCallbackUrl;
 }
