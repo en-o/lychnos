@@ -4,6 +4,7 @@ import cn.hutool.crypto.SecureUtil;
 import cn.tannn.jdevelops.exception.built.UserException;
 import cn.tannn.lychnos.common.pojo.JpaCommonBean;
 import cn.tannn.lychnos.common.views.Views;
+import com.alibaba.fastjson2.JSONArray;
 import com.fasterxml.jackson.annotation.JsonView;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.Column;
@@ -18,6 +19,8 @@ import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.Comment;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import static cn.tannn.jdevelops.utils.jwt.exception.UserCode.USER_PASSWORD_ERROR;
 
@@ -73,6 +76,21 @@ public class UserInfo extends JpaCommonBean<UserInfo> {
     @Comment("邮箱")
     @Schema(description = "邮箱")
     private String email;
+
+    /**
+     * 用户角色列表
+     * <p>
+     * 示例：["USER", "ADMIN"]
+     * 默认角色：["USER"]
+     * 可选角色：USER（普通用户）、ADMIN（管理员）、VIP（会员）等
+     * </p>
+     */
+    @Column(columnDefinition = " json ")
+    @Comment("用户角色列表")
+    @ColumnDefault("'[\"USER\"]'")
+    @Schema(description = "用户角色列表")
+    @JdbcTypeCode(SqlTypes.JSON)
+    private JSONArray roles;
 
     /**
      * 用户输入跟数据库密码对比
