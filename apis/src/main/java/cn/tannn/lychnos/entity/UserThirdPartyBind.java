@@ -1,8 +1,10 @@
 package cn.tannn.lychnos.entity;
 
 import cn.tannn.lychnos.common.pojo.JpaCommonBean;
+import cn.tannn.lychnos.common.views.Views;
 import cn.tannn.lychnos.enums.ProviderType;
 import com.alibaba.fastjson2.JSONObject;
+import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -47,6 +49,7 @@ public class UserThirdPartyBind extends JpaCommonBean<UserThirdPartyBind> {
         @Comment("用户ID")
         @Schema(description = "用户ID")
         @JsonSerialize(using = ToStringSerializer.class)
+        @JsonView(Views.ThirdPartyBindAdmin.class)
         private Long userId;
 
         /**
@@ -56,10 +59,12 @@ public class UserThirdPartyBind extends JpaCommonBean<UserThirdPartyBind> {
         @Column(columnDefinition = "varchar(50) not null")
         @Comment("第三方平台类型")
         @Schema(description = "第三方平台类型")
+        @JsonView(Views.ThirdPartyBindAdmin.class)
         private ProviderType providerType;
 
         /**
          * 第三方平台用户唯一标识（如 GitHub 的 user.id）
+         * 敏感数据，不对外展示
          */
         @Column(columnDefinition = "varchar(200) not null")
         @Comment("第三方平台用户唯一标识")
@@ -68,6 +73,7 @@ public class UserThirdPartyBind extends JpaCommonBean<UserThirdPartyBind> {
 
         /**
          * 第三方平台 UnionID（如微信的 unionId，可选）
+         * 敏感数据，不对外展示
          */
         @Column(columnDefinition = "varchar(200)")
         @Comment("第三方平台UnionID")
@@ -80,6 +86,7 @@ public class UserThirdPartyBind extends JpaCommonBean<UserThirdPartyBind> {
         @Column(columnDefinition = "varchar(100)")
         @Comment("第三方平台昵称")
         @Schema(description = "第三方平台昵称")
+        @JsonView(Views.ThirdPartyBindAdmin.class)
         private String nickname;
 
         /**
@@ -88,10 +95,12 @@ public class UserThirdPartyBind extends JpaCommonBean<UserThirdPartyBind> {
         @Column(columnDefinition = "varchar(500)")
         @Comment("第三方平台头像URL")
         @Schema(description = "第三方平台头像URL")
+        @JsonView(Views.ThirdPartyBindAdmin.class)
         private String avatarUrl;
 
         /**
          * 第三方平台邮箱
+         * 敏感数据，不对外展示
          */
         @Column(columnDefinition = "varchar(100)")
         @Comment("第三方平台邮箱")
@@ -100,6 +109,7 @@ public class UserThirdPartyBind extends JpaCommonBean<UserThirdPartyBind> {
 
         /**
          * 其他额外信息（JSON对象）
+         * 敏感数据，不对外展示
          */
         @Column(columnDefinition = "json")
         @Comment("其他额外信息（JSON格式）")

@@ -132,19 +132,23 @@ function AdminUserPage() {
                             ) : (
                                 <div className="space-y-4">
                                     {bindings.map((binding) => (
-                                        <div key={binding.id} className="border rounded-lg p-4">
+                                        <div key={binding.userId} className="border rounded-lg p-4">
                                             <div className="flex items-center justify-between">
                                                 <div className="flex items-center space-x-3">
-                                                    {binding.avatar && (
-                                                        <img src={binding.avatar} alt="" className="w-10 h-10 rounded-full" />
+                                                    {binding.avatarUrl && (
+                                                        <img src={binding.avatarUrl} alt="" className="w-10 h-10 rounded-full" />
                                                     )}
                                                     <div>
-                                                        <div className="font-medium">{binding.providerName}</div>
-                                                        <div className="text-sm text-gray-500">{binding.nickname}</div>
+                                                        <div className="flex items-center gap-2">
+                                                            <span className="font-medium">{binding.nickname}</span>
+                                                            <span className="px-2 py-0.5 text-xs bg-blue-100 text-blue-700 rounded">
+                                                                {binding.providerType}
+                                                            </span>
+                                                        </div>
+                                                        <div className="text-xs text-gray-400 mt-1">
+                                                            绑定时间: {new Date(binding.createTime).toLocaleString('zh-CN')}
+                                                        </div>
                                                     </div>
-                                                </div>
-                                                <div className="text-sm text-gray-500">
-                                                    {new Date(binding.createTime).toLocaleString('zh-CN')}
                                                 </div>
                                             </div>
                                         </div>

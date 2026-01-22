@@ -44,14 +44,12 @@ export interface UserDetail {
     updateTime: string;
 }
 
-// 第三方绑定信息
+// 第三方绑定信息（管理员视图，仅包含非敏感字段）
 export interface ThirdPartyBind {
-    id: number;
+    userId: number;
     providerType: string;
-    providerName: string;
-    openId: string;
     nickname: string;
-    avatar: string;
+    avatarUrl: string;
     createTime: string;
 }
 

@@ -3,11 +3,13 @@ package cn.tannn.lychnos.controller.admin;
 import cn.tannn.jdevelops.annotations.web.authentication.ApiMapping;
 import cn.tannn.jdevelops.annotations.web.mapping.PathRestController;
 import cn.tannn.jdevelops.result.response.ResultVO;
+import cn.tannn.lychnos.common.views.Views;
 import cn.tannn.lychnos.controller.vo.UserDetailVO;
 import cn.tannn.lychnos.entity.UserInfo;
 import cn.tannn.lychnos.entity.UserThirdPartyBind;
 import cn.tannn.lychnos.service.UserInfoService;
 import cn.tannn.lychnos.dao.UserThirdPartyBindDao;
+import com.fasterxml.jackson.annotation.JsonView;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
@@ -72,6 +74,7 @@ public class AdminUserController {
      */
     @Operation(summary = "获取用户的第三方绑定列表")
     @ApiMapping(value = "/third-party-bindings/{userId}", method = RequestMethod.GET)
+    @JsonView(Views.ThirdPartyBindAdmin.class)
     public ResultVO<List<UserThirdPartyBind>> getUserThirdPartyBindings(@PathVariable Long userId, HttpServletRequest request) {
         userInfoService.checkAdmin(request);
         List<UserThirdPartyBind> bindings = userThirdPartyBindDao.findByUserId(userId);

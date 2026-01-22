@@ -24,4 +24,10 @@ public class Views extends cn.tannn.jdevelops.result.views.Views {
      * <p> 密保相关 </p>
      */
     public static class UserSecurityQuestion implements Public {}
+
+    /**
+     * ThirdPartyBind - 第三方绑定的视图
+     * <p> 管理员查看第三方绑定信息（仅展示必要字段，隐藏敏感数据） </p>
+     */
+    public static class ThirdPartyBindAdmin implements Public {}
 }
