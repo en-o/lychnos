@@ -8,27 +8,22 @@ import cn.tannn.jdevelops.result.response.ResultVO;
 import cn.tannn.lychnos.common.views.Views;
 import cn.tannn.lychnos.controller.dto.UserPageDTO;
 import cn.tannn.lychnos.controller.vo.UserDetailVO;
-import cn.tannn.lychnos.dao.UserInfoDao;
+import cn.tannn.lychnos.dao.UserThirdPartyBindDao;
 import cn.tannn.lychnos.entity.UserInfo;
 import cn.tannn.lychnos.entity.UserThirdPartyBind;
 import cn.tannn.lychnos.service.UserInfoService;
-import cn.tannn.lychnos.dao.UserThirdPartyBindDao;
 import com.fasterxml.jackson.annotation.JsonView;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * 管理员-用户管理
