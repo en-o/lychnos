@@ -14,9 +14,10 @@ function AdminAIModelPage() {
     const [nickname, setNickname] = useState('');
     const [model, setModel] = useState('');
 
+    // 修复：添加搜索条件到依赖项，这样搜索后会自动加载数据
     useEffect(() => {
         loadModels();
-    }, [pageIndex, pageSize]);
+    }, [pageIndex, pageSize, loginName, nickname, model]);
 
     const loadModels = async () => {
         try {
@@ -39,6 +40,7 @@ function AdminAIModelPage() {
         }
     };
 
+    // 修复：搜索时重置页码（会触发 useEffect 自动加载数据）
     const handleSearch = () => {
         setPageIndex(1);
     };
@@ -162,57 +164,57 @@ function AdminAIModelPage() {
                 <div className="bg-white rounded-lg shadow overflow-hidden">
                     <table className="min-w-full divide-y divide-gray-200">
                         <thead className="bg-gray-50">
-                            <tr>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">模型归属(登录名)</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">模型名称</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">模型</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">厂家</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">类型</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">分享状态</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">启用状态</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">操作</th>
-                            </tr>
+                        <tr>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">模型归属(登录名)</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">模型名称</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">模型</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">厂家</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">类型</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">分享状态</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">可用状态</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">操作</th>
+                        </tr>
                         </thead>
                         <tbody className="bg-white divide-y divide-gray-200">
-                            {models.map((model) => (
-                                <tr key={model.id}>
-                                    <td className="px-6 py-4 text-sm text-gray-500">{model.loginName}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap">
-                                        <span className="text-sm font-medium text-gray-900">{model.name}</span>
-                                    </td>
-                                    <td className="px-6 py-4 text-sm text-gray-500">{model.model}</td>
-                                    <td className="px-6 py-4 text-sm text-gray-500">{model.factory}</td>
-                                    <td className="px-6 py-4 text-sm text-gray-500">{getModelTypeName(model.type)}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap">
+                        {models.map((model) => (
+                            <tr key={model.id}>
+                                <td className="px-6 py-4 text-sm text-gray-500">{model.loginName}</td>
+                                <td className="px-6 py-4 whitespace-nowrap">
+                                    <span className="text-sm font-medium text-gray-900">{model.name}</span>
+                                </td>
+                                <td className="px-6 py-4 text-sm text-gray-500">{model.model}</td>
+                                <td className="px-6 py-4 text-sm text-gray-500">{model.factory}</td>
+                                <td className="px-6 py-4 text-sm text-gray-500">{getModelTypeName(model.type)}</td>
+                                <td className="px-6 py-4 whitespace-nowrap">
                                         <span className={`px-2 py-1 text-xs rounded-full ${getShareTypeColor(model.share)}`}>
                                             {getShareTypeName(model.share)}
                                         </span>
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap">
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap">
                                         <span className={`px-2 py-1 text-xs rounded-full ${model.enabled ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
-                                            {model.enabled ? '已启用' : '已停用'}
+                                            {model.enabled ? '已可用' : '已禁用'}
                                         </span>
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm">
-                                        {model.share !== 0 && (
-                                            <button
-                                                onClick={() => handleSetOfficial(model)}
-                                                className="px-3 py-1 rounded bg-blue-100 text-blue-700 hover:bg-blue-200 mr-2"
-                                            >
-                                                设为官方
-                                            </button>
-                                        )}
-                                        {model.share !== 1 && (
-                                            <button
-                                                onClick={() => handleSetPrivate(model)}
-                                                className="px-3 py-1 rounded bg-gray-100 text-gray-700 hover:bg-gray-200"
-                                            >
-                                                设为私人
-                                            </button>
-                                        )}
-                                    </td>
-                                </tr>
-                            ))}
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm">
+                                    {model.share !== 0 && (
+                                        <button
+                                            onClick={() => handleSetOfficial(model)}
+                                            className="px-3 py-1 rounded bg-blue-100 text-blue-700 hover:bg-blue-200 mr-2"
+                                        >
+                                            设为官方
+                                        </button>
+                                    )}
+                                    {model.share !== 1 && (
+                                        <button
+                                            onClick={() => handleSetPrivate(model)}
+                                            className="px-3 py-1 rounded bg-gray-100 text-gray-700 hover:bg-gray-200"
+                                        >
+                                            设为私人
+                                        </button>
+                                    )}
+                                </td>
+                            </tr>
+                        ))}
                         </tbody>
                     </table>
 
@@ -228,7 +230,7 @@ function AdminAIModelPage() {
                     <div className="mt-4 flex items-center justify-between bg-white px-4 py-3 rounded-lg shadow">
                         <div className="flex items-center gap-4">
                             <div className="text-sm text-gray-700">
-                                共 {total} 条记录，第 {pageIndex} / {Math.ceil(total / pageSize)} 页
+                                共 {total} 条记录,第 {pageIndex} / {Math.ceil(total / pageSize)} 页
                             </div>
                             <div className="flex items-center gap-2">
                                 <label className="text-sm text-gray-700">每页</label>
@@ -236,7 +238,7 @@ function AdminAIModelPage() {
                                     value={pageSize}
                                     onChange={(e) => {
                                         setPageSize(Number(e.target.value));
-                                        setPageIndex(0);
+                                        setPageIndex(1); // 修复:改为 1 而不是 0
                                     }}
                                     className="px-2 py-1 border rounded"
                                 >

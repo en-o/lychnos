@@ -15,9 +15,10 @@ function AdminUserPage() {
     const [loginName, setLoginName] = useState('');
     const [nickname, setNickname] = useState('');
 
+    // 修复：添加搜索条件到依赖项，这样搜索后会自动加载数据
     useEffect(() => {
         loadUsers();
-    }, [pageIndex, pageSize]);
+    }, [pageIndex, pageSize, loginName, nickname]);
 
     const loadUsers = async () => {
         try {
@@ -39,6 +40,7 @@ function AdminUserPage() {
         }
     };
 
+    // 修复：搜索时重置页码（会触发 useEffect 自动加载数据）
     const handleSearch = () => {
         setPageIndex(1);
     };
@@ -106,45 +108,45 @@ function AdminUserPage() {
                 <div className="bg-white rounded-lg shadow overflow-hidden">
                     <table className="min-w-full divide-y divide-gray-200">
                         <thead className="bg-gray-50">
-                            <tr>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">ID</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">登录名</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">昵称</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">邮箱</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">角色</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">创建时间</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">操作</th>
-                            </tr>
+                        <tr>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">ID</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">登录名</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">昵称</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">邮箱</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">角色</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">创建时间</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">操作</th>
+                        </tr>
                         </thead>
                         <tbody className="bg-white divide-y divide-gray-200">
-                            {users.map((user) => (
-                                <tr key={user.id}>
-                                    <td className="px-6 py-4 text-sm text-gray-900">{user.id}</td>
-                                    <td className="px-6 py-4 text-sm text-gray-900">{user.loginName}</td>
-                                    <td className="px-6 py-4 text-sm text-gray-500">{user.nickname}</td>
-                                    <td className="px-6 py-4 text-sm text-gray-500">{user.email || '-'}</td>
-                                    <td className="px-6 py-4 text-sm">
-                                        <div className="flex gap-1">
-                                            {user.roles?.map((role, idx) => (
-                                                <span key={idx} className="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800">
+                        {users.map((user) => (
+                            <tr key={user.id}>
+                                <td className="px-6 py-4 text-sm text-gray-900">{user.id}</td>
+                                <td className="px-6 py-4 text-sm text-gray-900">{user.loginName}</td>
+                                <td className="px-6 py-4 text-sm text-gray-500">{user.nickname}</td>
+                                <td className="px-6 py-4 text-sm text-gray-500">{user.email || '-'}</td>
+                                <td className="px-6 py-4 text-sm">
+                                    <div className="flex gap-1">
+                                        {user.roles?.map((role, idx) => (
+                                            <span key={idx} className="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800">
                                                     {role}
                                                 </span>
-                                            ))}
-                                        </div>
-                                    </td>
-                                    <td className="px-6 py-4 text-sm text-gray-500">
-                                        {new Date(user.createTime).toLocaleString('zh-CN')}
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm">
-                                        <button
-                                            onClick={() => handleViewBindings(user)}
-                                            className="px-3 py-1 rounded bg-blue-100 text-blue-700 hover:bg-blue-200"
-                                        >
-                                            查看绑定
-                                        </button>
-                                    </td>
-                                </tr>
-                            ))}
+                                        ))}
+                                    </div>
+                                </td>
+                                <td className="px-6 py-4 text-sm text-gray-500">
+                                    {new Date(user.createTime).toLocaleString('zh-CN')}
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm">
+                                    <button
+                                        onClick={() => handleViewBindings(user)}
+                                        className="px-3 py-1 rounded bg-blue-100 text-blue-700 hover:bg-blue-200"
+                                    >
+                                        查看绑定
+                                    </button>
+                                </td>
+                            </tr>
+                        ))}
                         </tbody>
                     </table>
 
@@ -168,7 +170,7 @@ function AdminUserPage() {
                                     value={pageSize}
                                     onChange={(e) => {
                                         setPageSize(Number(e.target.value));
-                                        setPageIndex(0);
+                                        setPageIndex(1); // 修复：改为 1 而不是 0
                                     }}
                                     className="px-2 py-1 border rounded"
                                 >
