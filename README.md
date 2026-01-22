@@ -106,6 +106,10 @@ mvn clean package -DskipTests
 | `IMAGE_STORAGE_PATH` | 图片存储根目录 | `./data/images` | - |
 | `AES_SECRET_KEY` | AES 加密密钥（16位字符）<br/>生成方式：`AESUtil.generateSecretKey("Lychnos2026SecretKey")`<br/>⚠️ 生产环境必须修改此密钥 | `kZXQiOjE3MzczOTY3` | - |
 | `IMAGE_SIGNATURE_EXPIRY_MS` | 未登录用户图片签名有效期<br/>用于生成时效性签名 URL，允许未登录用户安全访问推荐书籍图片 | `120000`（2分钟） | 毫秒 |
+| `CALLBACK_BASE_URL` | OAuth 回调地址基础 URL<br/>第三方登录授权后回调到当前项目的地址<br/>⚠️ 生产环境改为实际域名 | `http://localhost:1250` | - |
+| `HTTP_PROXY_ENABLED` | 是否启用 HTTP 代理<br/>用于访问国外 AI 服务（如 OpenAI）时使用代理 | `false` | - |
+| `HTTP_PROXY_HOST` | HTTP 代理服务器地址 | `127.0.0.1` | - |
+| `HTTP_PROXY_PORT` | HTTP 代理服务器端口 | `7890` | - |
 
 ### Docker Compose 示例
 
@@ -124,6 +128,10 @@ environment:
   IMAGE_STORAGE_PATH: ${IMAGE_STORAGE_PATH:-./data/images}
   AES_SECRET_KEY: ${AES_SECRET_KEY:-kZXQiOjE3MzczOTY3}
   IMAGE_SIGNATURE_EXPIRY_MS: ${IMAGE_SIGNATURE_EXPIRY_MS:-120000}
+  CALLBACK_BASE_URL: ${CALLBACK_BASE_URL:-http://localhost:1250}
+  HTTP_PROXY_ENABLED: ${HTTP_PROXY_ENABLED:-false}
+  HTTP_PROXY_HOST: ${HTTP_PROXY_HOST:-127.0.0.1}
+  HTTP_PROXY_PORT: ${HTTP_PROXY_PORT:-7890}
 ```
 
 ### 安全说明
@@ -138,6 +146,18 @@ environment:
    - 使用 HMAC-SHA256 签名确保 URL 不可篡改
    - 建议根据实际需求调整（默认 2 分钟）
    - 时间过长可能存在安全风险，时间过短可能影响用户体验
+
+3. **CALLBACK_BASE_URL**：
+   - OAuth 第三方登录回调地址
+   - 开发环境：`http://localhost:1250`
+   - 生产环境：改为实际域名，如 `https://lychnos.tannn.cn`
+   - 必须与第三方平台配置的回调地址一致
+
+4. **HTTP_PROXY_***：
+   - 用于访问国外 AI 服务（如 OpenAI、Claude）
+   - 仅在需要代理时启用（`HTTP_PROXY_ENABLED=true`）
+   - 配置本地代理服务器的地址和端口
+   - 注意：代理服务器需支持 HTTPS 流量
 
 ## sql初始化
 > 项目启动会自己创建仓库和表结构，你只需要初始化点数据就好了用来预置的分析

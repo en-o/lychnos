@@ -28,6 +28,12 @@ services:
       AES_SECRET_KEY: ${AES_SECRET_KEY:-kZXQiOjE3MzczOTY3}
       # 单位 毫秒 millisecond
       IMAGE_SIGNATURE_EXPIRY_MS: ${IMAGE_SIGNATURE_EXPIRY_MS:-120000}
+      # OAuth 回调地址（生产环境改为实际域名）http://localhost:1250
+      CALLBACK_BASE_URL: ${CALLBACK_BASE_URL:-https://lychnos.tannn.cn}
+      # HTTP 代理配置（用于访问国外 AI 服务 - 这个需要自己服务器支持，尽量不要设置或者设置false）
+      HTTP_PROXY_ENABLED: ${HTTP_PROXY_ENABLED:-false}
+#      HTTP_PROXY_HOST: ${HTTP_PROXY_HOST:-127.0.0.1}
+#      HTTP_PROXY_PORT: ${HTTP_PROXY_PORT:-7890}
     volumes:
       # 可选：持久化日志
       - ./logs:/app/logs
