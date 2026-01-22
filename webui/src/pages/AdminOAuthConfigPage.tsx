@@ -455,6 +455,13 @@ function AdminOAuthConfigPage() {
                                         </button>
                                         <button
                                             type="button"
+                                            onClick={() => setFormData({...formData, webCallbackUrl: 'http://localhost:1250'})}
+                                            className="px-2 py-1 text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 rounded border border-gray-300"
+                                        >
+                                            http://localhost:1250
+                                        </button>
+                                        <button
+                                            type="button"
                                             onClick={() => setFormData({...formData, webCallbackUrl: 'https://lychnos.tannn.cn'})}
                                             className="px-2 py-1 text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 rounded border border-gray-300"
                                         >
