@@ -2,9 +2,13 @@ package cn.tannn.lychnos.controller.admin;
 
 import cn.tannn.jdevelops.annotations.web.authentication.ApiMapping;
 import cn.tannn.jdevelops.annotations.web.mapping.PathRestController;
+import cn.tannn.jdevelops.jpa.result.JpaPageResult;
+import cn.tannn.jdevelops.result.response.ResultPageVO;
 import cn.tannn.jdevelops.result.response.ResultVO;
 import cn.tannn.lychnos.common.views.Views;
+import cn.tannn.lychnos.controller.dto.UserPageDTO;
 import cn.tannn.lychnos.controller.vo.UserDetailVO;
+import cn.tannn.lychnos.dao.UserInfoDao;
 import cn.tannn.lychnos.entity.UserInfo;
 import cn.tannn.lychnos.entity.UserThirdPartyBind;
 import cn.tannn.lychnos.service.UserInfoService;
@@ -15,7 +19,12 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 import java.util.List;
@@ -36,23 +45,42 @@ public class AdminUserController {
 
     private final UserInfoService userInfoService;
     private final UserThirdPartyBindDao userThirdPartyBindDao;
-
-
+    private final UserInfoDao userInfoDao;
 
     /**
-     * 获取所有用户列表
+     * 分页查询用户列表
      */
-    @Operation(summary = "获取所有用户列表")
-    @ApiMapping(value = "/list", method = RequestMethod.GET)
-    public ResultVO<List<UserDetailVO>> listUsers(HttpServletRequest request) {
+    @Operation(summary = "分页查询用户列表")
+    @ApiMapping(value = "/list", method = RequestMethod.POST)
+    public ResultPageVO<UserDetailVO, JpaPageResult<UserDetailVO>> listUsers(@RequestBody UserPageDTO dto, HttpServletRequest request) {
         userInfoService.checkAdmin(request);
 
-        List<UserInfo> users = userInfoService.getJpaBasicsDao().findAll();
-        List<UserDetailVO> vos = users.stream()
+        Pageable pageable = dto.getPage().pageable();
+
+        // 构建查询条件
+        Specification<UserInfo> spec = (root, query, cb) -> {
+            if (StringUtils.isNotBlank(dto.getLoginName())) {
+                return cb.like(root.get("loginName"), "%" + dto.getLoginName() + "%");
+            }
+            return cb.conjunction();
+        };
+
+        Page<UserInfo> userPage = userInfoDao.findAll(spec, pageable);
+
+        // 转换为VO
+        List<UserDetailVO> voList = userPage.getContent().stream()
                 .map(this::convertToDetailVO)
                 .collect(Collectors.toList());
 
-        return ResultVO.success(vos);
+        JpaPageResult<UserDetailVO> result = new JpaPageResult<>(
+                userPage.getNumber() + 1,
+                userPage.getSize(),
+                userPage.getTotalPages(),
+                userPage.getTotalElements(),
+                voList
+        );
+
+        return ResultPageVO.success(result);
     }
 
     /**
