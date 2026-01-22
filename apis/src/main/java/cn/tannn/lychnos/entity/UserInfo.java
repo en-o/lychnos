@@ -81,13 +81,12 @@ public class UserInfo extends JpaCommonBean<UserInfo> {
      * 用户角色列表
      * <p>
      * 示例：["USER", "ADMIN"]
-     * 默认角色：["USER"]
+     * 默认角色：["USER"]（需要在代码中设置，JSON类型不支持数据库默认值）
      * 可选角色：USER（普通用户）、ADMIN（管理员）、VIP（会员）等
      * </p>
      */
     @Column(columnDefinition = " json ")
     @Comment("用户角色列表")
-    @ColumnDefault("'[\"USER\"]'")
     @Schema(description = "用户角色列表")
     @JdbcTypeCode(SqlTypes.JSON)
     private JSONArray roles;
