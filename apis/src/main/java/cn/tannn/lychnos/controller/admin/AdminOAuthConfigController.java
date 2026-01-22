@@ -78,28 +78,19 @@ public class AdminOAuthConfigController {
         config.setProviderType(cn.tannn.lychnos.enums.ProviderType.fromValue(dto.getProviderType().trim()));
         config.setClientId(dto.getClientId().trim());
         config.setClientSecret(dto.getClientSecret().trim());
+        config.setAuthorizeUrl(dto.getAuthorizeUrl().trim());
+        config.setTokenUrl(dto.getTokenUrl().trim());
+        config.setUserInfoUrl(dto.getUserInfoUrl().trim());
+        config.setScope(dto.getScope().trim());
+
+        config.setWebCallbackUrl(dto.getWebCallbackUrl().trim());
+        config.setSortOrder(dto.getSortOrder() != null ? dto.getSortOrder() : 0);
+        config.setEnabled(false); // 默认停用
 
         // 可选字段，使用 isNotBlank 判断并 trim
-        if (StringUtils.isNotBlank(dto.getAuthorizeUrl())) {
-            config.setAuthorizeUrl(dto.getAuthorizeUrl().trim());
-        }
-        if (StringUtils.isNotBlank(dto.getTokenUrl())) {
-            config.setTokenUrl(dto.getTokenUrl().trim());
-        }
-        if (StringUtils.isNotBlank(dto.getUserInfoUrl())) {
-            config.setUserInfoUrl(dto.getUserInfoUrl().trim());
-        }
-        if (StringUtils.isNotBlank(dto.getScope())) {
-            config.setScope(dto.getScope().trim());
-        }
         if (StringUtils.isNotBlank(dto.getIconUrl())) {
             config.setIconUrl(dto.getIconUrl().trim());
         }
-        if (StringUtils.isNotBlank(dto.getWebCallbackUrl())) {
-            config.setWebCallbackUrl(dto.getWebCallbackUrl().trim());
-        }
-        config.setSortOrder(dto.getSortOrder() != null ? dto.getSortOrder() : 0);
-        config.setEnabled(false); // 默认停用
 
         oauthConfigService.saveConfig(config);
         log.info("管理员新增OAuth配置：{}", config.getProviderType());
@@ -187,6 +178,28 @@ public class AdminOAuthConfigController {
 
         log.info("管理员更新OAuth配置排序：{} -> {}", config.getProviderType(), sortOrder);
         return ResultVO.successMessage("排序更新成功");
+    }
+
+    /**
+     * 删除OAuth配置
+     */
+    @Operation(summary = "删除OAuth配置")
+    @ApiMapping(value = "/delete/{id}", method = RequestMethod.DELETE)
+    public ResultVO<Void> deleteConfig(@PathVariable Long id, HttpServletRequest request) {
+        userInfoService.checkAdmin(request);
+
+        OAuthConfig config = oauthConfigService.getJpaBasicsDao().findById(id)
+                .orElseThrow(() -> new RuntimeException("配置不存在"));
+
+        // 检查是否为启用状态
+        if (config.getEnabled()) {
+            throw new RuntimeException("启用状态的配置不允许删除，请先停用");
+        }
+
+        oauthConfigService.getJpaBasicsDao().deleteById(id);
+        log.info("管理员删除OAuth配置：{}", config.getProviderType());
+
+        return ResultVO.successMessage("删除成功");
     }
 
     /**
