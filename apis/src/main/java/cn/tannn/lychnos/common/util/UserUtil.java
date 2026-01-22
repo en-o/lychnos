@@ -118,4 +118,33 @@ public class UserUtil extends cn.tannn.jdevelops.jwt.standalone.util.UserUtil {
         roles.add("USER");
         return roles;
     }
+
+    /**
+     * 判断角色列表中是否包含指定角色（忽略大小写）
+     *
+     * @param roles    角色列表
+     * @param roleName 角色名称
+     * @return true-包含，false-不包含
+     */
+    public static boolean hasRole(JSONArray roles, String roleName) {
+        if (roles == null || roles.isEmpty() || roleName == null) {
+            return false;
+        }
+        for (Object role : roles) {
+            if (role != null && role.toString().equalsIgnoreCase(roleName)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * 判断用户是否是管理员
+     *
+     * @param roles 角色列表
+     * @return true-是管理员，false-不是管理员
+     */
+    public static boolean isAdmin(JSONArray roles) {
+        return hasRole(roles, "ADMIN");
+    }
 }
