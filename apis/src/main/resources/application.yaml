@@ -28,8 +28,8 @@ app:
     callback-base-url: ${CALLBACK_BASE_URL:http://localhost:1250}
   proxy:
     enabled: ${HTTP_PROXY_ENABLED:false}
-    host: 127.0.0.1
-    port: 7890  # 改成你的代理端口
+    host: ${HTTP_PROXY_HOST:127.0.0.1}
+    port: ${HTTP_PROXY_PORT:7890}  # 改成你的代理端口
 
 jdevelops:
   swagger:
