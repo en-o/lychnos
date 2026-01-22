@@ -1,6 +1,9 @@
 package cn.tannn.lychnos.controller.dto;
 
 import cn.tannn.jdevelops.annotations.jpa.JpaSelectIgnoreField;
+import cn.tannn.jdevelops.annotations.jpa.JpaSelectOperator;
+import cn.tannn.jdevelops.annotations.jpa.enums.SQLConnect;
+import cn.tannn.jdevelops.annotations.jpa.enums.SQLOperatorWrapper;
 import cn.tannn.jdevelops.util.jpa.request.PagingSorteds;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
@@ -21,8 +24,12 @@ import lombok.ToString;
 public class UserPageDTO {
 
     @Schema(description = "用户名（模糊查询）")
-    @JpaSelectIgnoreField
+    @JpaSelectOperator(operatorWrapper = SQLOperatorWrapper.LIKE, connect = SQLConnect.AND)
     private String loginName;
+
+    @Schema(description = "昵称")
+    @JpaSelectOperator(operatorWrapper = SQLOperatorWrapper.LIKE, connect = SQLConnect.AND)
+    private String nickname;
 
     @Schema(description = "分页排序")
     @JpaSelectIgnoreField
