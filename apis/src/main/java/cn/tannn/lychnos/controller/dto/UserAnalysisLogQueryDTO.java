@@ -39,4 +39,10 @@ public class UserAnalysisLogQueryDTO {
      */
     @Schema(description = "是否精确匹配用户名")
     private Boolean exactMatch;
+
+    /**
+     * 模型来源：0-官方/1-私人/2-公开
+     */
+    @Schema(description = "模型来源：0-官方/1-私人/2-公开")
+    private Integer modelSource;
 }
