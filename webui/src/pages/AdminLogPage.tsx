@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {useNavigate} from 'react-router-dom';
 import {ArrowLeft, Search, FileText} from 'lucide-react';
 import {adminApi, type UserAnalysisLog} from '../api/admin';
@@ -8,11 +8,34 @@ const AdminLogPage: React.FC = () => {
     const navigate = useNavigate();
     const [logs, setLogs] = useState<UserAnalysisLog[]>([]);
     const [loading, setLoading] = useState(false);
+
+    // 获取默认时间范围：昨天到今天
+    const getDefaultTimeRange = () => {
+        const now = new Date();
+        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        const yesterday = new Date(today);
+        yesterday.setDate(yesterday.getDate() - 1);
+
+        const formatDateTime = (date: Date) => {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}T00:00`;
+        };
+
+        return {
+            startTime: formatDateTime(yesterday),
+            endTime: formatDateTime(new Date(today.getTime() + 24 * 60 * 60 * 1000)), // 今天结束
+        };
+    };
+
+    const defaultTimeRange = getDefaultTimeRange();
     const [queryParams, setQueryParams] = useState({
-        startTime: '',
-        endTime: '',
+        startTime: defaultTimeRange.startTime,
+        endTime: defaultTimeRange.endTime,
         userName: '',
         exactMatch: false,
+        modelSource: undefined as number | undefined,
     });
 
     // 加载日志
@@ -30,6 +53,9 @@ const AdminLogPage: React.FC = () => {
                 params.userName = queryParams.userName;
                 params.exactMatch = queryParams.exactMatch;
             }
+            if (queryParams.modelSource !== undefined) {
+                params.modelSource = queryParams.modelSource;
+            }
 
             const response = await adminApi.log.query(params);
             if (response.success) {
@@ -44,15 +70,21 @@ const AdminLogPage: React.FC = () => {
         }
     };
 
+    // 页面加载时自动执行查询
+    useEffect(() => {
+        loadLogs();
+    }, []);
+
     // 重置查询条件
     const resetQuery = () => {
+        const defaultTimeRange = getDefaultTimeRange();
         setQueryParams({
-            startTime: '',
-            endTime: '',
+            startTime: defaultTimeRange.startTime,
+            endTime: defaultTimeRange.endTime,
             userName: '',
             exactMatch: false,
+            modelSource: undefined,
         });
-        setLogs([]);
     };
 
     // 格式化时间
@@ -141,6 +173,21 @@ const AdminLogPage: React.FC = () => {
                                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                                 />
                             </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    模型来源
+                                </label>
+                                <select
+                                    value={queryParams.modelSource === undefined ? '' : queryParams.modelSource}
+                                    onChange={(e) => setQueryParams({...queryParams, modelSource: e.target.value === '' ? undefined : Number(e.target.value)})}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                >
+                                    <option value="">全部</option>
+                                    <option value="0">官方</option>
+                                    <option value="1">私人</option>
+                                    <option value="2">公开</option>
+                                </select>
+                            </div>
                             <div className="flex items-end">
                                 <label className="flex items-center gap-2 cursor-pointer">
                                     <input
@@ -170,7 +217,7 @@ const AdminLogPage: React.FC = () => {
                             </button>
                         </div>
                         <p className="text-xs text-gray-500 mt-3">
-                            💡 提示：默认查询最近20条记录，使用查询条件时最多返回200条记录
+                            💡 提示：默认查询昨天到今天的记录，最多返回200条记录
                         </p>
                     </div>
 
@@ -186,7 +233,7 @@ const AdminLogPage: React.FC = () => {
                                 <div className="text-center py-12">
                                     <FileText className="w-12 h-12 text-gray-400 mx-auto mb-3" />
                                     <p className="text-gray-500">暂无日志记录</p>
-                                    <p className="text-sm text-gray-400 mt-1">点击查询按钮加载日志</p>
+                                    <p className="text-sm text-gray-400 mt-1">请调整查询条件后重试</p>
                                 </div>
                             ) : (
                                 <table className="w-full">

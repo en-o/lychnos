@@ -98,6 +98,7 @@ export interface UserAnalysisLogQuery {
     endTime?: string;
     userName?: string;
     exactMatch?: boolean;
+    modelSource?: number;
 }
 
 // 用户分析日志

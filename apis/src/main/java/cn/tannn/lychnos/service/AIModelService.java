@@ -144,4 +144,47 @@ public class AIModelService extends J2ServiceImpl<AIModelDao, AIModel, Long> {
     public List<AIModel> findOfficialModels(ModelType type) {
         return getJpaBasicsDao().findByShareAndTypeAndEnabledOrderByCreateTimeDesc(ShareType.OFFICIAL.getCode(), type, true);
     }
+
+    /**
+     * 获取用户启用的模型（支持官方模型回退）
+     * <p>查询逻辑：</p>
+     * <ol>
+     *     <li>优先使用用户自己启用的模型</li>
+     *     <li>如果用户未配置，则回退到官方模型（share=0）</li>
+     *     <li>如果都不存在，返回null</li>
+     * </ol>
+     * <p>注意：此方法与 AIServiceImpl.getEnabledModel 逻辑保持一致，但不抛出异常</p>
+     *
+     * @param userId 用户ID
+     * @param type 模型类型
+     * @return 启用的模型，如果都不存在则返回null
+     */
+    public AIModel getEnabledModel(Long userId, ModelType type) {
+        // 1. 优先查询用户自己启用的模型
+        List<AIModel> userModels = getJpaBasicsDao().findByUserIdAndTypeAndEnabled(userId, type, true);
+
+        if (!userModels.isEmpty()) {
+            // 用户有配置启用的模型，直接返回第一个
+            AIModel model = userModels.get(0);
+            log.info("使用用户自己的模型，userId: {}, type: {}, modelId: {}", userId, type, model.getId());
+            return model;
+        }
+
+        // 2. 用户未配置模型，查询官方模型作为回退
+        log.info("用户未配置 {} 类型模型，尝试使用官方模型，userId: {}", type, userId);
+        List<AIModel> officialModels = getJpaBasicsDao().findByShareAndTypeAndEnabledOrderByCreateTimeDesc(
+                ShareType.OFFICIAL.getCode(), type, true);
+
+        if (!officialModels.isEmpty()) {
+            // 使用官方模型（取第一个）
+            AIModel officialModel = officialModels.get(0);
+            log.info("使用官方模型作为回退，userId: {}, type: {}, officialModelId: {}",
+                    userId, type, officialModel.getId());
+            return officialModel;
+        }
+
+        // 3. 用户未配置且无官方模型，返回null
+        log.warn("用户未配置模型且无可用的官方模型，userId: {}, type: {}", userId, type);
+        return null;
+    }
 }
