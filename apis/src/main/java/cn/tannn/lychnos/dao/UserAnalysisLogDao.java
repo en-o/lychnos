@@ -1,5 +1,6 @@
 package cn.tannn.lychnos.dao;
 
+import cn.tannn.lychnos.controller.vo.UserAnalysisLogVO;
 import cn.tannn.lychnos.entity.UserAnalysisLog;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -19,71 +20,86 @@ import java.util.List;
 public interface UserAnalysisLogDao extends JpaRepository<UserAnalysisLog, Long> {
 
     /**
-     * 查询最近的日志记录（按创建时间倒序）
+     * 查询最近的日志记录（按创建时间倒序）- 返回投影接口
      *
      * @param pageable 分页参数
-     * @return 日志列表
+     * @return 日志VO列表
      */
-    List<UserAnalysisLog> findAllByOrderByCreateTimeDesc(Pageable pageable);
+    List<UserAnalysisLogVO> findAllByOrderByCreateTimeDesc(Pageable pageable);
 
     /**
-     * 根据时间范围查询日志（按创建时间倒序）
+     * 根据时间范围查询日志（按创建时间倒序）- 返回投影接口
      *
      * @param startTime 开始时间
      * @param endTime 结束时间
      * @param pageable 分页参数
-     * @return 日志列表
+     * @return 日志VO列表
      */
-    @Query("SELECT u FROM UserAnalysisLog u WHERE u.createTime >= :startTime AND u.createTime <= :endTime ORDER BY u.createTime DESC")
-    List<UserAnalysisLog> findByCreateTimeBetween(@Param("startTime") LocalDateTime startTime,
-                                                   @Param("endTime") LocalDateTime endTime,
-                                                   Pageable pageable);
+    @Query("SELECT u.createTime AS createTime, u.userName AS userName, u.callIp AS callIp, " +
+           "u.modelId AS modelId, u.modelName AS modelName, u.modelType AS modelType, " +
+           "u.modelSource AS modelSource, u.usageType AS usageType, u.bookTitle AS bookTitle, " +
+           "u.bookAnalyseId AS bookAnalyseId, u.success AS success, u.errorMessage AS errorMessage, " +
+           "u.useExistingData AS useExistingData, u.userId AS userId, u.modelVendor AS modelVendor " +
+           "FROM UserAnalysisLog u WHERE u.createTime >= :startTime AND u.createTime <= :endTime ORDER BY u.createTime DESC")
+    List<UserAnalysisLogVO> findByCreateTimeBetween(@Param("startTime") LocalDateTime startTime,
+                                                     @Param("endTime") LocalDateTime endTime,
+                                                     Pageable pageable);
 
     /**
-     * 根据用户名精确匹配查询日志（按创建时间倒序）
+     * 根据用户名精确匹配查询日志（按创建时间倒序）- 返回投影接口
      *
      * @param userName 用户名
      * @param pageable 分页参数
-     * @return 日志列表
+     * @return 日志VO列表
      */
-    List<UserAnalysisLog> findByUserNameOrderByCreateTimeDesc(String userName, Pageable pageable);
+    List<UserAnalysisLogVO> findByUserNameOrderByCreateTimeDesc(String userName, Pageable pageable);
 
     /**
-     * 根据用户名模糊匹配查询日志（按创建时间倒序）
+     * 根据用户名模糊匹配查询日志（按创建时间倒序）- 返回投影接口
      *
      * @param userName 用户名
      * @param pageable 分页参数
-     * @return 日志列表
+     * @return 日志VO列表
      */
-    List<UserAnalysisLog> findByUserNameContainingOrderByCreateTimeDesc(String userName, Pageable pageable);
+    List<UserAnalysisLogVO> findByUserNameContainingOrderByCreateTimeDesc(String userName, Pageable pageable);
 
     /**
-     * 根据用户名精确匹配和时间范围查询日志（按创建时间倒序）
-     *
-     * @param userName 用户名
-     * @param startTime 开始时间
-     * @param endTime 结束时间
-     * @param pageable 分页参数
-     * @return 日志列表
-     */
-    @Query("SELECT u FROM UserAnalysisLog u WHERE u.userName = :userName AND u.createTime >= :startTime AND u.createTime <= :endTime ORDER BY u.createTime DESC")
-    List<UserAnalysisLog> findByUserNameAndCreateTimeBetween(@Param("userName") String userName,
-                                                              @Param("startTime") LocalDateTime startTime,
-                                                              @Param("endTime") LocalDateTime endTime,
-                                                              Pageable pageable);
-
-    /**
-     * 根据用户名模糊匹配和时间范围查询日志（按创建时间倒序）
+     * 根据用户名精确匹配和时间范围查询日志（按创建时间倒序）- 返回投影接口
      *
      * @param userName 用户名
      * @param startTime 开始时间
      * @param endTime 结束时间
      * @param pageable 分页参数
-     * @return 日志列表
+     * @return 日志VO列表
      */
-    @Query("SELECT u FROM UserAnalysisLog u WHERE u.userName LIKE %:userName% AND u.createTime >= :startTime AND u.createTime <= :endTime ORDER BY u.createTime DESC")
-    List<UserAnalysisLog> findByUserNameContainingAndCreateTimeBetween(@Param("userName") String userName,
-                                                                        @Param("startTime") LocalDateTime startTime,
-                                                                        @Param("endTime") LocalDateTime endTime,
-                                                                        Pageable pageable);
+    @Query("SELECT u.createTime AS createTime, u.userName AS userName, u.callIp AS callIp, " +
+           "u.modelId AS modelId, u.modelName AS modelName, u.modelType AS modelType, " +
+           "u.modelSource AS modelSource, u.usageType AS usageType, u.bookTitle AS bookTitle, " +
+           "u.bookAnalyseId AS bookAnalyseId, u.success AS success, u.errorMessage AS errorMessage, " +
+           "u.useExistingData AS useExistingData, u.userId AS userId, u.modelVendor AS modelVendor " +
+           "FROM UserAnalysisLog u WHERE u.userName = :userName AND u.createTime >= :startTime AND u.createTime <= :endTime ORDER BY u.createTime DESC")
+    List<UserAnalysisLogVO> findByUserNameAndCreateTimeBetween(@Param("userName") String userName,
+                                                                @Param("startTime") LocalDateTime startTime,
+                                                                @Param("endTime") LocalDateTime endTime,
+                                                                Pageable pageable);
+
+    /**
+     * 根据用户名模糊匹配和时间范围查询日志（按创建时间倒序）- 返回投影接口
+     *
+     * @param userName 用户名
+     * @param startTime 开始时间
+     * @param endTime 结束时间
+     * @param pageable 分页参数
+     * @return 日志VO列表
+     */
+    @Query("SELECT u.createTime AS createTime, u.userName AS userName, u.callIp AS callIp, " +
+           "u.modelId AS modelId, u.modelName AS modelName, u.modelType AS modelType, " +
+           "u.modelSource AS modelSource, u.usageType AS usageType, u.bookTitle AS bookTitle, " +
+           "u.bookAnalyseId AS bookAnalyseId, u.success AS success, u.errorMessage AS errorMessage, " +
+           "u.useExistingData AS useExistingData, u.userId AS userId, u.modelVendor AS modelVendor " +
+           "FROM UserAnalysisLog u WHERE u.userName LIKE %:userName% AND u.createTime >= :startTime AND u.createTime <= :endTime ORDER BY u.createTime DESC")
+    List<UserAnalysisLogVO> findByUserNameContainingAndCreateTimeBetween(@Param("userName") String userName,
+                                                                          @Param("startTime") LocalDateTime startTime,
+                                                                          @Param("endTime") LocalDateTime endTime,
+                                                                          Pageable pageable);
 }
