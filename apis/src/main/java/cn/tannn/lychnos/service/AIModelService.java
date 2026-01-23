@@ -153,7 +153,6 @@ public class AIModelService extends J2ServiceImpl<AIModelDao, AIModel, Long> {
      *     <li>如果用户未配置，则回退到官方模型（share=0）</li>
      *     <li>如果都不存在，返回null</li>
      * </ol>
-     * <p>注意：此方法与 AIServiceImpl.getEnabledModel 逻辑保持一致，但不抛出异常</p>
      *
      * @param userId 用户ID
      * @param type 模型类型

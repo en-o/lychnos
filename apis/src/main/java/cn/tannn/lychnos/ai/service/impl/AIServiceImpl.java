@@ -12,6 +12,7 @@ import cn.tannn.lychnos.common.util.AESUtil;
 import cn.tannn.lychnos.common.util.ZipUtil;
 import cn.tannn.lychnos.dao.AIModelDao;
 import cn.tannn.lychnos.entity.AIModel;
+import cn.tannn.lychnos.service.AIModelService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.model.ChatModel;
@@ -41,6 +42,7 @@ public class AIServiceImpl implements AIService {
 
     private final AIModelDao aiModelDao;
     private final DynamicAIClientFactory clientFactory;
+    private final AIModelService aiModelService;
 
     /**
      * 默认图片风格提示词
@@ -340,43 +342,25 @@ public class AIServiceImpl implements AIService {
      *     <li>如果用户未配置，则回退到官方模型（share=0）</li>
      *     <li>如果官方模型也不存在，则抛出异常</li>
      * </ol>
+     * <p>注意：此方法调用 AIModelService.getEnabledModel() 获取模型，然后进行 API Key 验证</p>
      */
     private AIModel getEnabledModel(Long userId, ModelType type) {
-        // 1. 优先查询用户自己启用的模型
-        List<AIModel> userModels = aiModelDao.findByUserIdAndTypeAndEnabled(userId, type, true);
+        // 调用 AIModelService 获取模型（包含官方模型回退逻辑）
+        AIModel model = aiModelService.getEnabledModel(userId, type);
 
-        if (!userModels.isEmpty()) {
-            // 用户有配置启用的模型，直接返回第一个
-            AIModel model = userModels.get(0);
-            log.info("使用用户自己的模型，userId: {}, type: {}, modelId: {}", userId, type, model.getId());
-
-            // 验证 API Key 是否有效
-            validateApiKey(model, userId, type);
-            return model;
+        // 如果没有找到任何可用模型，抛出异常
+        if (model == null) {
+            log.warn("用户未配置模型且无可用的官方模型，userId: {}, type: {}", userId, type);
+            throw new BusinessException(
+                    BusinessErrorCode.MODEL_NOT_CONFIGURED.getCode(),
+                    BusinessErrorCode.MODEL_NOT_CONFIGURED.formatMessage(type.name())
+            );
         }
 
-        // 2. 用户未配置模型，查询官方模型作为回退
-        log.info("用户未配置 {} 类型模型，尝试使用官方模型，userId: {}", type, userId);
-        List<AIModel> officialModels = aiModelDao.findByShareAndTypeAndEnabledOrderByCreateTimeDesc(
-                ShareType.OFFICIAL.getCode(), type, true);
+        // 验证 API Key 是否有效
+        validateApiKey(model, userId, type);
 
-        if (!officialModels.isEmpty()) {
-            // 使用官方模型（取第一个）
-            AIModel officialModel = officialModels.get(0);
-            log.info("使用官方模型作为回退，userId: {}, type: {}, officialModelId: {}",
-                    userId, type, officialModel.getId());
-
-            // 验证 API Key 是否有效
-            validateApiKey(officialModel, userId, type);
-            return officialModel;
-        }
-
-        // 3. 用户未配置且无官方模型，抛出异常
-        log.warn("用户未配置模型且无可用的官方模型，userId: {}, type: {}", userId, type);
-        throw new BusinessException(
-                BusinessErrorCode.MODEL_NOT_CONFIGURED.getCode(),
-                BusinessErrorCode.MODEL_NOT_CONFIGURED.formatMessage(type.name())
-        );
+        return model;
     }
 
     /**
