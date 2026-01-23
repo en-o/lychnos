@@ -11,6 +11,7 @@ import cn.tannn.lychnos.controller.dto.BookExtractDTO;
 import cn.tannn.lychnos.controller.vo.BookExtractVO;
 import cn.tannn.lychnos.controller.vo.BookRecommend;
 import cn.tannn.lychnos.entity.BookAnalyse;
+import cn.tannn.lychnos.service.BannedUserCacheService;
 import cn.tannn.lychnos.service.BookAnalyseService;
 import cn.tannn.lychnos.service.UserInterestService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -42,6 +43,7 @@ public class BookController {
 
     private final BookAnalyseService bookAnalyseService;
     private final UserInterestService userInterestService;
+    private final BannedUserCacheService bannedUserCacheService;
 
     @Value("${app.security.aes-secret-key}")
     private String secretKey;
@@ -144,6 +146,14 @@ public class BookController {
                                          HttpServletRequest request) {
 
         Long userId = UserUtil.userId2(request);
+
+        // 检查用户是否被封禁
+        if (bannedUserCacheService.isBanned(userId)) {
+            throw new BusinessException(
+                    BusinessErrorCode.PARAM_ERROR.getCode(),
+                    "账户已被封禁，无法使用分析功能"
+            );
+        }
 
         String bookTitle = bookInfo.getTitle().trim();
         String author = bookInfo.getAuthor();
