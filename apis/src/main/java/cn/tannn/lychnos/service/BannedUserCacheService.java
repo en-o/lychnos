@@ -45,13 +45,13 @@ public class BannedUserCacheService {
      */
     @PostConstruct
     public void init() {
-        // 获取JWT过期时间[默认  过期时间为一天 (单位:小时)]
-        long expireTimeMs = jwtConfig.getExpireTime();
-        log.info("初始化封禁用户缓存，过期时间: {}ms ({}小时)", expireTimeMs, expireTimeMs / 1000 / 3600);
+        // 获取JWT过期时间（单位：小时，默认24小时）
+        long expireTimeHours = jwtConfig.getExpireTime();
+        log.info("初始化封禁用户缓存，过期时间: {}小时", expireTimeHours);
 
         // 初始化缓存
         bannedUserCache = CacheBuilder.newBuilder()
-                .expireAfterWrite(expireTimeMs, TimeUnit.MILLISECONDS)
+                .expireAfterWrite(expireTimeHours, TimeUnit.HOURS)
                 .maximumSize(10000)
                 .build();
 
