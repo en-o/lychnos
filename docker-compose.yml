@@ -35,6 +35,7 @@ services:
       HTTP_PROXY_ENABLED: ${HTTP_PROXY_ENABLED:-false}
 #      HTTP_PROXY_HOST: ${HTTP_PROXY_HOST:-127.0.0.1}
 #      HTTP_PROXY_PORT: ${HTTP_PROXY_PORT:-7890}
+      JWT_TOKEN_SECRET: ${JWT_TOKEN_SECRET:b40715ff972d60c4yff8044acfb33ba091544b2e21825672edc38799f52f1895}
     volumes:
       # 可选：持久化日志
       - ./logs:/app/logs

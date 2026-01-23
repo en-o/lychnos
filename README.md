@@ -91,25 +91,26 @@ mvn clean package -DskipTests
 
 以下是所有可配置的环境变量及其说明：
 
-| 环境变量 | 说明 | 默认值 | 单位 |
-|---------|------|--------|------|
-| `TZ` | 时区设置 | `Asia/Shanghai` | - |
-| `FILE_MAX_SIZE` | 单个文件最大上传大小 | `500MB` | - |
-| `FILE_MAX_REQUEST` | 请求最大大小 | `500MB` | - |
-| `MYSQL_PWD` | MySQL 数据库密码 | `root` | - |
-| `MYSQL_UNM` | MySQL 数据库用户名 | `root` | - |
-| `MYSQL_URL` | MySQL 数据库地址 | `localhost:3306` | - |
-| `MYSQL_DB` | MySQL 数据库名称 | `db_lychnos` | - |
-| `DOC_PASSWORD` | API 文档访问密码 | `tan` | - |
-| `DOC_USERNAME` | API 文档访问用户名 | `tan` | - |
-| `CONFIG_ENV` | 配置环境（dev/prod） | `prod` | - |
-| `IMAGE_STORAGE_PATH` | 图片存储根目录 | `./data/images` | - |
+| 环境变量 | 说明                                                                                              | 默认值 | 单位 |
+|---------|-------------------------------------------------------------------------------------------------|--------|------|
+| `TZ` | 时区设置                                                                                            | `Asia/Shanghai` | - |
+| `FILE_MAX_SIZE` | 单个文件最大上传大小                                                                                      | `500MB` | - |
+| `FILE_MAX_REQUEST` | 请求最大大小                                                                                          | `500MB` | - |
+| `MYSQL_PWD` | MySQL 数据库密码                                                                                     | `root` | - |
+| `MYSQL_UNM` | MySQL 数据库用户名                                                                                    | `root` | - |
+| `MYSQL_URL` | MySQL 数据库地址                                                                                     | `localhost:3306` | - |
+| `MYSQL_DB` | MySQL 数据库名称                                                                                     | `db_lychnos` | - |
+| `DOC_PASSWORD` | API 文档访问密码                                                                                      | `tan` | - |
+| `DOC_USERNAME` | API 文档访问用户名                                                                                     | `tan` | - |
+| `CONFIG_ENV` | 配置环境（dev/prod）                                                                                  | `prod` | - |
+| `IMAGE_STORAGE_PATH` | 图片存储根目录                                                                                         | `./data/images` | - |
 | `AES_SECRET_KEY` | AES 加密密钥（16位字符）<br/>生成方式：`AESUtil.generateSecretKey("Lychnos2026SecretKey")`<br/>⚠️ 生产环境必须修改此密钥 | `kZXQiOjE3MzczOTY3` | - |
-| `IMAGE_SIGNATURE_EXPIRY_MS` | 未登录用户图片签名有效期<br/>用于生成时效性签名 URL，允许未登录用户安全访问推荐书籍图片 | `120000`（2分钟） | 毫秒 |
-| `CALLBACK_BASE_URL` | OAuth 回调地址基础 URL<br/>第三方登录授权后回调到当前项目的地址<br/>⚠️ 生产环境改为实际域名 | `http://localhost:1250` | - |
-| `HTTP_PROXY_ENABLED` | 是否启用 HTTP 代理<br/>用于访问国外 AI 服务（如 OpenAI）时使用代理 | `false` | - |
-| `HTTP_PROXY_HOST` | HTTP 代理服务器地址 | `127.0.0.1` | - |
-| `HTTP_PROXY_PORT` | HTTP 代理服务器端口 | `7890` | - |
+| `IMAGE_SIGNATURE_EXPIRY_MS` | 未登录用户图片签名有效期<br/>用于生成时效性签名 URL，允许未登录用户安全访问推荐书籍图片                                                | `120000`（2分钟） | 毫秒 |
+| `CALLBACK_BASE_URL` | OAuth 回调地址基础 URL<br/>第三方登录授权后回调到当前项目的地址<br/>⚠️ 生产环境改为实际域名                                       | `http://localhost:1250` | - |
+| `HTTP_PROXY_ENABLED` | 是否启用 HTTP 代理<br/>用于访问国外 AI 服务（如 OpenAI）时使用代理                                                    | `false` | - |
+| `HTTP_PROXY_HOST` | HTTP 代理服务器地址                                                                                    | `127.0.0.1` | - |
+| `HTTP_PROXY_PORT` | HTTP 代理服务器端口                                                                                    | `7890` | - |
+| `JWT_TOKEN_SECRET` | jwt的密钥需要设置（注意长度需要保持不变）                                                                          | `b40715ff972d60c4yff8044acfb33ba091544b2e21825672edc38799f52f1895` | - |
 
 ### Docker Compose 示例
 
@@ -132,6 +133,7 @@ environment:
   HTTP_PROXY_ENABLED: ${HTTP_PROXY_ENABLED:-false}
   HTTP_PROXY_HOST: ${HTTP_PROXY_HOST:-127.0.0.1}
   HTTP_PROXY_PORT: ${HTTP_PROXY_PORT:-7890}
+  JWT_TOKEN_SECRET: ${JWT_TOKEN_SECRET:b40715ff972d60c4yff8044acfb33ba091544b2e21825672edc38799f52f1895}
 ```
 
 ### 安全说明

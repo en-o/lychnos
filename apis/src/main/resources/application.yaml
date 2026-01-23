@@ -43,7 +43,7 @@ jdevelops:
     email: 1445763190@qq.com
     title: lychnos
   jwt:
-    token-secret: b40715ff972d60c4yff8044acfb33ba091544b2e21825672edc38799f52f1895
+    token-secret: ${JWT_TOKEN_SECRET:b40715ff972d60c4yff8044acfb33ba091544b2e21825672edc38799f52f1895}
     web:
       interceptor:
         exclude-path-patterns:
