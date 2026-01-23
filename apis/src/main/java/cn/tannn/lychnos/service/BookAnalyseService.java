@@ -560,22 +560,20 @@ public class BookAnalyseService extends J2ServiceImpl<BookAnalyseDao, BookAnalys
 
 
 
+    /**
+     * 获取文本模型（支持官方模型回退）
+     * 使用 AIModelService.getEnabledModel 确保与 AIService 的模型选择逻辑一致
+     */
     private AIModel getTextModel(Long userId) {
-        try {
-            var models = aiModelService.findByUserIdAndType(userId, ModelType.TEXT);
-            return models.stream().filter(m -> Boolean.TRUE.equals(m.getEnabled())).findFirst().orElse(null);
-        } catch (Exception e) {
-            return null;
-        }
+        return aiModelService.getEnabledModel(userId, ModelType.TEXT);
     }
 
+    /**
+     * 获取图片模型（支持官方模型回退）
+     * 使用 AIModelService.getEnabledModel 确保与 AIService 的模型选择逻辑一致
+     */
     private AIModel getImageModel(Long userId) {
-        try {
-            var models = aiModelService.findByUserIdAndType(userId, ModelType.IMAGE);
-            return models.stream().filter(m -> Boolean.TRUE.equals(m.getEnabled())).findFirst().orElse(null);
-        } catch (Exception e) {
-            return null;
-        }
+        return aiModelService.getEnabledModel(userId, ModelType.IMAGE);
     }
 
     /**
