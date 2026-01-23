@@ -169,78 +169,96 @@ function AdminUserPage() {
                 </div>
 
                 <div className="bg-white rounded-lg shadow overflow-hidden">
-                    <table className="w-full table-fixed divide-y divide-gray-200">
-                        <thead className="bg-gray-50">
-                        <tr>
-                            <th className="w-16 px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase whitespace-nowrap">ID</th>
-                            <th className="w-32 px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase whitespace-nowrap">登录名</th>
-                            <th className="w-32 px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase whitespace-nowrap">昵称</th>
-                            <th className="w-40 px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase whitespace-nowrap">邮箱</th>
-                            <th className="w-24 px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase whitespace-nowrap">角色</th>
-                            <th className="w-20 px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase whitespace-nowrap">状态</th>
-                            <th className="w-36 px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase whitespace-nowrap">创建时间</th>
-                            <th className="w-44 px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase whitespace-nowrap">操作</th>
-                        </tr>
-                        </thead>
+                    <div className="overflow-x-auto">
+                        <table className="w-full divide-y divide-gray-200">
+                            <colgroup>
+                                <col style={{width: '60px'}} />
+                                <col style={{width: '130px'}} />
+                                <col style={{width: '130px'}} />
+                                <col style={{width: '160px'}} />
+                                <col style={{width: '80px'}} />
+                                <col style={{width: '90px'}} />
+                                <col style={{width: '140px'}} />
+                                <col style={{width: '160px'}} />
+                            </colgroup>
+                            <thead className="bg-gray-50">
+                            <tr>
+                                <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase whitespace-nowrap">ID</th>
+                                <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase whitespace-nowrap">登录名</th>
+                                <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase whitespace-nowrap">昵称</th>
+                                <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase whitespace-nowrap">邮箱</th>
+                                <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase whitespace-nowrap">角色</th>
+                                <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase whitespace-nowrap">状态</th>
+                                <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase whitespace-nowrap">创建时间</th>
+                                <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase whitespace-nowrap">操作</th>
+                            </tr>
+                            </thead>
                         <tbody className="bg-white divide-y divide-gray-200">
                         {users.map((user) => (
                             <tr key={user.id}>
-                                <td className="px-4 py-4 text-sm text-gray-900 whitespace-nowrap">{user.id}</td>
-                                <td className="px-4 py-4 text-sm text-gray-900">
-                                    <CopyableText text={user.loginName} maxWidth="100%" />
-                                </td>
-                                <td className="px-4 py-4 text-sm text-gray-500">
-                                    <CopyableText text={user.nickname} maxWidth="100%" />
-                                </td>
-                                <td className="px-4 py-4 text-sm text-gray-500">
-                                    {user.email ? (
-                                        <CopyableText text={user.email} maxWidth="100%" />
-                                    ) : (
-                                        <span>-</span>
-                                    )}
-                                </td>
-                                <td className="px-4 py-4 text-sm whitespace-nowrap">
-                                    <div className="flex gap-1 flex-wrap">
-                                        {user.roles?.map((role, idx) => (
-                                            <span key={idx} className="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800">
-                                                    {role}
-                                                </span>
-                                        ))}
-                                    </div>
-                                </td>
-                                <td className="px-4 py-4 text-sm whitespace-nowrap">
-                                    {getStatusBadge(user.status)}
-                                </td>
-                                <td className="px-4 py-4 text-sm text-gray-500 whitespace-nowrap">
-                                    {new Date(user.createTime).toLocaleString('zh-CN')}
-                                </td>
-                                <td className="px-4 py-4 whitespace-nowrap text-sm">
-                                    <div className="flex gap-2">
-                                        <button
-                                            onClick={() => handleViewBindings(user)}
-                                            className="px-2 py-1 rounded bg-blue-100 text-blue-700 hover:bg-blue-200 text-xs"
-                                        >
-                                            查看绑定
-                                        </button>
-                                        <button
-                                            onClick={() => handleToggleStatus(user)}
-                                            disabled={user.roles?.includes('ADMIN') || toggleLoading === user.id}
-                                            className={`px-2 py-1 rounded text-xs ${
-                                                user.roles?.includes('ADMIN')
-                                                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                                                    : user.status === 1
-                                                        ? 'bg-red-100 text-red-700 hover:bg-red-200'
-                                                        : 'bg-green-100 text-green-700 hover:bg-green-200'
-                                            } disabled:opacity-50`}
-                                        >
-                                            {toggleLoading === user.id ? '处理中...' : user.status === 1 ? '封禁' : '启用'}
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                        ))}
-                        </tbody>
-                    </table>
+                                <td className="px-3 py-3 text-sm text-gray-900 whitespace-nowrap">{user.id}</td>
+                                    <td className="px-2 py-3 text-sm text-gray-900">
+                                        <CopyableText text={user.loginName} maxWidth="100%" />
+                                    </td>
+                                    <td className="px-2 py-3 text-sm text-gray-500">
+                                        <CopyableText text={user.nickname} maxWidth="100%" />
+                                    </td>
+                                    <td className="px-2 py-3 text-sm text-gray-500">
+                                        {user.email ? (
+                                            <CopyableText text={user.email} maxWidth="100%" />
+                                        ) : (
+                                            <span>-</span>
+                                        )}
+                                    </td>
+                                    <td className="px-2 py-3 text-sm whitespace-nowrap">
+                                        <div className="flex gap-1 flex-wrap">
+                                            {user.roles?.map((role, idx) => (
+                                                <span key={idx} className="px-1.5 py-0.5 text-xs rounded-full bg-blue-100 text-blue-800">
+                                                        {role}
+                                                    </span>
+                                            ))}
+                                        </div>
+                                    </td>
+                                    <td className="px-2 py-3 text-sm whitespace-nowrap">
+                                        {getStatusBadge(user.status)}
+                                    </td>
+                                    <td className="px-2 py-3 text-xs text-gray-500 whitespace-nowrap">
+                                        {new Date(user.createTime).toLocaleString('zh-CN', {
+                                            year: '2-digit',
+                                            month: '2-digit',
+                                            day: '2-digit',
+                                            hour: '2-digit',
+                                            minute: '2-digit'
+                                        })}
+                                    </td>
+                                    <td className="px-2 py-3 whitespace-nowrap text-sm">
+                                        <div className="flex gap-1">
+                                            <button
+                                                onClick={() => handleViewBindings(user)}
+                                                className="px-2 py-1 rounded bg-blue-100 text-blue-700 hover:bg-blue-200 text-xs whitespace-nowrap"
+                                            >
+                                                绑定
+                                            </button>
+                                            <button
+                                                onClick={() => handleToggleStatus(user)}
+                                                disabled={user.roles?.includes('ADMIN') || toggleLoading === user.id}
+                                                className={`px-2 py-1 rounded text-xs whitespace-nowrap ${
+                                                    user.roles?.includes('ADMIN')
+                                                        ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                                                        : user.status === 1
+                                                            ? 'bg-red-100 text-red-700 hover:bg-red-200'
+                                                            : 'bg-green-100 text-green-700 hover:bg-green-200'
+                                                } disabled:opacity-50`}
+                                            >
+                                                {toggleLoading === user.id ? '处理中' : user.status === 1 ? '封禁' : '启用'}
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            ))}
+                            </tbody>
+                        </table>
+                    </div>
 
                     {users.length === 0 && (
                         <div className="text-center py-12 text-gray-500">
