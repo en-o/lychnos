@@ -14,8 +14,8 @@ const OAUTH_DEFAULTS: Record<string, Partial<OAuthConfigUpdate>> = {
     },
     LINUXDO: {
         authorizeUrl: 'https://connect.linux.do/oauth2/authorize',
-        tokenUrl: 'https://connect.linux.do/oauth2/token',
-        userInfoUrl: 'https://connect.linux.do/api/user',
+        tokenUrl: 'https://connect.linuxdo.org/oauth2/token',
+        userInfoUrl: 'https://connect.linuxdo.org/api/user',
         scope: 'read',
         iconUrl: 'https://linux.do/uploads/default/optimized/4X/c/c/d/ccd8c210609d498cbeb3d5201d4c259348447562_2_32x32.png',
     },

@@ -95,13 +95,17 @@ class LychnosApplicationTests {
 
         // https://connect.linux.do
         // https://connect.linuxdo.org/
+        // https://linux.do/t/topic/1144530
         OAuthConfig config = new OAuthConfig();
         config.setProviderType(ProviderType.LINUXDO);
         config.setClientId(clientId);
         config.setClientSecret(clientSecret);
         // 注意：请根据 LinuxDo 官方文档确认最新的 OAuth2 端点
+        // 国内外都是用： https://connect.linux.do/oauth2/authorize
         config.setAuthorizeUrl("https://connect.linux.do/oauth2/authorize");
+        // 国内使用 https://connect.linuxdo.org/oauth2/token
         config.setTokenUrl("https://connect.linux.do/oauth2/token");
+        // 国内使用 https://connect.linuxdo.org/api/user
         config.setUserInfoUrl("https://connect.linux.do/api/user");
         config.setScope("read:user user:email");
         config.setIconUrl(
