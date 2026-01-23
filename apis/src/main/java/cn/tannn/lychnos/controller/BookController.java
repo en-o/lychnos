@@ -150,8 +150,8 @@ public class BookController {
         // 检查用户是否被封禁
         if (bannedUserCacheService.isBanned(userId)) {
             throw new BusinessException(
-                    BusinessErrorCode.PARAM_ERROR.getCode(),
-                    "账户已被封禁，无法使用分析功能"
+                    BusinessErrorCode.USER_BANNED.getCode(),
+                    BusinessErrorCode.USER_BANNED.getMessage()
             );
         }
 

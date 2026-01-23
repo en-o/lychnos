@@ -36,7 +36,12 @@ public enum BusinessErrorCode {
     /**
      * 1005: 参数错误
      */
-    PARAM_ERROR(1005, "参数错误");
+    PARAM_ERROR(1005, "参数错误"),
+
+    /**
+     * 1006: 账户已被封禁（需要前端强制退出登录）
+     */
+    USER_BANNED(1006, "账户已被封禁，请联系管理员");
 
     /**
      * 错误码

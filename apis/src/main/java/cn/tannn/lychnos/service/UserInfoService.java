@@ -3,6 +3,7 @@ package cn.tannn.lychnos.service;
 import cn.tannn.jdevelops.exception.built.BusinessException;
 import cn.tannn.jdevelops.exception.built.UserException;
 import cn.tannn.jdevelops.jpa.service.J2ServiceImpl;
+import cn.tannn.lychnos.common.constant.BusinessErrorCode;
 import cn.tannn.lychnos.common.constant.UserStatus;
 import cn.tannn.lychnos.common.util.UserUtil;
 import cn.tannn.lychnos.controller.dto.LoginPassword;
@@ -49,7 +50,10 @@ public class UserInfoService extends J2ServiceImpl<UserInfoDao, UserInfo, Long> 
 
         // 检查用户是否被封禁
         if (bannedUserCacheService.isBanned(userId)) {
-            throw new UserException("账户已被封禁，无法访问");
+            throw new BusinessException(
+                    BusinessErrorCode.USER_BANNED.getCode(),
+                    BusinessErrorCode.USER_BANNED.getMessage()
+            );
         }
 
         UserInfo userInfo = getJpaBasicsDao().findById(userId)
