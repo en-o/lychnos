@@ -2,6 +2,8 @@ package cn.tannn.lychnos.entity;
 
 import cn.hutool.crypto.SecureUtil;
 import cn.tannn.jdevelops.exception.built.UserException;
+import cn.tannn.lychnos.common.constant.ShareType;
+import cn.tannn.lychnos.common.constant.UserStatus;
 import cn.tannn.lychnos.common.pojo.JpaCommonBean;
 import cn.tannn.lychnos.common.views.Views;
 import com.alibaba.fastjson2.JSONArray;
@@ -86,6 +88,17 @@ public class UserInfo extends JpaCommonBean<UserInfo> {
     @Schema(description = "用户角色列表")
     @JdbcTypeCode(SqlTypes.JSON)
     private JSONArray roles;
+
+
+    /**
+     * 账户状态: 1:正常，2:注销，3:违规封禁
+     * @see UserStatus
+     */
+    @Column(columnDefinition = "int", nullable = false)
+    @Comment("账户状态: 1:正常，2:注销，3:违规封禁")
+    @ColumnDefault("1")
+    @Schema(description = "账户状态: 1:正常，2:注销，3:违规封禁")
+    private Integer status;
 
     /**
      * 用户输入跟数据库密码对比
