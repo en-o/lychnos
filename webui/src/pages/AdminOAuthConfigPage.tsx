@@ -3,6 +3,7 @@ import {useNavigate} from 'react-router-dom';
 import {Eye, EyeOff} from 'lucide-react';
 import {adminApi, type OAuthConfigDetail, type OAuthConfigUpdate} from '../api/admin';
 import {toast} from '../components/ToastContainer';
+import ConfirmDialog from '../components/ConfirmDialog';
 
 // OAuth 平台默认配置
 const OAUTH_DEFAULTS: Record<string, Partial<OAuthConfigUpdate>> = {
@@ -45,6 +46,17 @@ function AdminOAuthConfigPage() {
     const [isCreateMode, setIsCreateMode] = useState(false);
     const [showCallbackHelp, setShowCallbackHelp] = useState(false);
     const [showClientSecret, setShowClientSecret] = useState(false);
+    const [confirmDialog, setConfirmDialog] = useState<{
+        isOpen: boolean;
+        title: string;
+        message: string;
+        onConfirm: () => void;
+    }>({
+        isOpen: false,
+        title: '',
+        message: '',
+        onConfirm: () => {},
+    });
     const [formData, setFormData] = useState<OAuthConfigUpdate>({
         id: 0,
         providerType: '',
@@ -210,20 +222,23 @@ function AdminOAuthConfigPage() {
             return;
         }
 
-        const message = `确定要删除 "${config.providerName}" 的 OAuth 配置吗？\n\n删除后将无法恢复，用户将无法使用该平台登录。`;
-        if (!window.confirm(message)) {
-            return;
-        }
-
-        try {
-            const res = await adminApi.oauth.delete(config.id);
-            if (res.success) {
-                toast.success('删除成功');
-                loadConfigs();
-            }
-        } catch (error: any) {
-            // 错误已在拦截器中统一处理，这里只需要捕获异常
-        }
+        setConfirmDialog({
+            isOpen: true,
+            title: '删除 OAuth 配置',
+            message: `确定要删除 "${config.providerName}" 的 OAuth 配置吗？\n\n删除后将无法恢复，用户将无法使用该平台登录。`,
+            onConfirm: async () => {
+                setConfirmDialog({ ...confirmDialog, isOpen: false });
+                try {
+                    const res = await adminApi.oauth.delete(config.id);
+                    if (res.success) {
+                        toast.success('删除成功');
+                        loadConfigs();
+                    }
+                } catch (error: any) {
+                    // 错误已在拦截器中统一处理，这里只需要捕获异常
+                }
+            },
+        });
     };
 
     if (loading) {
@@ -587,6 +602,16 @@ function AdminOAuthConfigPage() {
                         </div>
                     </div>
                 )}
+
+                {/* 确认对话框 */}
+                <ConfirmDialog
+                    isOpen={confirmDialog.isOpen}
+                    title={confirmDialog.title}
+                    message={confirmDialog.message}
+                    type="danger"
+                    onConfirm={confirmDialog.onConfirm}
+                    onCancel={() => setConfirmDialog({ ...confirmDialog, isOpen: false })}
+                />
             </div>
         </div>
     );
