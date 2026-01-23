@@ -1,5 +1,6 @@
 import {useEffect, useState} from 'react';
 import {useNavigate} from 'react-router-dom';
+import {Eye, EyeOff} from 'lucide-react';
 import {adminApi, type OAuthConfigDetail, type OAuthConfigUpdate} from '../api/admin';
 import {toast} from '../components/ToastContainer';
 
@@ -43,6 +44,7 @@ function AdminOAuthConfigPage() {
     const [showEditDialog, setShowEditDialog] = useState(false);
     const [isCreateMode, setIsCreateMode] = useState(false);
     const [showCallbackHelp, setShowCallbackHelp] = useState(false);
+    const [showClientSecret, setShowClientSecret] = useState(false);
     const [formData, setFormData] = useState<OAuthConfigUpdate>({
         id: 0,
         providerType: '',
@@ -388,13 +390,26 @@ function AdminOAuthConfigPage() {
                                         Client Secret {isCreateMode && <span className="text-red-500">*</span>}
                                         {!isCreateMode && <span className="text-gray-500 text-xs">（留空则不修改）</span>}
                                     </label>
-                                    <input
-                                        type="password"
-                                        value={formData.clientSecret}
-                                        onChange={(e) => setFormData({...formData, clientSecret: e.target.value})}
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                                        placeholder={isCreateMode ? '请输入 Client Secret' : '留空则不修改'}
-                                    />
+                                    <div className="relative">
+                                        <input
+                                            type={showClientSecret ? 'text' : 'password'}
+                                            value={formData.clientSecret}
+                                            onChange={(e) => setFormData({...formData, clientSecret: e.target.value})}
+                                            className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-md"
+                                            placeholder={isCreateMode ? '请输入 Client Secret' : '留空则不修改'}
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowClientSecret(!showClientSecret)}
+                                            className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-gray-600"
+                                        >
+                                            {showClientSecret ? (
+                                                <EyeOff className="w-5 h-5" />
+                                            ) : (
+                                                <Eye className="w-5 h-5" />
+                                            )}
+                                        </button>
+                                    </div>
                                 </div>
 
                                 {/* 授权端点 */}
