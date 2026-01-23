@@ -84,7 +84,7 @@ public class UserAnalysisLog extends JpaCommonBean<UserAnalysisLog> {
     private Integer modelSource;
 
     @Column(columnDefinition = "varchar(20) not null")
-    @Comment("用途：BOOK_PARSE/BOOK_IMAGE")
+    @Comment("用途：BOOK_PARSE/BOOK_IMAGE/BOOK_EXTRACT")
     @Schema(description = "用途")
     @Enumerated(EnumType.STRING)
     private UsageType usageType;
