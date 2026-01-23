@@ -208,7 +208,8 @@ function AdminOAuthConfigPage() {
             return;
         }
 
-        if (!window.confirm(`确定要删除 ${config.providerName} 的配置吗？`)) {
+        const message = `确定要删除 "${config.providerName}" 的 OAuth 配置吗？\n\n删除后将无法恢复，用户将无法使用该平台登录。`;
+        if (!window.confirm(message)) {
             return;
         }
 

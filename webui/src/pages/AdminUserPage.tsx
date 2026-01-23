@@ -66,7 +66,11 @@ function AdminUserPage() {
         }
 
         const action = user.status === 1 ? '封禁' : '启用';
-        const confirmed = window.confirm(`确定要${action}该用户吗？`);
+        const message = user.status === 1
+            ? `确定要封禁用户 "${user.nickname || user.loginName}" 吗？\n\n封禁后该用户将无法登录系统。`
+            : `确定要启用用户 "${user.nickname || user.loginName}" 吗？\n\n启用后该用户将恢复正常访问权限。`;
+
+        const confirmed = window.confirm(message);
         if (!confirmed) return;
 
         try {
@@ -142,28 +146,40 @@ function AdminUserPage() {
                     </div>
                 </div>
 
-                <div className="bg-white rounded-lg shadow overflow-hidden">
+                <div className="bg-white rounded-lg shadow overflow-x-auto">
                     <table className="min-w-full divide-y divide-gray-200">
                         <thead className="bg-gray-50">
                         <tr>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">ID</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">登录名</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">昵称</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">邮箱</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">角色</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">状态</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">创建时间</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">操作</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase whitespace-nowrap">ID</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase whitespace-nowrap">登录名</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase whitespace-nowrap">昵称</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase whitespace-nowrap">邮箱</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase whitespace-nowrap">角色</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase whitespace-nowrap">状态</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase whitespace-nowrap">创建时间</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase whitespace-nowrap">操作</th>
                         </tr>
                         </thead>
                         <tbody className="bg-white divide-y divide-gray-200">
                         {users.map((user) => (
                             <tr key={user.id}>
-                                <td className="px-6 py-4 text-sm text-gray-900">{user.id}</td>
-                                <td className="px-6 py-4 text-sm text-gray-900">{user.loginName}</td>
-                                <td className="px-6 py-4 text-sm text-gray-500">{user.nickname}</td>
-                                <td className="px-6 py-4 text-sm text-gray-500">{user.email || '-'}</td>
-                                <td className="px-6 py-4 text-sm">
+                                <td className="px-6 py-4 text-sm text-gray-900 whitespace-nowrap">{user.id}</td>
+                                <td className="px-6 py-4 text-sm text-gray-900">
+                                    <div className="max-w-[150px] truncate" title={user.loginName}>
+                                        {user.loginName}
+                                    </div>
+                                </td>
+                                <td className="px-6 py-4 text-sm text-gray-500">
+                                    <div className="max-w-[150px] truncate" title={user.nickname}>
+                                        {user.nickname}
+                                    </div>
+                                </td>
+                                <td className="px-6 py-4 text-sm text-gray-500">
+                                    <div className="max-w-[200px] truncate" title={user.email || '-'}>
+                                        {user.email || '-'}
+                                    </div>
+                                </td>
+                                <td className="px-6 py-4 text-sm whitespace-nowrap">
                                     <div className="flex gap-1">
                                         {user.roles?.map((role, idx) => (
                                             <span key={idx} className="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800">
@@ -172,10 +188,10 @@ function AdminUserPage() {
                                         ))}
                                     </div>
                                 </td>
-                                <td className="px-6 py-4 text-sm">
+                                <td className="px-6 py-4 text-sm whitespace-nowrap">
                                     {getStatusBadge(user.status)}
                                 </td>
-                                <td className="px-6 py-4 text-sm text-gray-500">
+                                <td className="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">
                                     {new Date(user.createTime).toLocaleString('zh-CN')}
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm">
