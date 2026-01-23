@@ -32,8 +32,12 @@ import static cn.tannn.lychnos.entity.UserInfo.getMd5Password;
 @Service
 @Slf4j
 public class UserInfoService extends J2ServiceImpl<UserInfoDao, UserInfo, Long> {
-    public UserInfoService() {
+
+    private final BannedUserCacheService bannedUserCacheService;
+
+    public UserInfoService(BannedUserCacheService bannedUserCacheService) {
         super(UserInfo.class);
+        this.bannedUserCacheService = bannedUserCacheService;
     }
 
 
@@ -42,6 +46,12 @@ public class UserInfoService extends J2ServiceImpl<UserInfoDao, UserInfo, Long> 
      */
     public void checkAdmin(HttpServletRequest request) {
         Long userId = UserUtil.userId2(request);
+
+        // 检查用户是否被封禁
+        if (bannedUserCacheService.isBanned(userId)) {
+            throw new UserException("账户已被封禁，无法访问");
+        }
+
         UserInfo userInfo = getJpaBasicsDao().findById(userId)
                 .orElseThrow(() -> new RuntimeException("用户不存在"));
         if (!UserUtil.isAdmin(userInfo.getRoles())) {
@@ -182,11 +192,21 @@ public class UserInfoService extends J2ServiceImpl<UserInfoDao, UserInfo, Long> 
 
         Integer currentStatus = userInfo.getStatus();
         if (UserStatus.NORMAL.getCode().equals(currentStatus)) {
+            // 封禁用户
             userInfo.setStatus(UserStatus.BANNED.getCode());
+            // 添加到封禁缓存
+            bannedUserCacheService.addBannedUser(userId);
+            log.info("用户已被封禁，userId: {}", userId);
         } else if (UserStatus.BANNED.getCode().equals(currentStatus)) {
+            // 解封用户
             userInfo.setStatus(UserStatus.NORMAL.getCode());
+            // 从封禁缓存中移除
+            bannedUserCacheService.removeBannedUser(userId);
+            log.info("用户已被解封，userId: {}", userId);
         } else {
             userInfo.setStatus(UserStatus.NORMAL.getCode());
+            // 从封禁缓存中移除（兜底）
+            bannedUserCacheService.removeBannedUser(userId);
         }
 
         return getJpaBasicsDao().save(userInfo);
