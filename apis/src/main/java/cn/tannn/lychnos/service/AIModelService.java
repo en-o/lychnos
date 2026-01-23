@@ -3,6 +3,7 @@ package cn.tannn.lychnos.service;
 import cn.tannn.jdevelops.exception.built.BusinessException;
 import cn.tannn.jdevelops.jpa.service.J2ServiceImpl;
 import cn.tannn.lychnos.common.constant.ModelType;
+import cn.tannn.lychnos.common.constant.ShareType;
 import cn.tannn.lychnos.common.util.AESUtil;
 import cn.tannn.lychnos.dao.AIModelDao;
 import cn.tannn.lychnos.entity.AIModel;
@@ -131,5 +132,16 @@ public class AIModelService extends J2ServiceImpl<AIModelDao, AIModel, Long> {
     @Deprecated
     public void maskApiKeys(List<AIModel> models) {
         models.forEach(this::maskApiKey);
+    }
+
+    /**
+     * 查询官方启用的模型（用于展示给用户查看）
+     * 与 getEnabledModel 中的官方模型回退逻辑保持一致
+     *
+     * @param type 模型类型
+     * @return 官方模型列表
+     */
+    public List<AIModel> findOfficialModels(ModelType type) {
+        return getJpaBasicsDao().findByShareAndTypeAndEnabledOrderByCreateTimeDesc(ShareType.OFFICIAL.getCode(), type, true);
     }
 }

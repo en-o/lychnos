@@ -37,6 +37,7 @@ const ModelSettingsPage: React.FC = () => {
   const activeTab = (searchParams.get('tab') || 'analysis') as TabType;
 
   const [models, setModels] = useState<AIModelConfig[]>([]);
+  const [officialModels, setOfficialModels] = useState<Array<{type: string; model: string}>>([]);
   const [activeModelId, setActiveModelId] = useState<string>('');
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingModel, setEditingModel] = useState<AIModelConfig | null>(null);
@@ -55,6 +56,7 @@ const ModelSettingsPage: React.FC = () => {
   // 加载模型数据
   useEffect(() => {
     loadModels();
+    loadOfficialModels();
   }, [activeTab]);
 
   const loadModels = async () => {
@@ -74,6 +76,19 @@ const ModelSettingsPage: React.FC = () => {
     } catch (error) {
       console.error('加载模型列表失败:', error);
       toast.error('加载模型列表失败');
+    }
+  };
+
+  const loadOfficialModels = async () => {
+    try {
+      const modelType = activeTab === 'analysis' ? 'TEXT' : 'IMAGE';
+      const response = await aiModelApi.listOfficialModels(modelType);
+      if (response.success) {
+        setOfficialModels(response.data || []);
+      }
+    } catch (error) {
+      console.error('加载官方模型列表失败:', error);
+      // 不显示错误提示，因为官方模型是可选的
     }
   };
 
@@ -329,6 +344,33 @@ const ModelSettingsPage: React.FC = () => {
                 </li>
               </ul>
             </div>
+
+            {/* 官方模型展示 */}
+            {officialModels.length > 0 && (
+              <div className="px-6 py-4 bg-green-50 border-b border-green-100">
+                <h3 className="text-sm font-medium text-green-900 mb-3">官方提供的模型</h3>
+                <div className="space-y-2">
+                  {officialModels.map((officialModel, index) => (
+                    <div
+                      key={index}
+                      className="flex items-center gap-3 text-sm bg-white rounded-lg px-4 py-2 border border-green-200"
+                    >
+                      <span className="text-green-600 font-medium">📌</span>
+                      <span className="text-gray-700">
+                        <span className="font-medium">类型:</span> {officialModel.type === 'TEXT' ? 'AI分析' : 'AI生图'}
+                      </span>
+                      <span className="text-gray-300">|</span>
+                      <span className="text-gray-700">
+                        <span className="font-medium">模型:</span> {officialModel.model}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+                <p className="text-xs text-green-700 mt-3">
+                  💡 提示：当您未配置自己的模型时，系统将自动使用上述官方模型作为回退方案。
+                </p>
+              </div>
+            )}
 
             {/* 模型列表 */}
             <div className="p-6">

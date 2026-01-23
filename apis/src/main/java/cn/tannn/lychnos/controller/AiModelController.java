@@ -6,6 +6,7 @@ import cn.tannn.lychnos.common.constant.ModelType;
 import cn.tannn.lychnos.common.util.UserUtil;
 import cn.tannn.lychnos.controller.dto.AIModelDTO;
 import cn.tannn.lychnos.controller.vo.AIModelVO;
+import cn.tannn.lychnos.controller.vo.OfficialModelVO;
 import cn.tannn.lychnos.entity.AIModel;
 import cn.tannn.lychnos.service.AIModelService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -95,5 +96,15 @@ public class AiModelController {
         model.setEnabled(true);
         aiModelService.saveOne(model);
         return ResultVO.success();
+    }
+
+    @GetMapping("/models/official/{type}")
+    @Operation(summary = "获取官方模型列表")
+    public ResultVO<List<OfficialModelVO>> listOfficialModels(@PathVariable("type") ModelType type) {
+        List<AIModel> officialModels = aiModelService.findOfficialModels(type);
+        List<OfficialModelVO> vos = officialModels.stream()
+                .map(OfficialModelVO::fromEntity)
+                .collect(Collectors.toList());
+        return ResultVO.success(vos);
     }
 }

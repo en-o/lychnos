@@ -27,4 +27,9 @@ export const aiModelApi = {
     setActive: (id: string) => {
         return request.put<Result<null>>(`/ai/models/${id}/active`);
     },
+
+    // 获取官方模型列表
+    listOfficialModels: (type: ModelType) => {
+        return request.get<Result<Array<{type: ModelType; model: string}>>>(`/ai/models/official/${type}`);
+    },
 };
