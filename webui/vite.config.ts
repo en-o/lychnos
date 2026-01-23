@@ -31,6 +31,7 @@ export default defineConfig(({mode}) => {
       proxy: !isMock ? {
         [apiBaseUrl]: {  // 使用环境变量，确保与 request.ts 一致
           target: 'http://localhost:1250',
+          // target: 'https://lychnos.tannn.cn',
           changeOrigin: true,
           rewrite: (path) => path.replace(new RegExp(`^${apiBaseUrl}`), '')
         }
