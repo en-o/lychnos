@@ -133,10 +133,10 @@ const AdminLogPage: React.FC = () => {
             </nav>
 
             {/* 主内容 */}
-            <main className="pt-14">
-                <div className="max-w-7xl mx-auto px-4 py-8">
+            <main className="pt-14 h-screen flex flex-col">
+                <div className="max-w-7xl mx-auto px-4 py-8 flex-1 flex flex-col overflow-hidden">
                     {/* 查询表单 */}
-                    <div className="bg-white rounded-lg border border-gray-200 p-6 mb-6">
+                    <div className="bg-white rounded-lg border border-gray-200 p-6 mb-6 flex-shrink-0">
                         <h2 className="text-lg font-semibold text-gray-900 mb-4">查询条件</h2>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                             <div>
@@ -222,13 +222,13 @@ const AdminLogPage: React.FC = () => {
                     </div>
 
                     {/* 日志列表 */}
-                    <div className="bg-white rounded-lg border border-gray-200">
-                        <div className="px-6 py-4 border-b border-gray-200">
+                    <div className="bg-white rounded-lg border border-gray-200 flex-1 flex flex-col overflow-hidden">
+                        <div className="px-6 py-4 border-b border-gray-200 flex-shrink-0">
                             <h2 className="text-lg font-semibold text-gray-900">
                                 日志记录 {logs.length > 0 && `(${logs.length})`}
                             </h2>
                         </div>
-                        <div className="overflow-x-auto">
+                        <div className="overflow-auto flex-1">
                             {logs.length === 0 ? (
                                 <div className="text-center py-12">
                                     <FileText className="w-12 h-12 text-gray-400 mx-auto mb-3" />
@@ -305,12 +305,12 @@ const AdminLogPage: React.FC = () => {
                                                 <td className="px-4 py-3 text-sm text-gray-900">
                                                     {log.usageType || '-'}
                                                 </td>
-                                                <td className="px-4 py-3 text-sm text-gray-900 max-w-xs truncate">
-                                                    <span title={log.bookTitle}>
+                                                <td className="px-4 py-3 text-sm text-gray-900">
+                                                    <div className="w-48 truncate" title={log.bookTitle}>
                                                         {log.bookTitle || '-'}
-                                                    </span>
+                                                    </div>
                                                 </td>
-                                                <td className="px-4 py-3 text-sm">
+                                                <td className="px-4 py-3 text-sm whitespace-nowrap">
                                                     {log.success ? (
                                                         <span className="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">
                                                             成功
