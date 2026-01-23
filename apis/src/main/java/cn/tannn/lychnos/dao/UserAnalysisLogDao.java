@@ -35,12 +35,7 @@ public interface UserAnalysisLogDao extends JpaRepository<UserAnalysisLog, Long>
      * @param pageable 分页参数
      * @return 日志VO列表
      */
-    @Query("SELECT u.createTime AS createTime, u.userName AS userName, u.callIp AS callIp, " +
-           "u.modelId AS modelId, u.modelName AS modelName, u.modelType AS modelType, " +
-           "u.modelSource AS modelSource, u.usageType AS usageType, u.bookTitle AS bookTitle, " +
-           "u.bookAnalyseId AS bookAnalyseId, u.success AS success, u.errorMessage AS errorMessage, " +
-           "u.useExistingData AS useExistingData, u.userId AS userId, u.modelVendor AS modelVendor " +
-           "FROM UserAnalysisLog u WHERE u.createTime >= :startTime AND u.createTime <= :endTime ORDER BY u.createTime DESC")
+    @Query("SELECT u FROM UserAnalysisLog u WHERE u.createTime >= :startTime AND u.createTime <= :endTime ORDER BY u.createTime DESC")
     List<UserAnalysisLogVO> findByCreateTimeBetween(@Param("startTime") LocalDateTime startTime,
                                                      @Param("endTime") LocalDateTime endTime,
                                                      Pageable pageable);
@@ -72,12 +67,7 @@ public interface UserAnalysisLogDao extends JpaRepository<UserAnalysisLog, Long>
      * @param pageable 分页参数
      * @return 日志VO列表
      */
-    @Query("SELECT u.createTime AS createTime, u.userName AS userName, u.callIp AS callIp, " +
-           "u.modelId AS modelId, u.modelName AS modelName, u.modelType AS modelType, " +
-           "u.modelSource AS modelSource, u.usageType AS usageType, u.bookTitle AS bookTitle, " +
-           "u.bookAnalyseId AS bookAnalyseId, u.success AS success, u.errorMessage AS errorMessage, " +
-           "u.useExistingData AS useExistingData, u.userId AS userId, u.modelVendor AS modelVendor " +
-           "FROM UserAnalysisLog u WHERE u.userName = :userName AND u.createTime >= :startTime AND u.createTime <= :endTime ORDER BY u.createTime DESC")
+    @Query("SELECT u FROM UserAnalysisLog u WHERE u.userName = :userName AND u.createTime >= :startTime AND u.createTime <= :endTime ORDER BY u.createTime DESC")
     List<UserAnalysisLogVO> findByUserNameAndCreateTimeBetween(@Param("userName") String userName,
                                                                 @Param("startTime") LocalDateTime startTime,
                                                                 @Param("endTime") LocalDateTime endTime,
@@ -92,12 +82,7 @@ public interface UserAnalysisLogDao extends JpaRepository<UserAnalysisLog, Long>
      * @param pageable 分页参数
      * @return 日志VO列表
      */
-    @Query("SELECT u.createTime AS createTime, u.userName AS userName, u.callIp AS callIp, " +
-           "u.modelId AS modelId, u.modelName AS modelName, u.modelType AS modelType, " +
-           "u.modelSource AS modelSource, u.usageType AS usageType, u.bookTitle AS bookTitle, " +
-           "u.bookAnalyseId AS bookAnalyseId, u.success AS success, u.errorMessage AS errorMessage, " +
-           "u.useExistingData AS useExistingData, u.userId AS userId, u.modelVendor AS modelVendor " +
-           "FROM UserAnalysisLog u WHERE u.userName LIKE %:userName% AND u.createTime >= :startTime AND u.createTime <= :endTime ORDER BY u.createTime DESC")
+    @Query("SELECT u FROM UserAnalysisLog u WHERE u.userName LIKE %:userName% AND u.createTime >= :startTime AND u.createTime <= :endTime ORDER BY u.createTime DESC")
     List<UserAnalysisLogVO> findByUserNameContainingAndCreateTimeBetween(@Param("userName") String userName,
                                                                           @Param("startTime") LocalDateTime startTime,
                                                                           @Param("endTime") LocalDateTime endTime,

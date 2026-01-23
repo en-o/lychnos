@@ -11,6 +11,7 @@ import OAuthCallbackPage from './pages/OAuthCallbackPage';
 import AdminOAuthConfigPage from './pages/AdminOAuthConfigPage';
 import AdminUserPage from './pages/AdminUserPage';
 import AdminAIModelPage from './pages/AdminAIModelPage';
+import AdminLogPage from './pages/AdminLogPage';
 import SystemManagePage from './pages/SystemManagePage';
 import PrivateRoute from './components/PrivateRoute';
 import ToastContainer from './components/ToastContainer';
@@ -98,6 +99,14 @@ function App() {
           element={
             <PrivateRoute>
               <AdminAIModelPage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/sys-manage/logs"
+          element={
+            <PrivateRoute>
+              <AdminLogPage />
             </PrivateRoute>
           }
         />

@@ -92,6 +92,33 @@ export interface AIModelPageRequest {
     type?: string;
 }
 
+// 用户分析日志查询参数
+export interface UserAnalysisLogQuery {
+    startTime?: string;
+    endTime?: string;
+    userName?: string;
+    exactMatch?: boolean;
+}
+
+// 用户分析日志
+export interface UserAnalysisLog {
+    createTime: string;
+    userName: string;
+    callIp: string;
+    modelId: string;
+    modelName: string;
+    modelType: string;
+    modelSource: number;
+    usageType: string;
+    bookTitle: string;
+    bookAnalyseId: string;
+    success: boolean;
+    errorMessage: string;
+    useExistingData: boolean;
+    userId: string;
+    modelVendor: string;
+}
+
 // 用户分页请求参数
 export interface UserPageRequest {
     page?: {
@@ -170,6 +197,14 @@ export const adminApi = {
         // 设置模型为私人
         setPrivate: (id: number) => {
             return request.put<Result<void>>(`/sys-manage/ai-model/set-private/${id}`);
+        },
+    },
+
+    // 日志管理
+    log: {
+        // 查询用户分析日志
+        query: (params: UserAnalysisLogQuery) => {
+            return request.post<Result<UserAnalysisLog[]>>('/sys-manage/logs/query', params);
         },
     },
 };

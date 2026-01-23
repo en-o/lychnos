@@ -3,13 +3,20 @@ package cn.tannn.lychnos.service;
 import cn.tannn.lychnos.common.constant.ModelType;
 import cn.tannn.lychnos.common.constant.UsageType;
 import cn.tannn.lychnos.common.pojo.UserRequestInfo;
+import cn.tannn.lychnos.controller.dto.UserAnalysisLogQueryDTO;
+import cn.tannn.lychnos.controller.vo.UserAnalysisLogVO;
 import cn.tannn.lychnos.dao.UserAnalysisLogDao;
 import cn.tannn.lychnos.entity.AIModel;
 import cn.tannn.lychnos.entity.UserAnalysisLog;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 /**
  * 用户分析日志服务
@@ -126,5 +133,54 @@ public class UserAnalysisLogService {
         log.setUseExistingData(true);
 
         userAnalysisLogDao.save(log);
+    }
+
+    /**
+     * 查询用户分析日志（管理员功能）
+     * 默认查询最近20条，最多返回200条
+     * 直接返回JPA Projection接口
+     *
+     * @param queryDTO 查询条件
+     * @return 日志VO列表
+     */
+    public List<UserAnalysisLogVO> queryLogs(UserAnalysisLogQueryDTO queryDTO) {
+        // 默认查询20条，最多200条
+        int limit = 20;
+        if (queryDTO.getStartTime() != null || queryDTO.getEndTime() != null || StringUtils.isNotBlank(queryDTO.getUserName())) {
+            limit = 200;
+        }
+        Pageable pageable = PageRequest.of(0, limit);
+
+        // 1. 只有时间范围查询
+        if (queryDTO.getStartTime() != null && queryDTO.getEndTime() != null && StringUtils.isBlank(queryDTO.getUserName())) {
+            return userAnalysisLogDao.findByCreateTimeBetween(queryDTO.getStartTime(), queryDTO.getEndTime(), pageable);
+        }
+
+        // 2. 只有用户名查询
+        if (StringUtils.isNotBlank(queryDTO.getUserName()) && queryDTO.getStartTime() == null && queryDTO.getEndTime() == null) {
+            if (Boolean.TRUE.equals(queryDTO.getExactMatch())) {
+                // 精确匹配
+                return userAnalysisLogDao.findByUserNameOrderByCreateTimeDesc(queryDTO.getUserName(), pageable);
+            } else {
+                // 模糊匹配
+                return userAnalysisLogDao.findByUserNameContainingOrderByCreateTimeDesc(queryDTO.getUserName(), pageable);
+            }
+        }
+
+        // 3. 用户名 + 时间范围查询
+        if (StringUtils.isNotBlank(queryDTO.getUserName()) && queryDTO.getStartTime() != null && queryDTO.getEndTime() != null) {
+            if (Boolean.TRUE.equals(queryDTO.getExactMatch())) {
+                // 精确匹配
+                return userAnalysisLogDao.findByUserNameAndCreateTimeBetween(
+                        queryDTO.getUserName(), queryDTO.getStartTime(), queryDTO.getEndTime(), pageable);
+            } else {
+                // 模糊匹配
+                return userAnalysisLogDao.findByUserNameContainingAndCreateTimeBetween(
+                        queryDTO.getUserName(), queryDTO.getStartTime(), queryDTO.getEndTime(), pageable);
+            }
+        }
+
+        // 4. 默认查询最近20条
+        return userAnalysisLogDao.findAllByOrderByCreateTimeDesc(pageable);
     }
 }
