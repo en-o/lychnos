@@ -147,13 +147,7 @@ public class BookController {
 
         Long userId = UserUtil.userId2(request);
 
-        // 检查用户是否被封禁
-        if (bannedUserCacheService.isBanned(userId)) {
-            throw new BusinessException(
-                    BusinessErrorCode.USER_BANNED.getCode(),
-                    BusinessErrorCode.USER_BANNED.getMessage()
-            );
-        }
+        checkUserStatus(userId);
 
         String bookTitle = bookInfo.getTitle().trim();
         String author = bookInfo.getAuthor();
@@ -180,6 +174,8 @@ public class BookController {
         return ResultVO.success(bookAnalyseService.analyse(bookTitle, author, userId));
     }
 
+
+
     @Operation(summary = "提取书籍信息", description = "从用户输入中提取书名和作者信息")
     @PostMapping(value = "extract")
     public ResultVO<List<BookExtractVO>> extractBooks(@RequestBody BookExtractDTO dto,
@@ -195,6 +191,8 @@ public class BookController {
                     "需要登录才能使用书籍提取功能"
             );
         }
+
+        checkUserStatus(userId);
 
         if (dto.getInput() == null || dto.getInput().trim().isEmpty()) {
             throw new BusinessException(
@@ -301,5 +299,21 @@ public class BookController {
                             BusinessErrorCode.BOOK_ANALYSIS_NOT_FOUND.getMessage()
                     );
                 });
+    }
+
+
+
+    /**
+     * 检查用户状态
+     * @param userId userId
+     */
+    private void checkUserStatus(Long userId) {
+        // 检查用户是否被封禁
+        if (bannedUserCacheService.isBanned(userId)) {
+            throw new BusinessException(
+                    BusinessErrorCode.USER_BANNED.getCode(),
+                    BusinessErrorCode.USER_BANNED.getMessage()
+            );
+        }
     }
 }
