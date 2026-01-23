@@ -186,7 +186,7 @@ function AdminUserPage() {
                                 <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase whitespace-nowrap">邮箱</th>
                                 <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase whitespace-nowrap">角色</th>
                                 <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase whitespace-nowrap">状态</th>
-                                <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase whitespace-nowrap">创建时间</th>
+                                <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase whitespace-nowrap">注册时间</th>
                                 <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase whitespace-nowrap">操作</th>
                             </tr>
                             </thead>
