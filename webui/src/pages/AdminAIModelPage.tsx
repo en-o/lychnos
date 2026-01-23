@@ -46,6 +46,12 @@ function AdminAIModelPage() {
     };
 
     const handleSetOfficial = async (model: AIModelDetail) => {
+        // 检查模型是否可用
+        if (!model.enabled) {
+            toast.error('模型状态非可用，不允许设置为官方');
+            return;
+        }
+
         if (!window.confirm(`确定要将 "${model.name}" 设置为官方模型吗？`)) {
             return;
         }
@@ -201,7 +207,13 @@ function AdminAIModelPage() {
                                     {model.share !== 0 && (
                                         <button
                                             onClick={() => handleSetOfficial(model)}
-                                            className="px-3 py-1 rounded bg-blue-100 text-blue-700 hover:bg-blue-200 mr-2"
+                                            disabled={!model.enabled}
+                                            className={`px-3 py-1 rounded mr-2 ${
+                                                !model.enabled
+                                                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                                                    : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
+                                            }`}
+                                            title={!model.enabled ? '模型状态非可用，不允许设置为官方' : '设置为官方模型'}
                                         >
                                             设为官方
                                         </button>

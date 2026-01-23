@@ -275,8 +275,16 @@ function AdminOAuthConfigPage() {
                                             <span className="text-sm font-medium text-gray-900">{config.providerName}</span>
                                         </div>
                                     </td>
-                                    <td className="px-6 py-4 text-sm text-gray-500">{config.clientId}</td>
-                                    <td className="px-6 py-4 text-sm text-gray-500">{config.webCallbackUrl || '-'}</td>
+                                    <td className="px-6 py-4 text-sm text-gray-500">
+                                        <div className="max-w-xs truncate" title={config.clientId}>
+                                            {config.clientId}
+                                        </div>
+                                    </td>
+                                    <td className="px-6 py-4 text-sm text-gray-500">
+                                        <div className="max-w-xs truncate" title={config.webCallbackUrl || '-'}>
+                                            {config.webCallbackUrl || '-'}
+                                        </div>
+                                    </td>
                                     <td className="px-6 py-4 text-sm">
                                         <input
                                             type="number"

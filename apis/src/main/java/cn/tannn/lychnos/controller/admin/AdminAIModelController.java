@@ -103,6 +103,11 @@ public class AdminAIModelController {
         AIModel model = aiModelService.getJpaBasicsDao().findById(id)
                 .orElseThrow(() -> new RuntimeException("模型不存在"));
 
+        // 检查模型是否可用
+        if (!Boolean.TRUE.equals(model.getEnabled())) {
+            throw new RuntimeException("模型状态非可用，不允许设置为官方");
+        }
+
         model.setShare(ShareType.OFFICIAL.getCode());
         aiModelService.getJpaBasicsDao().save(model);
 
