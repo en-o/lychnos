@@ -6,6 +6,7 @@ REM 当前最新版本 0.0.2.6
 REM 如果build有镜像拉取问题，使用下面的先拉一次试试
 REM docker pull node:20-alpine && docker pull eclipse-temurin:17-jre-alpine && docker pull maven:3.9-eclipse-temurin-17
 REM 确保 npm run build 和 mvn package 能够正确的执行（即项目能正确编译）
+REM ERROR: failed to build: failed to solve: node:20-alpine: 多运行两次 ./docker-build.bat [版本] 就好了不知道抽什么风
 REM ============================================
 
 REM 设置默认版本号
