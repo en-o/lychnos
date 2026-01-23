@@ -139,6 +139,7 @@ public class UserAnalysisLogService {
      * 查询用户分析日志（管理员功能）
      * 默认查询最近20条，最多返回200条
      * 直接返回JPA Projection接口
+     * 支持模型来源筛选
      *
      * @param queryDTO 查询条件
      * @return 日志VO列表
@@ -146,41 +147,29 @@ public class UserAnalysisLogService {
     public List<UserAnalysisLogVO> queryLogs(UserAnalysisLogQueryDTO queryDTO) {
         // 默认查询20条，最多200条
         int limit = 20;
-        if (queryDTO.getStartTime() != null || queryDTO.getEndTime() != null || StringUtils.isNotBlank(queryDTO.getUserName())) {
+        if (queryDTO.getStartTime() != null || queryDTO.getEndTime() != null
+            || StringUtils.isNotBlank(queryDTO.getUserName()) || queryDTO.getModelSource() != null) {
             limit = 200;
         }
         Pageable pageable = PageRequest.of(0, limit);
 
-        // 1. 只有时间范围查询
-        if (queryDTO.getStartTime() != null && queryDTO.getEndTime() != null && StringUtils.isBlank(queryDTO.getUserName())) {
-            return userAnalysisLogDao.findByCreateTimeBetween(queryDTO.getStartTime(), queryDTO.getEndTime(), pageable);
+        // 使用通用查询方法
+        if (Boolean.TRUE.equals(queryDTO.getExactMatch())) {
+            // 精确匹配用户名
+            return userAnalysisLogDao.findByConditions(
+                    queryDTO.getStartTime(),
+                    queryDTO.getEndTime(),
+                    queryDTO.getUserName(),
+                    queryDTO.getModelSource(),
+                    pageable);
+        } else {
+            // 模糊匹配用户名
+            return userAnalysisLogDao.findByConditionsWithUserNameLike(
+                    queryDTO.getStartTime(),
+                    queryDTO.getEndTime(),
+                    queryDTO.getUserName(),
+                    queryDTO.getModelSource(),
+                    pageable);
         }
-
-        // 2. 只有用户名查询
-        if (StringUtils.isNotBlank(queryDTO.getUserName()) && queryDTO.getStartTime() == null && queryDTO.getEndTime() == null) {
-            if (Boolean.TRUE.equals(queryDTO.getExactMatch())) {
-                // 精确匹配
-                return userAnalysisLogDao.findByUserNameOrderByCreateTimeDesc(queryDTO.getUserName(), pageable);
-            } else {
-                // 模糊匹配
-                return userAnalysisLogDao.findByUserNameContainingOrderByCreateTimeDesc(queryDTO.getUserName(), pageable);
-            }
-        }
-
-        // 3. 用户名 + 时间范围查询
-        if (StringUtils.isNotBlank(queryDTO.getUserName()) && queryDTO.getStartTime() != null && queryDTO.getEndTime() != null) {
-            if (Boolean.TRUE.equals(queryDTO.getExactMatch())) {
-                // 精确匹配
-                return userAnalysisLogDao.findByUserNameAndCreateTimeBetween(
-                        queryDTO.getUserName(), queryDTO.getStartTime(), queryDTO.getEndTime(), pageable);
-            } else {
-                // 模糊匹配
-                return userAnalysisLogDao.findByUserNameContainingAndCreateTimeBetween(
-                        queryDTO.getUserName(), queryDTO.getStartTime(), queryDTO.getEndTime(), pageable);
-            }
-        }
-
-        // 4. 默认查询最近20条
-        return userAnalysisLogDao.findAllByOrderByCreateTimeDesc(pageable);
     }
 }
