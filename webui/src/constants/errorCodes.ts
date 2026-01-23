@@ -24,10 +24,16 @@ export const BOOK_NOT_IN_RECOMMENDATION = 1003;
 export const BOOK_ANALYSIS_NOT_FOUND = 1004;
 
 /**
+ * 1006: 账户已被封禁（需要前端强制退出登录）
+ */
+export const USER_BANNED = 1006;
+
+/**
  * 错误码类型定义
  */
 export type BusinessErrorCode =
   | typeof BOOK_ALREADY_ANALYZED
   | typeof MODEL_NOT_CONFIGURED
   | typeof BOOK_NOT_IN_RECOMMENDATION
-  | typeof BOOK_ANALYSIS_NOT_FOUND;
+  | typeof BOOK_ANALYSIS_NOT_FOUND
+  | typeof USER_BANNED;

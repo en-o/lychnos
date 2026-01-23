@@ -1,7 +1,7 @@
 import axios, {AxiosError, type AxiosInstance, type AxiosRequestConfig} from 'axios';
 import {AuthErrorCode, type Result} from '../models';
 import {toast} from '../components/ToastContainer';
-import {BOOK_ALREADY_ANALYZED, MODEL_NOT_CONFIGURED} from '../constants/errorCodes';
+import {BOOK_ALREADY_ANALYZED, MODEL_NOT_CONFIGURED, USER_BANNED} from '../constants/errorCodes';
 
 // 创建axios实例
 const instance: AxiosInstance = axios.create({
@@ -114,6 +114,16 @@ function handleBusinessError(data: Result) {
   if (data.code === 401) {
     toast.error('登录已失效，请重新登录');
     clearAuthAndRedirect();
+    return;
+  }
+
+  // 特殊处理错误码 - 账户已被封禁（强制退出登录）
+  if (data.code === USER_BANNED) {
+    toast.error(data.message || '账户已被封禁，请联系管理员');
+    // 延迟清除认证信息，让用户看到提示
+    setTimeout(() => {
+      clearAuthAndRedirect();
+    }, 2000);
     return;
   }
 
