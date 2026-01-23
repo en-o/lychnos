@@ -4,6 +4,7 @@ import cn.tannn.jdevelops.jpa.repository.JpaBasicsRepository;
 import cn.tannn.lychnos.entity.UserInfo;
 import jakarta.validation.constraints.NotBlank;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -29,4 +30,11 @@ public interface UserInfoDao extends JpaBasicsRepository<UserInfo,Long> {
      * @return 用户信息
      */
     Optional<UserInfo> findByEmail(@NotBlank String email);
+
+    /**
+     * 根据用户状态查询用户列表
+     * @param status 用户状态
+     * @return 用户列表
+     */
+    List<UserInfo> findByStatus(Integer status);
 }
