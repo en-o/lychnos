@@ -181,12 +181,12 @@ public class UserInfoService extends J2ServiceImpl<UserInfoDao, UserInfo, Long> 
         }
 
         Integer currentStatus = userInfo.getStatus();
-        if (UserStatus.OFFICIAL.getCode().equals(currentStatus)) {
-            userInfo.setStatus(UserStatus.PUBLIC.getCode());
-        } else if (UserStatus.PUBLIC.getCode().equals(currentStatus)) {
-            userInfo.setStatus(UserStatus.OFFICIAL.getCode());
+        if (UserStatus.NORMAL.getCode().equals(currentStatus)) {
+            userInfo.setStatus(UserStatus.BANNED.getCode());
+        } else if (UserStatus.BANNED.getCode().equals(currentStatus)) {
+            userInfo.setStatus(UserStatus.NORMAL.getCode());
         } else {
-            userInfo.setStatus(UserStatus.OFFICIAL.getCode());
+            userInfo.setStatus(UserStatus.NORMAL.getCode());
         }
 
         return getJpaBasicsDao().save(userInfo);
@@ -199,10 +199,10 @@ public class UserInfoService extends J2ServiceImpl<UserInfoDao, UserInfo, Long> 
      */
     public void validateUserStatus(UserInfo userInfo) {
         Integer status = userInfo.getStatus();
-        if (UserStatus.PUBLIC.getCode().equals(status)) {
+        if (UserStatus.BANNED.getCode().equals(status)) {
             throw new UserException("账户已被封禁，无法登录");
         }
-        if (UserStatus.PRIVATE.getCode().equals(status)) {
+        if (UserStatus.DELETE.getCode().equals(status)) {
             throw new UserException("账户已注销，无法登录");
         }
     }

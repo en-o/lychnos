@@ -14,16 +14,15 @@ public enum UserStatus {
     /**
      * 正常
      */
-    OFFICIAL(1, "正常"),
+    NORMAL(1, "正常"),
     /**
      * 注销 - 暂时没用
      */
-    PRIVATE(2, "注销"),
-
+    DELETE(2, "注销"),
     /**
      * 违规封禁
      */
-    PUBLIC(3, "违规封禁");
+    BANNED(3, "违规封禁");
 
     /**
      * 状态码（对应数据库存储值）
