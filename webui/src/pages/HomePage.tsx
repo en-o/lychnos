@@ -1003,25 +1003,27 @@ const HomePage: React.FC = () => {
       `}</style>
 
       {/* 登录确认对话框 */}
-      {showLoginConfirm && (
-        <ConfirmDialog
-          message="需要登录才能使用分析功能，是否前往登录？"
-          onConfirm={() => {
-            setShowLoginConfirm(false);
-            navigate('/login?redirect=/');
-          }}
-          onCancel={() => setShowLoginConfirm(false)}
-        />
-      )}
+      <ConfirmDialog
+        isOpen={showLoginConfirm}
+        title="需要登录"
+        message="需要登录才能使用分析功能，是否前往登录？"
+        type="info"
+        onConfirm={() => {
+          setShowLoginConfirm(false);
+          navigate('/login?redirect=/');
+        }}
+        onCancel={() => setShowLoginConfirm(false)}
+      />
 
       {/* 返回确认对话框 */}
-      {showBackConfirm && (
-        <ConfirmDialog
-          message="你还没有提交反馈，确定要返回吗？"
-          onConfirm={confirmBackToSearch}
-          onCancel={() => setShowBackConfirm(false)}
-        />
-      )}
+      <ConfirmDialog
+        isOpen={showBackConfirm}
+        title="确认返回"
+        message="你还没有提交反馈，确定要返回吗？"
+        type="warning"
+        onConfirm={confirmBackToSearch}
+        onCancel={() => setShowBackConfirm(false)}
+      />
 
       {/* 历史详情弹窗 */}
       {selectedHistoryItem && (

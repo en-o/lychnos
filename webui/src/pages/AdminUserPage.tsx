@@ -80,7 +80,6 @@ function AdminUserPage() {
             return; // 管理员账户不允许切换状态
         }
 
-        const action = user.status === 1 ? '封禁' : '启用';
         const title = user.status === 1 ? '封禁用户' : '启用用户';
         const message = user.status === 1
             ? `确定要封禁用户 "${user.nickname || user.loginName}" 吗？\n\n封禁后该用户将无法登录系统。`

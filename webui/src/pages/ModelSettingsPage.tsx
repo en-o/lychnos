@@ -675,22 +675,24 @@ const ModelSettingsPage: React.FC = () => {
       )}
 
       {/* 删除确认对话框 */}
-      {deleteConfirm?.show && (
-        <ConfirmDialog
-          message="确定要删除这个模型配置吗？"
-          onConfirm={confirmDelete}
-          onCancel={() => setDeleteConfirm(null)}
-        />
-      )}
+      <ConfirmDialog
+        isOpen={deleteConfirm?.show || false}
+        title="删除模型配置"
+        message="确定要删除这个模型配置吗？"
+        type="danger"
+        onConfirm={confirmDelete}
+        onCancel={() => setDeleteConfirm(null)}
+      />
 
       {/* 转换类型确认对话框 */}
-      {convertConfirm?.show && convertConfirm.model && (
-        <ConfirmDialog
-          message={`确定要将 "${convertConfirm.model.name}" 从 ${convertConfirm.model.type === 'TEXT' ? 'AI分析模型' : 'AI生图模型'} 转换为 ${convertConfirm.model.type === 'TEXT' ? 'AI生图模型' : 'AI分析模型'} 吗？\n\n注意：转换后模型将被禁用，需要重新设置为当前模型才能使用。`}
-          onConfirm={confirmConvert}
-          onCancel={() => setConvertConfirm({ show: false, model: null })}
-        />
-      )}
+      <ConfirmDialog
+        isOpen={convertConfirm?.show || false}
+        title="转换模型类型"
+        message={convertConfirm?.model ? `确定要将 "${convertConfirm.model.name}" 从 ${convertConfirm.model.type === 'TEXT' ? 'AI分析模型' : 'AI生图模型'} 转换为 ${convertConfirm.model.type === 'TEXT' ? 'AI生图模型' : 'AI分析模型'} 吗？\n\n注意：转换后模型将被禁用，需要重新设置为当前模型才能使用。` : ''}
+        type="warning"
+        onConfirm={confirmConvert}
+        onCancel={() => setConvertConfirm({ show: false, model: null })}
+      />
     </div>
   );
 };
