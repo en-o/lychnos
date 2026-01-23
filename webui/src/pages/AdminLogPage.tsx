@@ -134,10 +134,15 @@ const AdminLogPage: React.FC = () => {
 
             {/* 主内容 */}
             <main className="pt-14 h-screen flex flex-col">
-                <div className="max-w-7xl mx-auto px-4 py-8 flex-1 flex flex-col overflow-hidden">
+                <div className="max-w-7xl w-full mx-auto px-4 py-8 flex-1 flex flex-col overflow-hidden">
                     {/* 查询表单 */}
-                    <div className="bg-white rounded-lg border border-gray-200 p-6 mb-6 flex-shrink-0">
-                        <h2 className="text-lg font-semibold text-gray-900 mb-4">查询条件</h2>
+                    <div className="bg-white rounded-lg border border-gray-200 p-6 mb-6 flex-shrink-0 w-full">
+                        <div className="flex items-center justify-between mb-4">
+                            <h2 className="text-lg font-semibold text-gray-900">查询条件</h2>
+                            <p className="text-xs text-gray-500">
+                                💡 提示：默认查询昨天到今天的记录，最多返回200条记录
+                            </p>
+                        </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -216,13 +221,10 @@ const AdminLogPage: React.FC = () => {
                                 重置
                             </button>
                         </div>
-                        <p className="text-xs text-gray-500 mt-3">
-                            💡 提示：默认查询昨天到今天的记录，最多返回200条记录
-                        </p>
                     </div>
 
                     {/* 日志列表 */}
-                    <div className="bg-white rounded-lg border border-gray-200 flex-1 flex flex-col overflow-hidden">
+                    <div className="bg-white rounded-lg border border-gray-200 flex-1 flex flex-col overflow-hidden w-full">
                         <div className="px-6 py-4 border-b border-gray-200 flex-shrink-0">
                             <h2 className="text-lg font-semibold text-gray-900">
                                 日志记录 {logs.length > 0 && `(${logs.length})`}
@@ -230,10 +232,12 @@ const AdminLogPage: React.FC = () => {
                         </div>
                         <div className="overflow-auto flex-1">
                             {logs.length === 0 ? (
-                                <div className="text-center py-12">
-                                    <FileText className="w-12 h-12 text-gray-400 mx-auto mb-3" />
-                                    <p className="text-gray-500">暂无日志记录</p>
-                                    <p className="text-sm text-gray-400 mt-1">请调整查询条件后重试</p>
+                                <div className="h-full flex items-center justify-center">
+                                    <div className="text-center">
+                                        <FileText className="w-12 h-12 text-gray-400 mx-auto mb-3" />
+                                        <p className="text-gray-500">暂无日志记录</p>
+                                        <p className="text-sm text-gray-400 mt-1">请调整查询条件后重试</p>
+                                    </div>
                                 </div>
                             ) : (
                                 <table className="w-full">
