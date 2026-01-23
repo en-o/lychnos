@@ -14,6 +14,7 @@ services:
       TZ: Asia/Shanghai
       FILE_MAX_SIZE: ${FILE_MAX_SIZE:-500MB}
       FILE_MAX_REQUEST: ${FILE_MAX_REQUEST:-500MB}
+      # 管理员需要自己创建好用户后在数据库中更改数据，将自己的`tb_user_info.roles`设置为`["USER", "ADMIN"]`
       MYSQL_PWD: ${MYSQL_PWD:-root}
       MYSQL_UNM: ${MYSQL_UNM:-root}
       MYSQL_URL: ${MYSQL_UNM:-localhost:3306}

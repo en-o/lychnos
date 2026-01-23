@@ -536,4 +536,4 @@ public InputStream getImage(String posterUrl) {
 3. **测试两种模式**：开发时建议在 Mock 和真实接口两种模式下都测试功能
 4. **前端环境变量修改后需重启**：修改 `.env` 文件后需要重启开发服务器
 5. 当前项目以书名作为唯一，如果同名不同内容以先上传为准，后上传的会提示已分析过
-6. 管理员需要自己在数据库中更改数据，将自己的`tb_user_info.roles`设置为`["USER", "ADMIN"]` 
+6. 管理员需要自己创建好用户后在数据库中更改数据，将自己的`tb_user_info.roles`设置为`["USER", "ADMIN"]` 
