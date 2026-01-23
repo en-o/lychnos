@@ -204,7 +204,10 @@ public class OAuth2Service {
         UserInfo userInfo = userInfoService.findByLoginName(loginName)
                 .orElseThrow(() -> new UserException("绑定目标用户不存在: " + loginName));
 
-        // 2. 检查该第三方账号是否已被其他用户绑定
+        // 2. 验证用户状态
+        userInfoService.validateUserStatus(userInfo);
+
+        // 3. 检查该第三方账号是否已被其他用户绑定
         Optional<UserThirdPartyBind> existingBind = bindDao.findByProviderTypeAndOpenId(
                 providerType,
                 oauthUserInfo.getOpenId());
@@ -268,6 +271,9 @@ public class OAuth2Service {
             userInfo = createUserForOAuth(oauthUserInfo, providerType);
             log.info("第三方账号首次登录，创建新用户：{}，第三方平台：{}", userInfo.getId(), providerType);
         }
+
+        // 验证用户状态
+        userInfoService.validateUserStatus(userInfo);
 
         // 生成 JWT Token 返回
         String token = UserUtil.generateLoginToken(loginService, userInfo);

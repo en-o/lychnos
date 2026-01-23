@@ -37,6 +37,9 @@ public class UserDetailVO {
     @Schema(description = "用户角色列表")
     private JSONArray roles;
 
+    @Schema(description = "账户状态: 1:正常，2:注销，3:违规封禁")
+    private Integer status;
+
     @Schema(description = "创建时间")
     private String createTime;
 

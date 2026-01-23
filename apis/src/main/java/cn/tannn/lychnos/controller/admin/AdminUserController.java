@@ -79,4 +79,20 @@ public class AdminUserController {
         return ResultVO.success(bindings);
     }
 
+    /**
+     * 切换用户状态（启用/封禁）
+     */
+    @Operation(summary = "切换用户状态（启用/封禁）")
+    @ApiMapping(value = "/toggle-status/{id}", method = RequestMethod.PUT)
+    public ResultVO<Void> toggleUserStatus(@PathVariable Long id, HttpServletRequest request) {
+        try {
+            userInfoService.checkAdmin(request);
+            userInfoService.toggleUserStatus(id);
+            return ResultVO.successMessage("用户状态已更新");
+        } catch (Exception e) {
+            log.error("切换用户状态失败: userId={}, error={}", id, e.getMessage(), e);
+            return ResultVO.failMessage(e.getMessage());
+        }
+    }
+
 }

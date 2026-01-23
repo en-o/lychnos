@@ -49,6 +49,7 @@ public class LoginController {
             throws IllegalAccessException {
         log.info("登录请求，登录名：{}", login.getLoginName());
         UserInfo userInfo = userInfoService.authenticateUser(login);
+        userInfoService.validateUserStatus(userInfo);
         String sign = UserUtil.generateLoginToken(loginService, userInfo);
         return ResultVO.success("登录成功", new LoginVO(sign));
     }

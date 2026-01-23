@@ -16,6 +16,7 @@ const OAuthCallbackPage: React.FC = () => {
     useEffect(() => {
         const handleCallback = async () => {
             // 从 URL Query 获取参数
+            const error = searchParams.get('error');
             const tokenFromQuery = searchParams.get('token');
             const code = searchParams.get('code');
             const state = searchParams.get('state');
@@ -24,6 +25,23 @@ const OAuthCallbackPage: React.FC = () => {
             const savedState = localStorage.getItem('oauth_state');
             const providerType = localStorage.getItem('oauth_provider');
             const redirect = localStorage.getItem('oauth_redirect') || '/';
+
+            // === 处理错误情况 ===
+            if (error) {
+                const decodedError = decodeURIComponent(error);
+                toast.error(decodedError);
+
+                // 清理 localStorage
+                localStorage.removeItem('oauth_state');
+                localStorage.removeItem('oauth_provider');
+                localStorage.removeItem('oauth_redirect');
+                localStorage.removeItem('oauth_action');
+                localStorage.removeItem('oauth_bind_login_name');
+
+                // 重定向到登录页
+                navigate('/login');
+                return;
+            }
 
             // === 新流程：后端直接重定向并携带 token ===
             if (tokenFromQuery) {

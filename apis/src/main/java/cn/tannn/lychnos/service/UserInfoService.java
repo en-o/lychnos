@@ -3,6 +3,7 @@ package cn.tannn.lychnos.service;
 import cn.tannn.jdevelops.exception.built.BusinessException;
 import cn.tannn.jdevelops.exception.built.UserException;
 import cn.tannn.jdevelops.jpa.service.J2ServiceImpl;
+import cn.tannn.lychnos.common.constant.UserStatus;
 import cn.tannn.lychnos.common.util.UserUtil;
 import cn.tannn.lychnos.controller.dto.LoginPassword;
 import cn.tannn.lychnos.controller.dto.PasswordEdit;
@@ -13,6 +14,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
@@ -161,6 +163,48 @@ public class UserInfoService extends J2ServiceImpl<UserInfoDao, UserInfo, Long> 
      */
     public Optional<UserInfo> findByLoginName(String loginName) {
         return getJpaBasicsDao().findByLoginName(loginName);
+    }
+
+    /**
+     * 切换用户状态（启用/封禁）
+     *
+     * @param userId 用户ID
+     * @return 更新后的用户信息
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public UserInfo toggleUserStatus(Long userId) {
+        UserInfo userInfo = getJpaBasicsDao().findById(userId)
+                .orElseThrow(() -> new BusinessException("用户不存在"));
+
+        if (UserUtil.isAdmin(userInfo.getRoles())) {
+            throw new BusinessException("不允许修改管理员账户状态");
+        }
+
+        Integer currentStatus = userInfo.getStatus();
+        if (UserStatus.OFFICIAL.getCode().equals(currentStatus)) {
+            userInfo.setStatus(UserStatus.PUBLIC.getCode());
+        } else if (UserStatus.PUBLIC.getCode().equals(currentStatus)) {
+            userInfo.setStatus(UserStatus.OFFICIAL.getCode());
+        } else {
+            userInfo.setStatus(UserStatus.OFFICIAL.getCode());
+        }
+
+        return getJpaBasicsDao().save(userInfo);
+    }
+
+    /**
+     * 验证用户状态
+     *
+     * @param userInfo 用户信息
+     */
+    public void validateUserStatus(UserInfo userInfo) {
+        Integer status = userInfo.getStatus();
+        if (UserStatus.PUBLIC.getCode().equals(status)) {
+            throw new UserException("账户已被封禁，无法登录");
+        }
+        if (UserStatus.PRIVATE.getCode().equals(status)) {
+            throw new UserException("账户已注销，无法登录");
+        }
     }
 
 

@@ -14,6 +14,7 @@ function AdminUserPage() {
     const [total, setTotal] = useState(0);
     const [loginName, setLoginName] = useState('');
     const [nickname, setNickname] = useState('');
+    const [toggleLoading, setToggleLoading] = useState<number | null>(null);
 
     // 修复：添加搜索条件到依赖项，这样搜索后会自动加载数据
     useEffect(() => {
@@ -55,6 +56,42 @@ function AdminUserPage() {
             }
         } catch (error: any) {
             // 错误已在拦截器中统一处理，这里只需要捕获异常
+        }
+    };
+
+    const handleToggleStatus = async (user: UserDetail) => {
+        const isAdmin = user.roles?.includes('ADMIN');
+        if (isAdmin) {
+            return; // 管理员账户不允许切换状态
+        }
+
+        const action = user.status === 1 ? '封禁' : '启用';
+        const confirmed = window.confirm(`确定要${action}该用户吗？`);
+        if (!confirmed) return;
+
+        try {
+            setToggleLoading(user.id);
+            const res = await adminApi.user.toggleStatus(user.id);
+            if (res.success) {
+                await loadUsers(); // 重新加载用户列表
+            }
+        } catch (error: any) {
+            // 错误已在拦截器中统一处理
+        } finally {
+            setToggleLoading(null);
+        }
+    };
+
+    const getStatusBadge = (status: number) => {
+        switch (status) {
+            case 1:
+                return <span className="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">正常</span>;
+            case 3:
+                return <span className="px-2 py-1 text-xs rounded-full bg-red-100 text-red-800">已封禁</span>;
+            case 2:
+                return <span className="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-800">已注销</span>;
+            default:
+                return <span className="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-800">未知</span>;
         }
     };
 
@@ -114,6 +151,7 @@ function AdminUserPage() {
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">昵称</th>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">邮箱</th>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">角色</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">状态</th>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">创建时间</th>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">操作</th>
                         </tr>
@@ -134,16 +172,34 @@ function AdminUserPage() {
                                         ))}
                                     </div>
                                 </td>
+                                <td className="px-6 py-4 text-sm">
+                                    {getStatusBadge(user.status)}
+                                </td>
                                 <td className="px-6 py-4 text-sm text-gray-500">
                                     {new Date(user.createTime).toLocaleString('zh-CN')}
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm">
-                                    <button
-                                        onClick={() => handleViewBindings(user)}
-                                        className="px-3 py-1 rounded bg-blue-100 text-blue-700 hover:bg-blue-200"
-                                    >
-                                        查看绑定
-                                    </button>
+                                    <div className="flex gap-2">
+                                        <button
+                                            onClick={() => handleViewBindings(user)}
+                                            className="px-3 py-1 rounded bg-blue-100 text-blue-700 hover:bg-blue-200"
+                                        >
+                                            查看绑定
+                                        </button>
+                                        <button
+                                            onClick={() => handleToggleStatus(user)}
+                                            disabled={user.roles?.includes('ADMIN') || toggleLoading === user.id}
+                                            className={`px-3 py-1 rounded ${
+                                                user.roles?.includes('ADMIN')
+                                                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                                                    : user.status === 1
+                                                        ? 'bg-red-100 text-red-700 hover:bg-red-200'
+                                                        : 'bg-green-100 text-green-700 hover:bg-green-200'
+                                            } disabled:opacity-50`}
+                                        >
+                                            {toggleLoading === user.id ? '处理中...' : user.status === 1 ? '封禁' : '启用'}
+                                        </button>
+                                    </div>
                                 </td>
                             </tr>
                         ))}

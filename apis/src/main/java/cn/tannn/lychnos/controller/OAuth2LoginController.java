@@ -131,31 +131,62 @@ public class OAuth2LoginController {
         // 转换为枚举
         ProviderType providerTypeEnum = ProviderType.fromValue(providerType);
 
-        // 处理OAuth2回调，获取登录信息
-        LoginVO loginVO = oauth2Service.handleCallback(providerTypeEnum, code, state);
+        try {
+            // 处理OAuth2回调，获取登录信息
+            LoginVO loginVO = oauth2Service.handleCallback(providerTypeEnum, code, state);
 
-        // 获取配置的Web回调地址前缀
-        OAuthConfig config = oauthConfigService.getConfigByProviderType(providerTypeEnum);
-        String webCallbackPrefix = config.getWebCallbackUrl();
+            // 获取配置的Web回调地址前缀
+            OAuthConfig config = oauthConfigService.getConfigByProviderType(providerTypeEnum);
+            String webCallbackPrefix = config.getWebCallbackUrl();
 
-        // 如果没有配置Web回调地址前缀，使用空字符串（相对路径）
-        if (webCallbackPrefix == null || webCallbackPrefix.isEmpty()) {
-            webCallbackPrefix = "";
+            // 如果没有配置Web回调地址前缀，使用空字符串（相对路径）
+            if (webCallbackPrefix == null || webCallbackPrefix.isEmpty()) {
+                webCallbackPrefix = "";
+            }
+
+            // 移除末尾的斜杠（如果有）
+            if (webCallbackPrefix.endsWith("/")) {
+                webCallbackPrefix = webCallbackPrefix.substring(0, webCallbackPrefix.length() - 1);
+            }
+
+            // 构建完整的重定向URL
+            // 格式：{前缀}#/oauth/callback?token={token}
+            // 示例：http://localhost:3000/lychnos#/oauth/callback?token=xxx
+            String redirectUrl = String.format("%s#/oauth/callback?token=%s",
+                webCallbackPrefix,
+                loginVO.getToken());
+
+            log.info("OAuth2登录成功，重定向到：{}", redirectUrl);
+            return new RedirectView(redirectUrl);
+        } catch (Exception e) {
+            log.error("OAuth2回调处理失败：平台={}, 错误={}", providerType, e.getMessage(), e);
+
+            // 获取配置的Web回调地址前缀
+            OAuthConfig config = oauthConfigService.getConfigByProviderType(providerTypeEnum);
+            String webCallbackPrefix = config.getWebCallbackUrl();
+
+            // 如果没有配置Web回调地址前缀，使用空字符串（相对路径）
+            if (webCallbackPrefix == null || webCallbackPrefix.isEmpty()) {
+                webCallbackPrefix = "";
+            }
+
+            // 移除末尾的斜杠（如果有）
+            if (webCallbackPrefix.endsWith("/")) {
+                webCallbackPrefix = webCallbackPrefix.substring(0, webCallbackPrefix.length() - 1);
+            }
+
+            // 构建错误消息
+            String errorMessage = e.getMessage() != null ? e.getMessage() : "登录失败，请重试";
+            String encodedError = java.net.URLEncoder.encode(errorMessage, java.nio.charset.StandardCharsets.UTF_8);
+
+            // 构建错误重定向URL
+            // 格式：{前缀}#/oauth/callback?error={encodedError}
+            String redirectUrl = String.format("%s#/oauth/callback?error=%s",
+                webCallbackPrefix,
+                encodedError);
+
+            log.info("OAuth2登录失败，重定向到：{}", redirectUrl);
+            return new RedirectView(redirectUrl);
         }
-
-        // 移除末尾的斜杠（如果有）
-        if (webCallbackPrefix.endsWith("/")) {
-            webCallbackPrefix = webCallbackPrefix.substring(0, webCallbackPrefix.length() - 1);
-        }
-
-        // 构建完整的重定向URL
-        // 格式：{前缀}#/oauth/callback?token={token}
-        // 示例：http://localhost:3000/lychnos#/oauth/callback?token=xxx
-        String redirectUrl = String.format("%s#/oauth/callback?token=%s",
-            webCallbackPrefix,
-            loginVO.getToken());
-
-        log.info("OAuth2登录成功，重定向到：{}", redirectUrl);
-        return new RedirectView(redirectUrl);
     }
 }

@@ -41,6 +41,7 @@ export interface UserDetail {
     nickname: string;
     email: string;
     roles: string[];
+    status: number;
     createTime: string;
     updateTime: string;
 }
@@ -180,6 +181,11 @@ export const adminApi = {
         // 获取用户的第三方绑定列表
         thirdPartyBindings: (userId: number) => {
             return request.get<Result<ThirdPartyBind[]>>(`/sys-manage/user/third-party-bindings/${userId}`);
+        },
+
+        // 切换用户状态（启用/封禁）
+        toggleStatus: (id: number) => {
+            return request.put<Result<void>>(`/sys-manage/user/toggle-status/${id}`);
         },
     },
 
