@@ -17,13 +17,17 @@ spring:
       ddl-auto: update
     open-in-view: false
     database: mysql
-
-
+# --knife4j.enable=false --springdoc.swagger-ui.enabled=false --springdoc.api-docs.enabled=false
 knife4j:
-  enable: true
+  enable: ${DOC_ENABLE:false}
   basic:
-    enable: true
+    enable: ${DOC_ENABLE:false}
     password: ${DOC_PASSWORD:tan}
     username: ${DOC_USERNAME:tan}
     include:
       - /v3;/api-docs
+springdoc:
+  api-docs:
+    enabled: ${DOC_ENABLE:false}
+  swagger-ui:
+    enabled: ${DOC_ENABLE:false}
