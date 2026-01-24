@@ -7,7 +7,6 @@ import cn.tannn.lychnos.ai.factory.DynamicAIClientFactory;
 import cn.tannn.lychnos.ai.service.AIService;
 import cn.tannn.lychnos.common.constant.BusinessErrorCode;
 import cn.tannn.lychnos.common.constant.ModelType;
-import cn.tannn.lychnos.common.constant.ShareType;
 import cn.tannn.lychnos.common.util.AESUtil;
 import cn.tannn.lychnos.common.util.ZipUtil;
 import cn.tannn.lychnos.dao.AIModelDao;
@@ -25,7 +24,6 @@ import org.springframework.stereotype.Service;
 
 import java.io.InputStream;
 import java.net.URL;
-import java.util.List;
 import java.util.Objects;
 
 /**

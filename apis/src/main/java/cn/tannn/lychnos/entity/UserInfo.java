@@ -2,7 +2,6 @@ package cn.tannn.lychnos.entity;
 
 import cn.hutool.crypto.SecureUtil;
 import cn.tannn.jdevelops.exception.built.UserException;
-import cn.tannn.lychnos.common.constant.ShareType;
 import cn.tannn.lychnos.common.constant.UserStatus;
 import cn.tannn.lychnos.common.pojo.JpaCommonBean;
 import cn.tannn.lychnos.common.views.Views;
