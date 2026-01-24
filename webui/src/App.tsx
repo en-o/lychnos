@@ -12,6 +12,7 @@ import AdminOAuthConfigPage from './pages/AdminOAuthConfigPage';
 import AdminUserPage from './pages/AdminUserPage';
 import AdminAIModelPage from './pages/AdminAIModelPage';
 import AdminLogPage from './pages/AdminLogPage';
+import AdminAttackStatsPage from './pages/AdminAttackStatsPage';
 import SystemManagePage from './pages/SystemManagePage';
 import PrivateRoute from './components/PrivateRoute';
 import ToastContainer from './components/ToastContainer';
@@ -107,6 +108,14 @@ function App() {
           element={
             <PrivateRoute>
               <AdminLogPage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/sys-manage/attack-stats"
+          element={
+            <PrivateRoute>
+              <AdminAttackStatsPage />
             </PrivateRoute>
           }
         />

@@ -1,5 +1,5 @@
 import {useNavigate} from 'react-router-dom';
-import {Settings, Users, ArrowLeft, Brain, FileText} from 'lucide-react';
+import {Settings, Users, ArrowLeft, Brain, FileText, Shield} from 'lucide-react';
 
 function SystemManagePage() {
     const navigate = useNavigate();
@@ -73,6 +73,20 @@ function SystemManagePage() {
                             <h2 className="text-xl font-semibold text-gray-900">日志查询</h2>
                         </div>
                         <p className="text-gray-600">查询用户分析日志，支持时间范围和用户名筛选</p>
+                    </button>
+
+                    {/* 攻击统计 */}
+                    <button
+                        onClick={() => navigate('/sys-manage/attack-stats')}
+                        className="bg-white rounded-lg shadow p-6 hover:shadow-lg transition text-left"
+                    >
+                        <div className="flex items-center gap-4 mb-3">
+                            <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
+                                <Shield className="w-6 h-6 text-red-600" />
+                            </div>
+                            <h2 className="text-xl font-semibold text-gray-900">攻击统计</h2>
+                        </div>
+                        <p className="text-gray-600">查看恶意攻击统计数据，管理高频攻击IP</p>
                     </button>
                 </div>
             </div>

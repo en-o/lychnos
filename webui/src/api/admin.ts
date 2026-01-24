@@ -213,5 +213,43 @@ export const adminApi = {
         query: (params: UserAnalysisLogQuery) => {
             return request.post<Result<UserAnalysisLog[]>>('/sys-manage/logs/query', params);
         },
+
+        // 获取攻击统计数据
+        getAttackStats: (limit: number = 10) => {
+            return request.get<Result<AttackStats>>(`/sys-manage/logs/attack-stats?limit=${limit}`);
+        },
+
+        // 查询指定IP的攻击次数
+        getIpAttackCount: (ip: string) => {
+            return request.get<Result<number>>(`/sys-manage/logs/attack-stats/${ip}`);
+        },
+
+        // 清空攻击统计数据
+        clearAttackStats: () => {
+            return request.delete<Result<string>>('/sys-manage/logs/attack-stats');
+        },
+
+        // 移除指定IP的攻击统计
+        removeIpStats: (ip: string) => {
+            return request.delete<Result<string>>(`/sys-manage/logs/attack-stats/${ip}`);
+        },
+
+        // 获取高频攻击者列表
+        getHighFrequencyAttackers: (threshold: number = 20) => {
+            return request.get<Result<AttackRecord[]>>(`/sys-manage/logs/high-frequency-attackers?threshold=${threshold}`);
+        },
     },
 };
+
+// 攻击记录
+export interface AttackRecord {
+    ip: string;
+    count: number;
+}
+
+// 攻击统计数据
+export interface AttackStats {
+    totalIpCount: number;
+    totalAttackCount: number;
+    topAttackers: AttackRecord[];
+}
