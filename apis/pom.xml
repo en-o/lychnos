@@ -85,7 +85,7 @@
         <dependency>
             <groupId>cn.tannn.jdevelops</groupId>
             <artifactId>jdevelops-apis-knife4j</artifactId>
-            <version>1.0.3.1-sb34</version>
+            <version>1.0.3.2-sb34</version>
         </dependency>
 
         <!-- Spring AI - OpenAI 核心库（支持所有兼容 OpenAI 协议的 AI 厂家）
