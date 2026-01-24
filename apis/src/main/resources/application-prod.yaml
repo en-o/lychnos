@@ -21,7 +21,7 @@ spring:
 knife4j:
   enable: ${DOC_ENABLE:false}
   basic:
-    enable: ${DOC_ENABLE:false}
+    enable: ${DOC_BASIC_ENABLE:true}
     password: ${DOC_PASSWORD:tan}
     username: ${DOC_USERNAME:tan}
     include:
