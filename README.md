@@ -111,6 +111,7 @@ mvn clean package -DskipTests
 | `HTTP_PROXY_HOST` | HTTP 代理服务器地址                                                                                    | `127.0.0.1` | - |
 | `HTTP_PROXY_PORT` | HTTP 代理服务器端口                                                                                    | `7890` | - |
 | `JWT_TOKEN_SECRET` | jwt的密钥需要设置（注意长度需要保持不变）                                                                          | `b40715ff972d60c4yff8044acfb33ba091544b2e21825672edc38799f52f1895` | - |
+| `DOC_ENABLE` | 关闭prod中的接口文档，只有在prod配置文件中有效                                                                     | `false` | - |
 
 ### Docker Compose 示例
 
