@@ -49,7 +49,7 @@ public class AdminLogController {
     @Operation(summary = "查询用户分析日志")
     @ApiMapping(value = "/query", method = RequestMethod.POST)
     public ResultVO<List<UserAnalysisLogVO>> queryLogs(@RequestBody UserAnalysisLogQueryDTO queryDTO,
-                                                        HttpServletRequest request) {
+                                                       HttpServletRequest request) {
         // 鉴权：仅管理员可访问
         userInfoService.checkAdmin(request);
 
@@ -71,8 +71,10 @@ public class AdminLogController {
     @ApiMapping(value = "/attack-stats", method = RequestMethod.GET)
     public ResultVO<AttackStatsDTO> getAttackStats(
             @Parameter(description = "返回TOP数量，0表示全部")
-            @RequestParam(defaultValue = "10") Integer limit) {
-
+            @RequestParam(defaultValue = "10") Integer limit,
+            HttpServletRequest request) {
+        // 鉴权：仅管理员可访问
+        userInfoService.checkAdmin(request);
         // 获取统计数据
         Map<String, Long> stats = attackStatsService.getAttackStats(limit);
 
@@ -100,8 +102,10 @@ public class AdminLogController {
     @ApiMapping(value = "/attack-stats/{ip}", method = RequestMethod.GET)
     public ResultVO<Long> getIpAttackCount(
             @Parameter(description = "攻击者IP")
-            @PathVariable String ip) {
-
+            @PathVariable String ip,
+            HttpServletRequest request) {
+        // 鉴权：仅管理员可访问
+        userInfoService.checkAdmin(request);
         long count = attackStatsService.getAttackCount(ip);
         return ResultVO.success(count);
     }
@@ -113,7 +117,10 @@ public class AdminLogController {
      */
     @Operation(summary = "清空攻击统计", description = "清空当前所有攻击统计数据（慎用）")
     @ApiMapping(value = "/attack-stats", method = RequestMethod.DELETE)
-    public ResultVO<String> clearAttackStats() {
+    public ResultVO<String> clearAttackStats(
+            HttpServletRequest request) {
+        // 鉴权：仅管理员可访问
+        userInfoService.checkAdmin(request);
         long beforeCount = attackStatsService.getAttackerCount();
         attackStatsService.clearAll();
 
@@ -131,8 +138,9 @@ public class AdminLogController {
     @ApiMapping(value = "/attack-stats/{ip}", method = RequestMethod.DELETE)
     public ResultVO<String> removeIpStats(
             @Parameter(description = "攻击者IP")
-            @PathVariable String ip) {
-
+            @PathVariable String ip, HttpServletRequest request) {
+        // 鉴权：仅管理员可访问
+        userInfoService.checkAdmin(request);
         long count = attackStatsService.getAttackCount(ip);
         if (count == 0) {
             return ResultVO.fail("该IP无攻击记录");
@@ -153,8 +161,9 @@ public class AdminLogController {
     @ApiMapping(value = "/high-frequency-attackers", method = RequestMethod.GET)
     public ResultVO<List<AttackStatsDTO.AttackRecord>> getHighFrequencyAttackers(
             @Parameter(description = "攻击次数阈值")
-            @RequestParam(defaultValue = "20") Integer threshold) {
-
+            @RequestParam(defaultValue = "20") Integer threshold
+            , HttpServletRequest request) {
+        userInfoService.checkAdmin(request);
         Map<String, Long> allStats = attackStatsService.getAttackStats(0);
 
         List<AttackStatsDTO.AttackRecord> highFrequencyAttackers = allStats.entrySet().stream()
