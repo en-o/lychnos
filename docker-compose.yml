@@ -6,7 +6,7 @@ services:
       context: .
       dockerfile: api/Dockerfile
     container_name: lychnos
-    image: tannnn/lychnos:latest # 0.0.2.8
+    image: tannnn/lychnos:latest # 0.0.2.8.1
     ports:
       - "1250:1250"
     environment:
