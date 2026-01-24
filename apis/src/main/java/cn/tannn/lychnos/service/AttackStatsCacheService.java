@@ -63,6 +63,13 @@ public class AttackStatsCacheService {
         long newCount = (currentCount == null ? 0 : currentCount) + 1;
         attackStatsCache.put(ip, newCount);
 
+        // 检查是否为高频攻击
+        if (isHighFrequencyAttacker(ip, 50)) {  // 1小时内超过50次
+            log.error("⚠️ 检测到高频攻击者! IP: {} | 累计: {} 次 | 建议加入黑名单",
+                    ip, newCount);
+            // TODO: 可以在这里触发自动封禁IP的逻辑
+        }
+
         // 记录警告日志
         log.warn("🚨 恶意{}请求已拦截 | Method: {} | URI: {} | IP: {} | 累计攻击: {} 次 | UA: {}",
                 method.equals("POST") ? "攻击" : "扫描",
