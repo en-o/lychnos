@@ -1,10 +1,13 @@
 package cn.tannn.lychnos.controller;
 
 import cn.tannn.jdevelops.annotations.web.authentication.ApiMapping;
+import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseStatus;
+
 
 /**
  * 前端路由控制器 & 安全防护拦截器
@@ -13,6 +16,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
  * @version V1.0
  * @date 2026/1/12 09:31
  */
+@Slf4j
 @Controller
 public class IndexPageController {
 
@@ -41,7 +45,7 @@ public class IndexPageController {
 
     /**
      * 恶意扫描和攻击路径拦截 - GET 请求
-     * 直接返回 404,静默处理,避免日志污染
+     * 直接返回 404,记录警告日志
      */
     @ApiMapping(value = {
 
@@ -257,8 +261,13 @@ public class IndexPageController {
 
     }, method = RequestMethod.GET, checkToken = false)
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public void blockMaliciousGetRequests() {
-        // 静默处理,不返回任何内容
+    public void blockMaliciousGetRequests(HttpServletRequest request) {
+        String uri = request.getRequestURI();
+        String ip = getClientIp(request);
+        String userAgent = request.getHeader("User-Agent");
+
+        log.warn("🚨 恶意扫描已拦截 | Method: GET | URI: {} | IP: {} | UA: {}",
+                uri, ip, userAgent);
     }
 
     /**
@@ -276,7 +285,36 @@ public class IndexPageController {
             "/eval.php"
     }, method = RequestMethod.POST, checkToken = false)
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public void blockMaliciousPostRequests() {
-        // 静默处理
+    public void blockMaliciousPostRequests(HttpServletRequest request) {
+        String uri = request.getRequestURI();
+        String ip = getClientIp(request);
+        String userAgent = request.getHeader("User-Agent");
+
+        log.warn("🚨 恶意攻击已拦截 | Method: POST | URI: {} | IP: {} | UA: {}",
+                uri, ip, userAgent);
+    }
+
+    /**
+     * 获取客户端真实 IP
+     */
+    private String getClientIp(HttpServletRequest request) {
+        String ip = request.getHeader("X-Forwarded-For");
+        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
+            ip = request.getHeader("X-Real-IP");
+        }
+        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
+            ip = request.getHeader("Proxy-Client-IP");
+        }
+        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
+            ip = request.getHeader("WL-Proxy-Client-IP");
+        }
+        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
+            ip = request.getRemoteAddr();
+        }
+        // 处理多个 IP 的情况,取第一个
+        if (ip != null && ip.contains(",")) {
+            ip = ip.split(",")[0].trim();
+        }
+        return ip;
     }
 }
