@@ -22,6 +22,7 @@ export interface UserInfo {
   id: string;
   email?: string;
   createTime?: string;
+  roles?: string[];
 }
 
 

@@ -15,6 +15,7 @@ import AdminLogPage from './pages/AdminLogPage';
 import AdminAttackStatsPage from './pages/AdminAttackStatsPage';
 import SystemManagePage from './pages/SystemManagePage';
 import PrivateRoute from './components/PrivateRoute';
+import AdminRoute from './components/AdminRoute';
 import ToastContainer from './components/ToastContainer';
 
 function App() {
@@ -74,49 +75,49 @@ function App() {
         <Route
           path="/sys-manage"
           element={
-            <PrivateRoute>
+            <AdminRoute>
               <SystemManagePage />
-            </PrivateRoute>
+            </AdminRoute>
           }
         />
         <Route
           path="/sys-manage/oauth-config"
           element={
-            <PrivateRoute>
+            <AdminRoute>
               <AdminOAuthConfigPage />
-            </PrivateRoute>
+            </AdminRoute>
           }
         />
         <Route
           path="/sys-manage/users"
           element={
-            <PrivateRoute>
+            <AdminRoute>
               <AdminUserPage />
-            </PrivateRoute>
+            </AdminRoute>
           }
         />
         <Route
           path="/sys-manage/ai-model"
           element={
-            <PrivateRoute>
+            <AdminRoute>
               <AdminAIModelPage />
-            </PrivateRoute>
+            </AdminRoute>
           }
         />
         <Route
           path="/sys-manage/logs"
           element={
-            <PrivateRoute>
+            <AdminRoute>
               <AdminLogPage />
-            </PrivateRoute>
+            </AdminRoute>
           }
         />
         <Route
           path="/sys-manage/attack-stats"
           element={
-            <PrivateRoute>
+            <AdminRoute>
               <AdminAttackStatsPage />
-            </PrivateRoute>
+            </AdminRoute>
           }
         />
 
