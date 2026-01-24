@@ -1,13 +1,14 @@
 package cn.tannn.lychnos.controller;
 
 import cn.tannn.jdevelops.annotations.web.authentication.ApiMapping;
+import cn.tannn.lychnos.service.AttackStatsCacheService;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseStatus;
-
 
 /**
  * 前端路由控制器 & 安全防护拦截器
@@ -18,7 +19,10 @@ import org.springframework.web.bind.annotation.ResponseStatus;
  */
 @Slf4j
 @Controller
+@RequiredArgsConstructor
 public class IndexPageController {
+
+    private final AttackStatsCacheService attackStatsService;
 
     /**
      * 首页路由 - 转发到 index.html
@@ -45,10 +49,8 @@ public class IndexPageController {
 
     /**
      * 恶意扫描和攻击路径拦截 - GET 请求
-     * 直接返回 404,记录警告日志
      */
     @ApiMapping(value = {
-
             // ========== 版本控制系统配置 ==========
             "/.env",
             "/.env.local",
@@ -266,8 +268,8 @@ public class IndexPageController {
         String ip = getClientIp(request);
         String userAgent = request.getHeader("User-Agent");
 
-        log.warn("🚨 恶意扫描已拦截 | Method: GET | URI: {} | IP: {} | UA: {}",
-                uri, ip, userAgent);
+        // 委托给服务层处理统计
+        attackStatsService.recordAttack(ip, uri, "GET", userAgent);
     }
 
     /**
@@ -290,8 +292,8 @@ public class IndexPageController {
         String ip = getClientIp(request);
         String userAgent = request.getHeader("User-Agent");
 
-        log.warn("🚨 恶意攻击已拦截 | Method: POST | URI: {} | IP: {} | UA: {}",
-                uri, ip, userAgent);
+        // 委托给服务层处理统计
+        attackStatsService.recordAttack(ip, uri, "POST", userAgent);
     }
 
     /**
@@ -311,7 +313,6 @@ public class IndexPageController {
         if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
             ip = request.getRemoteAddr();
         }
-        // 处理多个 IP 的情况,取第一个
         if (ip != null && ip.contains(",")) {
             ip = ip.split(",")[0].trim();
         }
