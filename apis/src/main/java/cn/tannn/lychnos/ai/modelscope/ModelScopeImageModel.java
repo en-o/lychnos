@@ -47,11 +47,13 @@ public class ModelScopeImageModel implements ImageModel {
     @Override
     public ImageResponse call(ImagePrompt imagePrompt) {
         try {
-            log.info("调用 ModelScope 异步图片生成，model: {}, prompt: {}",
-                    model, imagePrompt.getInstructions().get(0).getText());
+            String prompt = imagePrompt.getInstructions().get(0).getText();
+            ImageOptions options = imagePrompt.getOptions();
 
-            // 1. 提交异步任务
-            String taskId = submitAsyncTask(imagePrompt.getInstructions().get(0).getText());
+            log.info("调用 ModelScope 异步图片生成，model: {}, prompt: {}", model, prompt);
+
+            // 1. 提交异步任务（传递 options）
+            String taskId = submitAsyncTask(prompt, options);
 
             // 2. 轮询获取结果
             String imageUrl = pollTaskResult(taskId);
@@ -69,8 +71,12 @@ public class ModelScopeImageModel implements ImageModel {
 
     /**
      * 提交异步任务
+     *
+     * @param prompt 提示词
+     * @param options 图片选项（可为 null）
+     * @return 任务 ID
      */
-    private String submitAsyncTask(String prompt) {
+    private String submitAsyncTask(String prompt, ImageOptions options) {
         // ModelScope 限制提示词长度不超过2000字符，使用智能压缩策略
         String finalPrompt = prompt;
         if (prompt.length() > MAX_PROMPT_LENGTH) {
@@ -105,14 +111,18 @@ public class ModelScopeImageModel implements ImageModel {
         headers.setBearerAuth(apiKey);
         headers.set("X-ModelScope-Async-Mode", "true");
 
+        // 构建请求参数
         Map<String, Object> requestBody = new HashMap<>();
         requestBody.put("model", model);
         requestBody.put("prompt", finalPrompt);
+        // 从 options 中提取参数，或使用默认值
+        String size = "1024x1024";
         requestBody.put("size", "1920x1080");  // 设置图片尺寸为 1920x1080 (Full HD, 16:9横向)
+
 
         HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestBody, headers);
 
-        log.debug("提交异步任务到 ModelScope，提示词长度: {}, 尺寸: 1920x1080", finalPrompt.length());
+        log.debug("提交异步任务到 ModelScope，提示词长度: {}, 尺寸: {}", finalPrompt.length(), size);
         ResponseEntity<Map> response = restTemplate.exchange(
                 url,
                 HttpMethod.POST,
