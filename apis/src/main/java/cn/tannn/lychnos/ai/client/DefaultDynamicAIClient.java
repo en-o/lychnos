@@ -215,7 +215,7 @@ public class DefaultDynamicAIClient implements DynamicAIClient {
         @Override
         public String url() {
             ImageResponse response = call();
-            if (response == null || response.getResults().isEmpty()) {
+            if (response.getResults().isEmpty()) {
                 throw new AIException.ModelCallFailedException("AI 返回空响应", null);
             }
             return response.getResult().getOutput().getUrl();
