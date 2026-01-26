@@ -45,11 +45,19 @@ public class DefaultDynamicAIClient implements DynamicAIClient {
 
     @Override
     public TextPromptBuilder prompt() {
+        if (chatModel == null) {
+            throw new AIException.ModelCallFailedException(
+                "当前模型不支持文本生成，请使用 TEXT 类型的模型", null);
+        }
         return new DefaultTextPromptBuilder();
     }
 
     @Override
     public ImagePromptBuilder imagePrompt() {
+        if (imageModel == null) {
+            throw new AIException.ModelCallFailedException(
+                "当前模型不支持图片生成，请使用 IMAGE 类型的模型", null);
+        }
         return new DefaultImagePromptBuilder();
     }
 

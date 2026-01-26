@@ -4,6 +4,8 @@
 
 `DynamicAIClient` 是参考 Spring AI `ChatClient` 设计的流式 API 客户端，提供更优雅的参数传递和链式调用方式。
 
+**重要说明**：客户端根据 `AIModel` 的类型（TEXT 或 IMAGE）只创建对应的模型实例，避免资源浪费。如果在 TEXT 类型模型上调用 `imagePrompt()`，或在 IMAGE 类型模型上调用 `prompt()`，会抛出明确的异常提示。
+
 ## 设计优势
 
 ### 1. 旧方式的问题
@@ -48,6 +50,7 @@ String imageUrl = client.imagePrompt()
 - ✅ 运行时参数覆盖（temperature、maxTokens、width、height）
 - ✅ 默认参数和运行时参数分离
 - ✅ 类型安全的 Builder 模式
+- ✅ 资源优化：根据模型类型只创建需要的实例
 - ✅ 参考 Spring AI 官方设计，符合最佳实践
 
 ## 详细使用示例
@@ -665,6 +668,26 @@ public String generateWithValidation(Long userId, String prompt, Double temperat
     }
 
     return builder.content();
+}
+```
+
+### 4. 模型类型检查
+
+```java
+public String safeGenerate(Long userId, Long modelId, String prompt) {
+    AIModel aiModel = aiModelService.findById(modelId);
+    DynamicAIClient client = clientFactory.createClient(aiModel);
+
+    try {
+        // 如果模型类型不匹配，会抛出清晰的异常
+        return client.prompt()
+            .user(prompt)
+            .content();
+    } catch (AIException.ModelCallFailedException e) {
+        // 异常信息："当前模型不支持文本生成，请使用 TEXT 类型的模型"
+        log.error("模型类型不匹配: {}", e.getMessage());
+        throw new BusinessException("请使用正确类型的模型");
+    }
 }
 ```
 

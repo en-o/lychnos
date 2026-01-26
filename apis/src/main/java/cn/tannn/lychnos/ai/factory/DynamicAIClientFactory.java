@@ -5,6 +5,7 @@ import cn.tannn.lychnos.ai.client.DynamicAIClient;
 import cn.tannn.lychnos.ai.config.CustomRetryConfig;
 import cn.tannn.lychnos.ai.config.DynamicAIModelConfig;
 import cn.tannn.lychnos.ai.modelscope.ModelScopeImageModel;
+import cn.tannn.lychnos.common.constant.ModelType;
 import cn.tannn.lychnos.entity.AIModel;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.model.ChatModel;
@@ -192,27 +193,41 @@ public class DynamicAIClientFactory {
      *     .url();
      * </pre>
      *
+     * <p>
+     * 注意：根据 aiModel 的类型（TEXT 或 IMAGE），只会创建对应的模型实例，
+     * 避免资源浪费。如果使用不匹配的方法（如在 TEXT 模型上调用 imagePrompt()），
+     * 会抛出异常。
+     * </p>
+     *
      * @param aiModel AI 模型配置
      * @return DynamicAIClient 客户端实例
      */
     public DynamicAIClient createClient(AIModel aiModel) {
         DynamicAIModelConfig config = DynamicAIModelConfig.buildAiClientConfig(aiModel);
 
-        // 创建 ChatModel 和默认选项
-        ChatModel chatModel = createChatModel(config);
-        OpenAiChatOptions defaultChatOptions = OpenAiChatOptions.builder()
-                .model(config.getModel())
-                .temperature(config.getTemperature())
-                .maxTokens(config.getMaxTokens())
-                .build();
+        ChatModel chatModel = null;
+        OpenAiChatOptions defaultChatOptions = null;
+        ImageModel imageModel = null;
+        OpenAiImageOptions defaultImageOptions = null;
 
-        // 创建 ImageModel 和默认选项
-        ImageModel imageModel = createImageModel(config, aiModel.getFactory());
-        OpenAiImageOptions defaultImageOptions = OpenAiImageOptions.builder()
-                .model(config.getModel())
-                .width(1920)
-                .height(1080)
-                .build();
+        // 根据模型类型只创建需要的模型
+        if (aiModel.getType() == ModelType.TEXT) {
+            log.info("创建文本模型客户端，modelId: {}, model: {}", aiModel.getId(), config.getModel());
+            chatModel = createChatModel(config);
+            defaultChatOptions = OpenAiChatOptions.builder()
+                    .model(config.getModel())
+                    .temperature(config.getTemperature())
+                    .maxTokens(config.getMaxTokens())
+                    .build();
+        } else if (aiModel.getType() == ModelType.IMAGE) {
+            log.info("创建图片模型客户端，modelId: {}, model: {}", aiModel.getId(), config.getModel());
+            imageModel = createImageModel(config, aiModel.getFactory());
+            defaultImageOptions = OpenAiImageOptions.builder()
+                    .model(config.getModel())
+                    .width(1920)
+                    .height(1080)
+                    .build();
+        }
 
         return new DefaultDynamicAIClient(chatModel, imageModel, defaultChatOptions, defaultImageOptions);
     }
