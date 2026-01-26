@@ -1,5 +1,6 @@
 package cn.tannn.lychnos.ai.modelscope;
 
+import cn.tannn.lychnos.ai.config.DynamicAIModelConfig;
 import cn.tannn.lychnos.common.util.ZipUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,10 +25,9 @@ import java.util.concurrent.TimeUnit;
 @RequiredArgsConstructor
 public class ModelScopeImageModel implements ImageModel {
 
-    private final String apiKey;
-    private final String baseUrl;
     private final String model;
     private final RestTemplate restTemplate;
+    private final DynamicAIModelConfig config;
 
     /**
      * ModelScope 提示词最大长度限制
@@ -104,11 +104,11 @@ public class ModelScopeImageModel implements ImageModel {
                     String.format("%.1f", (1.0 - (double)finalPrompt.length() / prompt.length()) * 100));
         }
 
-        String url = baseUrl + "/v1/images/generations";
+        String url = config.getBaseUrl() + "/v1/images/generations";
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.setBearerAuth(apiKey);
+        headers.setBearerAuth(config.getApiKey());
         headers.set("X-ModelScope-Async-Mode", "true");
 
         // 构建请求参数
@@ -116,16 +116,18 @@ public class ModelScopeImageModel implements ImageModel {
         requestBody.put("model", model);
         requestBody.put("prompt", finalPrompt);
 
-        // 从 options 中提取参数,或使用 Z-Image-Turbo 推荐的默认值
-        String size = "1024x1024";
-        Integer steps = 9;  // Z-Image-Turbo 推荐值(实际执行8次DiT前向传播)
-        Double guidanceScale = 0.0;  // Turbo模型必须设置为0
+        // 从 options 中提取参数,优先使用用户传入的值,否则使用配置的默认值
+        String size = config.getDefaultImageSize();
+        Integer steps = config.getImageInferenceSteps();
+        Double guidanceScale = config.getImageGuidanceScale();
+        Integer seed = config.getImageSeed();
 
         if (options != null) {
+            // 如果用户指定了尺寸,优先使用用户指定的
             if (options.getWidth() != null && options.getHeight() != null) {
                 size = options.getWidth() + "x" + options.getHeight();
             }
-            // 允许用户自定义步数,但建议使用9
+            // 如果用户指定了步数,优先使用用户指定的
             if (options.getN() != null && options.getN() > 0) {
                 steps = options.getN();
             }
@@ -134,7 +136,11 @@ public class ModelScopeImageModel implements ImageModel {
         requestBody.put("size", size);
         requestBody.put("num_inference_steps", steps);
         requestBody.put("guidance_scale", guidanceScale);
-        requestBody.put("seed", 42);  // 固定随机种子以保证可复现性
+
+        // 如果 seed 为 -1 表示随机,不传 seed 参数
+        if (seed != null && seed >= 0) {
+            requestBody.put("seed", seed);
+        }
 
         HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestBody, headers);
 
@@ -165,10 +171,10 @@ public class ModelScopeImageModel implements ImageModel {
      * 轮询任务结果
      */
     private String pollTaskResult(String taskId) throws InterruptedException {
-        String url = baseUrl + "/v1/tasks/" + taskId;
+        String url = config.getBaseUrl() + "/v1/tasks/" + taskId;
 
         HttpHeaders headers = new HttpHeaders();
-        headers.setBearerAuth(apiKey);
+        headers.setBearerAuth(config.getApiKey());
         headers.set("X-ModelScope-Task-Type", "image_generation");
         HttpEntity<Void> request = new HttpEntity<>(headers);
 

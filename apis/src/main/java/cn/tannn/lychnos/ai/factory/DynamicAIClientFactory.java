@@ -121,9 +121,8 @@ public class DynamicAIClientFactory {
         String apiKey = StringUtils.hasText(config.getApiKey()) ? config.getApiKey() : "dummy";
         return new ModelScopeImageModel(
                 apiKey,
-                config.getBaseUrl(),
-                config.getModel(),
-                restTemplate
+                restTemplate,
+                config
         );
     }
 

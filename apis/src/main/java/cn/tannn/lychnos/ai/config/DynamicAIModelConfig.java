@@ -53,7 +53,29 @@ public class DynamicAIModelConfig {
     @Builder.Default
     private Integer maxTokens = 2000;
 
+    /**
+     * 图片生成默认尺寸（格式: "宽x高"，如 "1024x1024"）
+     */
+    @Builder.Default
+    private String defaultImageSize = "1024x1024";
 
+    /**
+     * 图片生成推理步数（Z-Image-Turbo 推荐值为 9）
+     */
+    @Builder.Default
+    private Integer imageInferenceSteps = 9;
+
+    /**
+     * 图片生成引导系数（Turbo 模型必须为 0.0）
+     */
+    @Builder.Default
+    private Double imageGuidanceScale = 0.0;
+
+    /**
+     * 图片生成随机种子（-1 表示随机，固定值可保证可复现性）
+     */
+    @Builder.Default
+    private Integer imageSeed = 42;
 
     /**
      * 构建 ai 模型配置
