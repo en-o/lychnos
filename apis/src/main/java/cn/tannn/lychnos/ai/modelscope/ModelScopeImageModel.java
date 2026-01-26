@@ -115,14 +115,31 @@ public class ModelScopeImageModel implements ImageModel {
         Map<String, Object> requestBody = new HashMap<>();
         requestBody.put("model", model);
         requestBody.put("prompt", finalPrompt);
-        // 从 options 中提取参数，或使用默认值
-        String size = "1024x1024";
-        requestBody.put("size", "1920x1080");  // 设置图片尺寸为 1920x1080 (Full HD, 16:9横向)
 
+        // 从 options 中提取参数,或使用 Z-Image-Turbo 推荐的默认值
+        String size = "1024x1024";
+        Integer steps = 9;  // Z-Image-Turbo 推荐值(实际执行8次DiT前向传播)
+        Double guidanceScale = 0.0;  // Turbo模型必须设置为0
+
+        if (options != null) {
+            if (options.getWidth() != null && options.getHeight() != null) {
+                size = options.getWidth() + "x" + options.getHeight();
+            }
+            // 允许用户自定义步数,但建议使用9
+            if (options.getN() != null && options.getN() > 0) {
+                steps = options.getN();
+            }
+        }
+
+        requestBody.put("size", size);
+        requestBody.put("num_inference_steps", steps);
+        requestBody.put("guidance_scale", guidanceScale);
+        requestBody.put("seed", 42);  // 固定随机种子以保证可复现性
 
         HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestBody, headers);
 
-        log.debug("提交异步任务到 ModelScope，提示词长度: {}, 尺寸: {}", finalPrompt.length(), size);
+        log.debug("提交异步任务到 ModelScope，提示词长度: {}, 尺寸: {}, 推理步数: {}, 引导系数: {}",
+                  finalPrompt.length(), size, steps, guidanceScale);
         ResponseEntity<Map> response = restTemplate.exchange(
                 url,
                 HttpMethod.POST,
