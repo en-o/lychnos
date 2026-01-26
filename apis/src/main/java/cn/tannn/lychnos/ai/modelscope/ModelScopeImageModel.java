@@ -117,10 +117,10 @@ public class ModelScopeImageModel implements ImageModel {
         requestBody.put("prompt", finalPrompt);
 
         // 从 options 中提取参数,优先使用用户传入的值,否则使用配置的默认值
-        String size = config.getDefaultImageSize();
-        Integer steps = config.getImageInferenceSteps();
-        Double guidanceScale = config.getImageGuidanceScale();
-        Integer seed = config.getImageSeed();
+        String size = config.getImageConfig().getDefaultSize();
+        Integer steps = config.getImageConfig().getInferenceSteps();
+        Double guidanceScale = config.getImageConfig().getGuidanceScale();
+        Integer seed = config.getImageConfig().getSeed();
 
         if (options != null) {
             // 如果用户指定了尺寸,优先使用用户指定的
