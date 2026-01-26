@@ -1,5 +1,7 @@
 package cn.tannn.lychnos.ai.factory;
 
+import cn.tannn.lychnos.ai.client.DefaultDynamicAIClient;
+import cn.tannn.lychnos.ai.client.DynamicAIClient;
 import cn.tannn.lychnos.ai.config.CustomRetryConfig;
 import cn.tannn.lychnos.ai.config.DynamicAIModelConfig;
 import cn.tannn.lychnos.ai.modelscope.ModelScopeImageModel;
@@ -8,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.image.ImageModel;
 import org.springframework.ai.openai.OpenAiChatModel;
+import org.springframework.ai.openai.OpenAiChatOptions;
 import org.springframework.ai.openai.OpenAiImageModel;
 import org.springframework.ai.openai.OpenAiImageOptions;
 import org.springframework.ai.openai.api.OpenAiApi;
@@ -168,5 +171,49 @@ public class DynamicAIClientFactory {
                 .baseUrl(baseUrl)
                 .apiKey(apiKey)
                 .build();
+    }
+
+    /**
+     * 创建动态 AI 客户端（推荐使用，支持链式调用和运行时参数覆盖）
+     * <p>
+     * 参考 Spring AI ChatClient 设计，提供流式 API：
+     * <pre>
+     * // 文本生成示例
+     * String result = client.prompt()
+     *     .user("你好")
+     *     .temperature(0.8)
+     *     .content();
+     *
+     * // 图片生成示例
+     * String imageUrl = client.imagePrompt()
+     *     .prompt("一只可爱的猫")
+     *     .width(1024)
+     *     .height(1024)
+     *     .url();
+     * </pre>
+     *
+     * @param aiModel AI 模型配置
+     * @return DynamicAIClient 客户端实例
+     */
+    public DynamicAIClient createClient(AIModel aiModel) {
+        DynamicAIModelConfig config = DynamicAIModelConfig.buildAiClientConfig(aiModel);
+
+        // 创建 ChatModel 和默认选项
+        ChatModel chatModel = createChatModel(config);
+        OpenAiChatOptions defaultChatOptions = OpenAiChatOptions.builder()
+                .model(config.getModel())
+                .temperature(config.getTemperature())
+                .maxTokens(config.getMaxTokens())
+                .build();
+
+        // 创建 ImageModel 和默认选项
+        ImageModel imageModel = createImageModel(config, aiModel.getFactory());
+        OpenAiImageOptions defaultImageOptions = OpenAiImageOptions.builder()
+                .model(config.getModel())
+                .width(1920)
+                .height(1080)
+                .build();
+
+        return new DefaultDynamicAIClient(chatModel, imageModel, defaultChatOptions, defaultImageOptions);
     }
 }
