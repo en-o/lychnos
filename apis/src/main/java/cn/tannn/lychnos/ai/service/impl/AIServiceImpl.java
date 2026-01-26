@@ -9,7 +9,6 @@ import cn.tannn.lychnos.common.constant.BusinessErrorCode;
 import cn.tannn.lychnos.common.constant.ModelType;
 import cn.tannn.lychnos.common.util.AESUtil;
 import cn.tannn.lychnos.common.util.ZipUtil;
-import cn.tannn.lychnos.dao.AIModelDao;
 import cn.tannn.lychnos.entity.AIModel;
 import cn.tannn.lychnos.service.AIModelService;
 import lombok.RequiredArgsConstructor;
@@ -38,7 +37,6 @@ import java.util.Objects;
 @RequiredArgsConstructor
 public class AIServiceImpl implements AIService {
 
-    private final AIModelDao aiModelDao;
     private final DynamicAIClientFactory clientFactory;
     private final AIModelService aiModelService;
 
@@ -308,8 +306,7 @@ public class AIServiceImpl implements AIService {
      * 查找并验证模型权限和类型
      */
     private AIModel findAndVerifyModel(Long modelId, Long userId, ModelType expectedType) {
-        AIModel aiModel = aiModelDao.findById(modelId)
-                .orElseThrow(() -> new BusinessException("模型不存在，modelId: " + modelId));
+        AIModel aiModel = aiModelService.findById(modelId);
 
         // 验证用户权限
         if (!Objects.equals(aiModel.getUserId(), userId)) {
