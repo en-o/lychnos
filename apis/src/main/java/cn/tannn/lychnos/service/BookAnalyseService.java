@@ -1,7 +1,8 @@
 package cn.tannn.lychnos.service;
 
 import cn.tannn.jdevelops.jpa.service.J2ServiceImpl;
- import cn.tannn.lychnos.ai.prompt.BookPrompt;
+import cn.tannn.lychnos.ai.prompt.BookPrompt;
+import cn.tannn.lychnos.ai.prompt.ImagePrompt;
 import cn.tannn.lychnos.ai.service.AIService;
 import cn.tannn.lychnos.common.constant.BookSourceType;
 import cn.tannn.lychnos.common.constant.ModelType;
@@ -243,7 +244,7 @@ public class BookAnalyseService extends J2ServiceImpl<BookAnalyseDao, BookAnalys
     private void generateAndSavePoster(BookAnalyse bookAnalyse, Long userId, String bookTitle) {
         var userInfo = UserUtil.userRequestInfo();
         try {
-            String imageContentPrompt = buildImageContentPrompt(bookAnalyse);
+            String imageContentPrompt = ImagePrompt.buildBookInfographicPrompt(bookAnalyse);
             try (InputStream imageStream = aiService.generateImageStreamWithContent(userId, imageContentPrompt)) {
                 if (imageStream == null) {
                     log.warn("AI 返回的图片流为 null，书名: {}", bookTitle);
@@ -289,86 +290,6 @@ public class BookAnalyseService extends J2ServiceImpl<BookAnalyseDao, BookAnalys
             : String.format("《%s》", bookTitle);
 
         return String.format("请对书籍%s进行分析，返回JSON格式的分析结果。", bookInfo);
-    }
-
-    /**
-     * 构建图片内容提示词（仅描述内容，不包含风格）
-     * 书籍信息会被转换为详细的内容描述，风格由AIService的默认提示词提供
-     */
-    private String buildImageContentPrompt(BookAnalyse analysis) {
-        // 将JSONArray转换为字符串列表
-        String themesStr = analysis.getThemes() != null ?
-            String.join("、", analysis.getThemes().toJavaList(String.class)) : "";
-        String keyElementsStr = analysis.getKeyElements() != null ?
-            String.join("、", analysis.getKeyElements().toJavaList(String.class)) : "";
-
-        // 提取推荐语的核心内容（前80字）作为补充描述
-        String shortRecommendation = "";
-        if (analysis.getRecommendation() != null && !analysis.getRecommendation().isEmpty()) {
-            shortRecommendation = analysis.getRecommendation().length() > 80 ?
-                    analysis.getRecommendation().substring(0, 80) + "..." :
-                    analysis.getRecommendation();
-        }
-
-        // 提示词
-        String prompt = String.format("""
-                【书籍信息】
-                书名：《%s》
-                类型：%s
-                基调：%s
-                核心主题：%s
-                关键元素：%s
-
-                【内容简介】
-                %s
-
-                【设计要求】
-                请创建一张书籍内容分析信息图（非封面图），重点展示书籍的核心信息和分析结果：
-                1. 标识信息：
-                   - 书名标识：《%s》（简洁展示，不占用过多空间）
-                2. 核心内容展示（主要部分）：
-                   - 类型标签：【%s】用彩色标签展示
-                   - 基调说明：%s，用副标题或图标展示
-                   - 主题展示：%s，用图标或色块分区展示
-                   - 关键元素：%s，用插图或符号可视化
-                3. 视觉风格：
-                   - 根据书籍类型选择合适的配色方案（科幻：蓝紫色系；文学：暖色系；历史：典雅色系等）
-                   - 使用扁平化设计，信息层次清晰
-                   - 添加相关的图标、符号或简笔插画
-                   - 保持横向16:9布局(1920x1080 Full HD高分辨率)，信息密度高但不拥挤
-                4. 内容布局：
-                   - 将整个画面分为2-3个水平区域
-                   - 每个区域展示不同维度的书籍分析信息
-                   - 使用分隔线、色块或留白区分各区域
-                   - 重点突出内容分析，而非书名
-
-                【中文文字要求（极其重要）】
-                ⚠️ CRITICAL: 生成的信息图中如果包含中文文字，必须确保每个中文字符都是真实存在的汉字，字形清晰准确。
-                ⚠️ 严禁生成类似汉字但实际上不存在或无意义的字符（乱码）。
-                ⚠️ 如果无法准确生成中文字符，请改用图标、符号或英文代替。
-                ⚠️ 建议：尽可能使用视觉元素（图标、色块、插画）表达信息，减少中文文字的使用。
-
-                【注意事项】
-                - 这是内容分析信息图，不是封面图，重点展示分析内容
-                - 所有文字（中文/英文/其他语言）必须清晰、准确、真实存在
-                - 色彩搭配和谐，符合书籍主题
-                - 信息完整但不凌乱
-                - 整体风格现代、专业、吸引人
-                """,
-                analysis.getTitle(),
-                analysis.getGenre(),
-                analysis.getTone(),
-                themesStr,
-                keyElementsStr,
-                shortRecommendation,
-                analysis.getTitle(),
-                analysis.getGenre(),
-                analysis.getTone(),
-                themesStr,
-                keyElementsStr
-        );
-
-        return prompt;
     }
 
     /**
