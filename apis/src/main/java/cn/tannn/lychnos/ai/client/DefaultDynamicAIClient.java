@@ -159,7 +159,10 @@ public class DefaultDynamicAIClient implements DynamicAIClient {
             if (response.getResults().isEmpty()) {
                 throw new AIException.ModelCallFailedException("AI 返回空响应", null);
             }
-            return response.getResults().get(0).getOutput().getText();
+            String result = response.getResults().get(0).getOutput().getText();
+            int length = result != null ? result.length() : 0;
+            log.debug("AI文本生成成功， 响应长度: {}",length);
+            return result;
         }
     }
 

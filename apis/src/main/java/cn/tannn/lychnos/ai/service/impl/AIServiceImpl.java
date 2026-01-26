@@ -1,6 +1,7 @@
 package cn.tannn.lychnos.ai.service.impl;
 
 import cn.tannn.jdevelops.exception.built.BusinessException;
+import cn.tannn.lychnos.ai.client.DynamicAIClient;
 import cn.tannn.lychnos.ai.exception.AIException;
 import cn.tannn.lychnos.ai.factory.DynamicAIClientFactory;
 import cn.tannn.lychnos.ai.service.AIService;
@@ -213,10 +214,9 @@ public class AIServiceImpl implements AIService {
             log.info("调用AI文本生成，modelId: {}, userId: {}, model: {}",
                     aiModel.getId(), aiModel.getUserId(), aiModel.getModel());
 
-            ChatModel chatModel = clientFactory.createChatModel(aiModel);
-            ChatResponse response = chatModel.call(new Prompt(prompt));
-
-            return extractTextFromResponse(response, aiModel.getId());
+            return  clientFactory.createClient(aiModel).prompt()
+                    .user(prompt)
+                    .content();
         } catch (Exception e) {
             log.error("AI文本生成失败，modelId: {}, userId: {}, error: {}",
                     aiModel.getId(), aiModel.getUserId(), e.getMessage(), e);
@@ -232,9 +232,11 @@ public class AIServiceImpl implements AIService {
             log.info("调用AI图片生成，modelId: {}, userId: {}, model: {}",
                     aiModel.getId(), aiModel.getUserId(), aiModel.getModel());
 
-            ImageModel imageModel = clientFactory.createImageModel(aiModel);
-            ImageResponse response = imageModel.call(new ImagePrompt(prompt));
-
+            ImageResponse response = clientFactory.createClient(aiModel).imagePrompt()
+                    .prompt(prompt)
+                    .width(1920)
+                    .height(1080)
+                    .call();
             log.info("AI图片生成成功，modelId: {}", aiModel.getId());
             return response;
         } catch (Exception e) {
@@ -362,21 +364,6 @@ public class AIServiceImpl implements AIService {
                     BusinessErrorCode.MODEL_NOT_CONFIGURED.formatMessage(type.name())
             );
         }
-    }
-
-    /**
-     * 从响应中提取文本
-     */
-    private String extractTextFromResponse(ChatResponse response, Long modelId) {
-        if (response == null || response.getResults().isEmpty()) {
-            throw new AIException.ModelCallFailedException("AI返回空响应", null);
-        }
-
-        String result = response.getResults().get(0).getOutput().getText();
-        int length = result != null ? result.length() : 0;
-
-        log.info("AI文本生成成功，modelId: {}, 响应长度: {}", modelId, length);
-        return result;
     }
 
 

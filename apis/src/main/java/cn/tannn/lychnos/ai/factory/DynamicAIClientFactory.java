@@ -78,8 +78,8 @@ public class DynamicAIClientFactory {
                 .openAiApi(openAiApi)
                 .defaultOptions(org.springframework.ai.openai.OpenAiChatOptions.builder()
                         .model(config.getModel())
-                        .temperature(config.getTemperature())
-                        .maxTokens(config.getMaxTokens())
+                        .temperature(config.getTextConfig().getTemperature())
+                        .maxTokens(config.getTextConfig().getMaxTokens())
                         .build())
                 .retryTemplate(retryTemplate)
                 .build();
@@ -136,8 +136,8 @@ public class DynamicAIClientFactory {
         // 创建图片选项 - 1920x1080 Full HD 横向16:9布局（高分辨率，放大不模糊）
         OpenAiImageOptions imageOptions = OpenAiImageOptions.builder()
                 .model(config.getModel())
-                .width(1920)
-                .height(1080)
+                .width(config.getImageConfig().getDefaultWidth())
+                .height(config.getImageConfig().getDefaultHeight())
                 .build();
 
         // 创建自定义重试模板
@@ -215,16 +215,16 @@ public class DynamicAIClientFactory {
             chatModel = createChatModel(config);
             defaultChatOptions = OpenAiChatOptions.builder()
                     .model(config.getModel())
-                    .temperature(config.getTemperature())
-                    .maxTokens(config.getMaxTokens())
+                    .temperature(config.getTextConfig().getTemperature())
+                    .maxTokens(config.getTextConfig().getMaxTokens())
                     .build();
         } else if (aiModel.getType() == ModelType.IMAGE) {
             log.info("创建图片模型客户端，modelId: {}, model: {}", aiModel.getId(), config.getModel());
             imageModel = createImageModel(config, aiModel.getFactory());
             defaultImageOptions = OpenAiImageOptions.builder()
                     .model(config.getModel())
-                    .width(1920)
-                    .height(1080)
+                    .width(config.getImageConfig().getDefaultWidth())
+                    .height(config.getImageConfig().getDefaultHeight())
                     .build();
         }
 
