@@ -34,12 +34,12 @@ public class AIServiceImpl implements AIService {
 
     /**
      * 默认图片风格提示词
-     * 风格：现代信息图解风格，1024x576尺寸（16:9横向比例）
+     * 风格：现代信息图解风格1920x1080尺寸
      * 强制横向布局，内容密集
      */
     private static final String DEFAULT_IMAGE_STYLE_PROMPT = """
             CRITICAL REQUIREMENTS (MUST FOLLOW):
-            - Image size: EXACTLY 1024x576 pixels (16:9 aspect ratio)
+            - Image size: EXACTLY 1920x1080 pixels (16:9 aspect ratio)
             - Orientation: HORIZONTAL LANDSCAPE (width MUST be 1024, height MUST be 576)
             - DO NOT create vertical/portrait images
 
