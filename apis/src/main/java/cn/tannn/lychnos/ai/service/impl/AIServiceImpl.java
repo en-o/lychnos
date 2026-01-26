@@ -233,16 +233,8 @@ public class AIServiceImpl implements AIService {
             log.info("调用AI图片生成，modelId: {}, userId: {}, model: {}",
                     aiModel.getId(), aiModel.getUserId(), aiModel.getModel());
 
-            // 压缩提示词：去除多余空格、换行、制表符（减少token消耗）
-            String compressedPrompt = ZipUtil.smartCompressPrompt(prompt, 1999);
-            if (compressedPrompt.length() != prompt.length()) {
-                log.info("提示词已压缩，原始: {} -> 压缩: {} (节省 {} 字符)",
-                        prompt.length(), compressedPrompt.length(),
-                        prompt.length() - compressedPrompt.length());
-            }
-
             ImageModel imageModel = clientFactory.createImageModel(aiModel);
-            ImageResponse response = imageModel.call(new ImagePrompt(compressedPrompt));
+            ImageResponse response = imageModel.call(new ImagePrompt(prompt));
 
             log.info("AI图片生成成功，modelId: {}", aiModel.getId());
             return response;

@@ -1,5 +1,6 @@
 package cn.tannn.lychnos.ai.modelscope;
 
+import cn.tannn.lychnos.common.util.ZipUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.image.*;
@@ -70,11 +71,31 @@ public class ModelScopeImageModel implements ImageModel {
      * 提交异步任务
      */
     private String submitAsyncTask(String prompt) {
-        // ModelScope 限制提示词长度不超过2000字符
+        // ModelScope 限制提示词长度不超过2000字符，使用智能压缩策略
         String finalPrompt = prompt;
         if (prompt.length() > MAX_PROMPT_LENGTH) {
-            log.warn("提示词长度 {} 超过 ModelScope 限制 {}，进行截断", prompt.length(), MAX_PROMPT_LENGTH);
-            finalPrompt = prompt.substring(0, MAX_PROMPT_LENGTH);
+            log.info("提示词长度 {} 超过限制 {}，尝试智能压缩", prompt.length(), MAX_PROMPT_LENGTH);
+
+            // 第一步：尝试普通压缩
+            finalPrompt = ZipUtil.smartCompressPrompt(prompt, MAX_PROMPT_LENGTH);
+
+            // 第二步：如果还是超长，使用激进压缩
+            if (finalPrompt.length() > MAX_PROMPT_LENGTH) {
+                log.warn("普通压缩后长度 {} 仍超限，使用激进压缩", finalPrompt.length());
+                finalPrompt = ZipUtil.compressPromptAggressive(prompt);
+
+                // 第三步：最后的保险，如果还是超长才截断
+                if (finalPrompt.length() > MAX_PROMPT_LENGTH) {
+                    log.error("激进压缩后长度 {} 仍超限，被迫截断到 {}",
+                             finalPrompt.length(), MAX_PROMPT_LENGTH);
+                    finalPrompt = finalPrompt.substring(0, MAX_PROMPT_LENGTH);
+                }
+            }
+
+            log.info("提示词压缩完成：{} -> {} 字符（节省 {}%）",
+                    prompt.length(),
+                    finalPrompt.length(),
+                    String.format("%.1f", (1.0 - (double)finalPrompt.length() / prompt.length()) * 100));
         }
 
         String url = baseUrl + "/v1/images/generations";
