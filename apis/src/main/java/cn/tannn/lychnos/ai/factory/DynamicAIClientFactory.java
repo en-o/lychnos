@@ -4,6 +4,8 @@ import cn.tannn.lychnos.ai.client.DefaultDynamicAIClient;
 import cn.tannn.lychnos.ai.client.DynamicAIClient;
 import cn.tannn.lychnos.ai.config.CustomRetryConfig;
 import cn.tannn.lychnos.ai.config.DynamicAIModelConfig;
+import cn.tannn.lychnos.ai.config.ImageGenerationConfig;
+import cn.tannn.lychnos.ai.config.TextGenerationConfig;
 import cn.tannn.lychnos.ai.modelscope.ModelScopeImageModel;
 import cn.tannn.lychnos.common.constant.ModelType;
 import cn.tannn.lychnos.entity.AIModel;
@@ -73,13 +75,17 @@ public class DynamicAIClientFactory {
         // 创建自定义重试模板
         RetryTemplate retryTemplate = CustomRetryConfig.createRetryTemplate();
 
-        // 创建 OpenAI 聊天模型
+        // 创建 OpenAI 聊天模型，使用 TextGenerationConfig 中的所有参数
+        TextGenerationConfig textConfig = config.getTextConfig();
         return OpenAiChatModel.builder()
                 .openAiApi(openAiApi)
                 .defaultOptions(org.springframework.ai.openai.OpenAiChatOptions.builder()
                         .model(config.getModel())
-                        .temperature(config.getTextConfig().getTemperature())
-                        .maxTokens(config.getTextConfig().getMaxTokens())
+                        .temperature(textConfig.getTemperature())
+                        .maxTokens(textConfig.getMaxTokens())
+                        .topP(textConfig.getTopP())
+                        .frequencyPenalty(textConfig.getFrequencyPenalty())
+                        .presencePenalty(textConfig.getPresencePenalty())
                         .build())
                 .retryTemplate(retryTemplate)
                 .build();
@@ -133,11 +139,15 @@ public class DynamicAIClientFactory {
         // 创建 OpenAI Image API 客户端
         OpenAiImageApi openAiImageApi = createOpenAiImageApi(config);
 
-        // 创建图片选项 - 1920x1080 Full HD 横向16:9布局（高分辨率，放大不模糊）
+        // 使用 ImageGenerationConfig 中的所有参数
+        ImageGenerationConfig imageConfig = config.getImageConfig();
         OpenAiImageOptions imageOptions = OpenAiImageOptions.builder()
                 .model(config.getModel())
-                .width(config.getImageConfig().getDefaultWidth())
-                .height(config.getImageConfig().getDefaultHeight())
+                .width(imageConfig.getDefaultWidth())
+                .height(imageConfig.getDefaultHeight())
+                .N(imageConfig.getCount())
+                .quality(imageConfig.getQuality())
+                .style(imageConfig.getStyle())
                 .build();
 
         // 创建自定义重试模板
@@ -213,18 +223,26 @@ public class DynamicAIClientFactory {
         if (aiModel.getType() == ModelType.TEXT) {
             log.info("创建文本模型客户端，modelId: {}, model: {}", aiModel.getId(), config.getModel());
             chatModel = createChatModel(config);
+            TextGenerationConfig textConfig = config.getTextConfig();
             defaultChatOptions = OpenAiChatOptions.builder()
                     .model(config.getModel())
-                    .temperature(config.getTextConfig().getTemperature())
-                    .maxTokens(config.getTextConfig().getMaxTokens())
+                    .temperature(textConfig.getTemperature())
+                    .maxTokens(textConfig.getMaxTokens())
+                    .topP(textConfig.getTopP())
+                    .frequencyPenalty(textConfig.getFrequencyPenalty())
+                    .presencePenalty(textConfig.getPresencePenalty())
                     .build();
         } else if (aiModel.getType() == ModelType.IMAGE) {
             log.info("创建图片模型客户端，modelId: {}, model: {}", aiModel.getId(), config.getModel());
             imageModel = createImageModel(config, aiModel.getFactory());
+            ImageGenerationConfig imageConfig = config.getImageConfig();
             defaultImageOptions = OpenAiImageOptions.builder()
                     .model(config.getModel())
-                    .width(config.getImageConfig().getDefaultWidth())
-                    .height(config.getImageConfig().getDefaultHeight())
+                    .width(imageConfig.getDefaultWidth())
+                    .height(imageConfig.getDefaultHeight())
+                    .N(imageConfig.getCount())
+                    .quality(imageConfig.getQuality())
+                    .style(imageConfig.getStyle())
                     .build();
         }
 

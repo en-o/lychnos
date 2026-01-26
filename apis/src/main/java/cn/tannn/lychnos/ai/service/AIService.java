@@ -34,6 +34,27 @@ public interface AIService {
     String generateTextWithModel(Long modelId, Long userId, String prompt);
 
     /**
+     * 文本生成（支持系统提示词和用户消息）
+     *
+     * @param userId        用户ID
+     * @param systemMessage 系统提示词
+     * @param userMessage   用户消息
+     * @return 生成的文本
+     */
+    String generateTextWithSystem(Long userId, String systemMessage, String userMessage);
+
+    /**
+     * 文本生成（使用指定模型，支持系统提示词和用户消息）
+     *
+     * @param modelId       模型ID
+     * @param userId        用户ID
+     * @param systemMessage 系统提示词
+     * @param userMessage   用户消息
+     * @return 生成的文本
+     */
+    String generateTextWithSystemAndModel(Long modelId, Long userId, String systemMessage, String userMessage);
+
+    /**
      * 图片生成
      *
      * @param userId 用户ID
