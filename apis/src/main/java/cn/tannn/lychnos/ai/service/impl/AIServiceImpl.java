@@ -17,6 +17,8 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.Objects;
 
+import static cn.tannn.lychnos.ai.prompt.ImagePrompt.DEFAULT_IMAGE_STYLE_PROMPT;
+
 /**
  * AI 服务实现
  *
@@ -32,38 +34,6 @@ public class AIServiceImpl implements AIService {
     private final DynamicAIClientFactory clientFactory;
     private final AIModelService aiModelService;
 
-    /**
-     * 默认图片风格提示词
-     * 风格：现代信息图解风格1920x1080尺寸
-     * 强制横向布局，内容密集
-     */
-    private static final String DEFAULT_IMAGE_STYLE_PROMPT = """
-            CRITICAL REQUIREMENTS (MUST FOLLOW):
-            - Image size: EXACTLY 1920x1080 pixels (16:9 aspect ratio)
-            - Orientation: HORIZONTAL LANDSCAPE (width MUST be 1024, height MUST be 576)
-            - DO NOT create vertical/portrait images
-
-            Style Requirements:
-            - Design style: Modern infographic poster with dense, information-rich layout
-            - Background: Light neutral color (beige, light gray, or white) suitable for reading
-            - Color scheme: Harmonious color palette with clear contrast for readability
-            - Layout: Multi-section horizontal layout with maximum information density
-            - Typography: Clean, modern fonts; mix of bold headers and regular body text
-            - Visual elements: Multiple illustrations, icons, diagrams, charts to fill the space
-            - Composition: Divide horizontally into 2-3 main columns or sections
-            - Information density: HIGH - utilize all available horizontal space
-            - Decorative elements: Minimal, focus on information delivery
-            - Atmosphere: Professional, educational, informative
-            - Quality: High resolution, suitable for web display
-            - Information presentation: Use boxes, arrows, bullet points, numbered lists, and visual connectors
-
-            Layout Suggestions:
-            - Left section: Main title and key information
-            - Middle section: Core content with icons/diagrams
-            - Right section: Additional details or summary
-            - Use horizontal dividers and borders to organize content
-
-            """;
 
     @Override
     public String generateText(Long userId, String prompt) {
@@ -86,6 +56,29 @@ public class AIServiceImpl implements AIService {
 
         // 使用指定模型进行生成
         return doGenerateText(aiModel, prompt);
+    }
+
+    @Override
+    public String generateTextWithSystem(Long userId, String systemMessage, String userMessage) {
+        validateUserId(userId);
+        validatePrompt(userMessage);
+        // 获取用户启用的默认模型
+        AIModel aiModel = getEnabledModel(userId, ModelType.TEXT);
+        // 使用系统提示词和用户消息进行生成
+        return doGenerateTextWithSystem(aiModel, systemMessage, userMessage);
+    }
+
+    @Override
+    public String generateTextWithSystemAndModel(Long modelId, Long userId, String systemMessage, String userMessage) {
+        validateModelId(modelId);
+        validateUserId(userId);
+        validatePrompt(userMessage);
+
+        // 查询并验证模型
+        AIModel aiModel = findAndVerifyModel(modelId, userId, ModelType.TEXT);
+
+        // 使用指定模型和系统提示词进行生成
+        return doGenerateTextWithSystem(aiModel, systemMessage, userMessage);
     }
 
     @Override
@@ -213,6 +206,30 @@ public class AIServiceImpl implements AIService {
                     .content();
         } catch (Exception e) {
             log.error("AI文本生成失败，modelId: {}, userId: {}, error: {}",
+                    aiModel.getId(), aiModel.getUserId(), e.getMessage(), e);
+            throw new AIException.ModelCallFailedException("文本生成失败: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * 执行文本生成（支持系统提示词和用户消息，内部方法）
+     */
+    private String doGenerateTextWithSystem(AIModel aiModel, String systemMessage, String userMessage) {
+        try {
+            log.info("调用AI文本生成（带系统提示词），modelId: {}, userId: {}, model: {}",
+                    aiModel.getId(), aiModel.getUserId(), aiModel.getModel());
+
+            var promptBuilder = clientFactory.createClient(aiModel).prompt()
+                    .user(userMessage);
+
+            // 如果系统提示词不为空，则添加
+            if (systemMessage != null && !systemMessage.trim().isEmpty()) {
+                promptBuilder.system(systemMessage);
+            }
+
+            return promptBuilder.content();
+        } catch (Exception e) {
+            log.error("AI文本生成失败（带系统提示词），modelId: {}, userId: {}, error: {}",
                     aiModel.getId(), aiModel.getUserId(), e.getMessage(), e);
             throw new AIException.ModelCallFailedException("文本生成失败: " + e.getMessage(), e);
         }
