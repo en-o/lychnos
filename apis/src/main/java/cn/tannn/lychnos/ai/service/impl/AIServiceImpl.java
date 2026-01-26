@@ -6,7 +6,6 @@ import cn.tannn.lychnos.ai.factory.DynamicAIClientFactory;
 import cn.tannn.lychnos.ai.service.AIService;
 import cn.tannn.lychnos.common.constant.BusinessErrorCode;
 import cn.tannn.lychnos.common.constant.ModelType;
-import cn.tannn.lychnos.common.util.ZipUtil;
 import cn.tannn.lychnos.entity.AIModel;
 import cn.tannn.lychnos.service.AIModelService;
 import lombok.RequiredArgsConstructor;
