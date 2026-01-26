@@ -2,6 +2,9 @@ package cn.tannn.lychnos.ai.client;
 
 import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.image.ImageResponse;
+import org.springframework.ai.tool.ToolCallback;
+
+import java.util.List;
 
 /**
  * 动态 AI 客户端接口
@@ -62,6 +65,26 @@ public interface DynamicAIClient {
          * @return this
          */
         TextPromptBuilder maxTokens(Integer maxTokens);
+
+        /**
+         * 添加单个工具回调（Tool Calling）
+         * <p>
+         * 允许 AI 模型在生成响应时调用外部工具
+         *
+         * @param toolCallback 工具回调
+         * @return this
+         */
+        TextPromptBuilder tool(ToolCallback toolCallback);
+
+        /**
+         * 添加多个工具回调（Tool Calling）
+         * <p>
+         * 允许 AI 模型在生成响应时调用多个外部工具
+         *
+         * @param toolCallbacks 工具回调列表
+         * @return this
+         */
+        TextPromptBuilder tools(List<ToolCallback> toolCallbacks);
 
         /**
          * 调用 AI 模型并返回响应

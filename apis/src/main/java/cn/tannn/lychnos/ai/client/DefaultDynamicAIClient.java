@@ -12,6 +12,7 @@ import org.springframework.ai.image.ImagePrompt;
 import org.springframework.ai.image.ImageResponse;
 import org.springframework.ai.openai.OpenAiChatOptions;
 import org.springframework.ai.openai.OpenAiImageOptions;
+import org.springframework.ai.tool.ToolCallback;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -60,6 +61,7 @@ public class DefaultDynamicAIClient implements DynamicAIClient {
         private String systemMessage;
         private Double temperature;
         private Integer maxTokens;
+        private final List<ToolCallback> toolCallbacks = new ArrayList<>();
 
         @Override
         public TextPromptBuilder user(String userMessage) {
@@ -82,6 +84,22 @@ public class DefaultDynamicAIClient implements DynamicAIClient {
         @Override
         public TextPromptBuilder maxTokens(Integer maxTokens) {
             this.maxTokens = maxTokens;
+            return this;
+        }
+
+        @Override
+        public TextPromptBuilder tool(ToolCallback toolCallback) {
+            if (toolCallback != null) {
+                this.toolCallbacks.add(toolCallback);
+            }
+            return this;
+        }
+
+        @Override
+        public TextPromptBuilder tools(List<ToolCallback> toolCallbacks) {
+            if (toolCallbacks != null) {
+                this.toolCallbacks.addAll(toolCallbacks);
+            }
             return this;
         }
 
@@ -112,6 +130,10 @@ public class DefaultDynamicAIClient implements DynamicAIClient {
                 }
                 if (maxTokens != null) {
                     optionsBuilder.maxTokens(maxTokens);
+                }
+                // 添加工具回调
+                if (!toolCallbacks.isEmpty()) {
+                    optionsBuilder.toolCallbacks(toolCallbacks);
                 }
 
                 // 创建 Prompt 并调用

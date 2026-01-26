@@ -270,6 +270,277 @@ public class AIServiceImpl implements AIService {
 }
 ```
 
+### 3. Tool Calling（工具调用）
+
+Tool Calling 允许 AI 模型在生成响应时调用外部工具/函数，极大地扩展了 AI 的能力。
+
+#### 什么是 Tool Calling？
+
+Tool Calling（也称为 Function Calling）是一种让 AI 模型能够：
+1. 识别何时需要外部信息或操作
+2. 请求调用特定的工具/函数
+3. 使用工具返回的结果生成最终响应
+
+**典型应用场景**：
+- 查询实时数据（天气、股票、新闻等）
+- 执行计算或数据处理
+- 访问数据库或 API
+- 执行系统操作
+
+#### 基础用法
+
+```java
+@Service
+@RequiredArgsConstructor
+public class WeatherService {
+
+    private final DynamicAIClientFactory clientFactory;
+    private final AIModelService aiModelService;
+
+    public String getWeatherInfo(Long userId, String question) {
+        AIModel aiModel = aiModelService.getEnabledModel(userId, ModelType.TEXT);
+        DynamicAIClient client = clientFactory.createClient(aiModel);
+
+        // 定义天气查询工具
+        ToolCallback weatherTool = FunctionToolCallback.builder()
+            .function("getCurrentWeather", (request) -> {
+                // 从请求中提取参数
+                String location = request.get("location");
+                // 调用实际的天气 API
+                return queryWeatherAPI(location);
+            })
+            .description("获取指定城市的实时天气信息")
+            .inputType(WeatherRequest.class)
+            .build();
+
+        // 使用工具调用
+        return client.prompt()
+            .system("你是一个天气助手")
+            .user(question)
+            .tool(weatherTool)  // 添加工具
+            .content();
+    }
+
+    private String queryWeatherAPI(String location) {
+        // 实际的天气 API 调用逻辑
+        return "{\"temperature\": 25, \"condition\": \"晴天\"}";
+    }
+
+    // 定义参数类型
+    record WeatherRequest(String location) {}
+}
+```
+
+#### 使用多个工具
+
+```java
+public String getComprehensiveInfo(Long userId, String question) {
+    AIModel aiModel = aiModelService.getEnabledModel(userId, ModelType.TEXT);
+    DynamicAIClient client = clientFactory.createClient(aiModel);
+
+    // 定义多个工具
+    List<ToolCallback> tools = List.of(
+        // 天气工具
+        FunctionToolCallback.builder()
+            .function("getCurrentWeather", this::getWeather)
+            .description("获取城市天气")
+            .inputType(WeatherRequest.class)
+            .build(),
+
+        // 时间工具
+        FunctionToolCallback.builder()
+            .function("getCurrentTime", this::getTime)
+            .description("获取当前时间")
+            .inputType(TimeRequest.class)
+            .build(),
+
+        // 计算器工具
+        FunctionToolCallback.builder()
+            .function("calculate", this::calculate)
+            .description("执行数学计算")
+            .inputType(CalculateRequest.class)
+            .build()
+    );
+
+    // AI 会根据问题自动选择合适的工具
+    return client.prompt()
+        .user(question)
+        .tools(tools)  // 添加多个工具
+        .content();
+}
+```
+
+#### 完整示例：数据库查询工具
+
+```java
+@Service
+@RequiredArgsConstructor
+public class BookQueryService {
+
+    private final DynamicAIClientFactory clientFactory;
+    private final AIModelService aiModelService;
+    private final BookAnalyseService bookAnalyseService;
+
+    public String queryBooksWithAI(Long userId, String naturalLanguageQuery) {
+        AIModel aiModel = aiModelService.getEnabledModel(userId, ModelType.TEXT);
+        DynamicAIClient client = clientFactory.createClient(aiModel);
+
+        // 定义书籍查询工具
+        ToolCallback bookQueryTool = FunctionToolCallback.builder()
+            .function("searchBooks", (request) -> {
+                String keyword = request.get("keyword");
+                String author = request.get("author");
+                Integer limit = request.get("limit");
+
+                // 调用实际的数据库查询
+                List<BookAnalyse> books = bookAnalyseService.search(keyword, author, limit);
+
+                // 返回 JSON 格式的结果
+                return objectMapper.writeValueAsString(books);
+            })
+            .description("在数据库中搜索书籍，支持按关键词、作者筛选")
+            .inputType(BookSearchRequest.class)
+            .build();
+
+        // AI 会理解自然语言查询，调用工具，并生成友好的回复
+        return client.prompt()
+            .system("你是一个图书推荐助手，可以帮助用户查找书籍")
+            .user(naturalLanguageQuery)
+            .tool(bookQueryTool)
+            .content();
+    }
+
+    record BookSearchRequest(String keyword, String author, Integer limit) {}
+}
+```
+
+**使用示例**：
+```java
+// 用户输入自然语言
+String result = bookQueryService.queryBooksWithAI(userId, "帮我找一些村上春树的小说");
+
+// AI 会：
+// 1. 理解用户意图
+// 2. 调用 searchBooks 工具，参数：keyword=null, author="村上春树", limit=10
+// 3. 获取查询结果
+// 4. 生成友好的回复："我为您找到了以下村上春树的小说：..."
+```
+
+#### Tool Calling 工作流程
+
+```
+用户提问
+    ↓
+AI 分析问题
+    ↓
+AI 决定是否需要调用工具
+    ↓
+[需要] → AI 返回工具调用请求（函数名 + 参数）
+    ↓
+Spring AI 自动执行 ToolCallback
+    ↓
+工具返回结果
+    ↓
+AI 使用结果生成最终响应
+    ↓
+返回给用户
+```
+
+#### 高级用法：条件性工具调用
+
+```java
+public String generateWithConditionalTools(Long userId, String question, boolean enableWeather) {
+    AIModel aiModel = aiModelService.getEnabledModel(userId, ModelType.TEXT);
+    DynamicAIClient client = clientFactory.createClient(aiModel);
+
+    var builder = client.prompt()
+        .user(question);
+
+    // 根据条件添加工具
+    if (enableWeather) {
+        builder.tool(weatherTool);
+    }
+
+    return builder.content();
+}
+```
+
+#### 错误处理
+
+```java
+public String safeToolCall(Long userId, String question) {
+    try {
+        AIModel aiModel = aiModelService.getEnabledModel(userId, ModelType.TEXT);
+        DynamicAIClient client = clientFactory.createClient(aiModel);
+
+        ToolCallback riskyTool = FunctionToolCallback.builder()
+            .function("riskyOperation", (request) -> {
+                try {
+                    // 可能失败的操作
+                    return performRiskyOperation(request);
+                } catch (Exception e) {
+                    // 返回错误信息给 AI
+                    return "{\"error\": \"" + e.getMessage() + "\"}";
+                }
+            })
+            .description("执行可能失败的操作")
+            .inputType(RiskyRequest.class)
+            .build();
+
+        return client.prompt()
+            .user(question)
+            .tool(riskyTool)
+            .content();
+
+    } catch (AIException.ModelCallFailedException e) {
+        log.error("AI 调用失败: {}", e.getMessage());
+        return "抱歉，处理您的请求时出现了问题";
+    }
+}
+```
+
+#### 最佳实践
+
+1. **工具描述要清晰**
+   ```java
+   // ❌ 不好的描述
+   .description("查询")
+
+   // ✅ 好的描述
+   .description("在数据库中搜索书籍，支持按书名、作者、ISBN 筛选，返回最多 20 条结果")
+   ```
+
+2. **参数类型要明确**
+   ```java
+   // 使用 record 定义清晰的参数结构
+   record WeatherRequest(
+       @JsonProperty("location") String location,
+       @JsonProperty("unit") String unit  // "celsius" or "fahrenheit"
+   ) {}
+   ```
+
+3. **返回结构化数据**
+   ```java
+   // ✅ 返回 JSON 格式
+   return objectMapper.writeValueAsString(result);
+
+   // ❌ 返回纯文本（AI 难以解析）
+   return "Temperature: 25, Condition: Sunny";
+   ```
+
+4. **工具应该是幂等的**
+   - 避免在工具中执行不可逆操作（删除、修改数据）
+   - 如果必须执行，应该有明确的确认机制
+
+5. **限制工具的权限范围**
+   ```java
+   // ✅ 限制查询范围
+   .function("searchBooks", (request) -> {
+       int limit = Math.min(request.get("limit"), 50);  // 最多 50 条
+       return bookService.search(keyword, limit);
+   })
+   ```
+
 ## API 参考
 
 ### DynamicAIClient 接口
@@ -282,6 +553,8 @@ public class AIServiceImpl implements AIService {
 | `system(String)` | 系统消息 | 设置系统消息（可选） | TextPromptBuilder |
 | `temperature(Double)` | 温度值 (0.0-1.0) | 覆盖默认温度参数 | TextPromptBuilder |
 | `maxTokens(Integer)` | 最大 Token 数 | 覆盖默认最大 Token 数 | TextPromptBuilder |
+| `tool(ToolCallback)` | 工具回调 | 添加单个工具（Tool Calling） | TextPromptBuilder |
+| `tools(List<ToolCallback>)` | 工具回调列表 | 添加多个工具（Tool Calling） | TextPromptBuilder |
 | `call()` | - | 调用 AI 并返回完整响应 | ChatResponse |
 | `content()` | - | 调用 AI 并直接返回文本内容 | String |
 
@@ -432,11 +705,14 @@ String url = client.imagePrompt().prompt(prompt).url();
 1. **链式调用**：代码更简洁、可读性更强
 2. **参数灵活性**：支持默认参数和运行时参数覆盖
 3. **类型安全**：Builder 模式提供编译时类型检查
-4. **符合最佳实践**：参考 Spring AI 官方 ChatClient 设计
+4. **Tool Calling 支持**：轻松集成外部工具和函数
+5. **符合最佳实践**：参考 Spring AI 官方 ChatClient 设计
 
 推荐在新代码中使用 `DynamicAIClient`，旧代码可以逐步迁移。
 
 ## 参考资料
 
 - [Spring AI ChatClient 官方文档](https://docs.spring.io/spring-ai/reference/api/chatclient.html)
+- [Spring AI Tool Calling 文档](https://docs.spring.io/spring-ai/reference/1.0/api/tools.html)
 - [Spring AI 项目地址](https://github.com/spring-projects/spring-ai)
+- [Spring AI 1.1.2 版本](https://github.com/spring-projects/spring-ai/tree/1.1.2)
