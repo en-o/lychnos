@@ -20,6 +20,8 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class DynamicAIModelConfig {
 
+    // ==================== 公共设置 ====================
+
     /**
      * API Key
      */
@@ -35,11 +37,33 @@ public class DynamicAIModelConfig {
      */
     private String model;
 
+    // ==================== HTTP 设置 ====================
+
     /**
-     * 请求超时时间（秒）
+     * HTTP 请求超时时间（秒）
      */
     @Builder.Default
     private Integer timeout = 60;
+
+    /**
+     * HTTP 连接超时时间（秒）
+     */
+    @Builder.Default
+    private Integer connectTimeout = 30;
+
+    /**
+     * HTTP 读取超时时间（秒）
+     */
+    @Builder.Default
+    private Integer readTimeout = 60;
+
+    /**
+     * 最大重试次数
+     */
+    @Builder.Default
+    private Integer maxRetries = 3;
+
+    // ==================== Text 生成设置 ====================
 
     /**
      * 温度参数（0-2之间，控制随机性）
@@ -52,6 +76,26 @@ public class DynamicAIModelConfig {
      */
     @Builder.Default
     private Integer maxTokens = 2000;
+
+    /**
+     * Top P 采样参数（0-1之间）
+     */
+    @Builder.Default
+    private Double topP = 1.0;
+
+    /**
+     * 频率惩罚（-2.0 到 2.0 之间）
+     */
+    @Builder.Default
+    private Double frequencyPenalty = 0.0;
+
+    /**
+     * 存在惩罚（-2.0 到 2.0 之间）
+     */
+    @Builder.Default
+    private Double presencePenalty = 0.0;
+
+    // ==================== Image 生成设置 ====================
 
     /**
      * 图片生成默认尺寸（格式: "宽x高"，如 "1024x1024"）
@@ -76,6 +120,24 @@ public class DynamicAIModelConfig {
      */
     @Builder.Default
     private Integer imageSeed = 42;
+
+    /**
+     * 图片生成数量
+     */
+    @Builder.Default
+    private Integer imageCount = 1;
+
+    /**
+     * 图片质量（如: "standard", "hd"）
+     */
+    @Builder.Default
+    private String imageQuality = "standard";
+
+    /**
+     * 图片风格（如: "vivid", "natural"）
+     */
+    @Builder.Default
+    private String imageStyle = "vivid";
 
     /**
      * 构建 ai 模型配置
