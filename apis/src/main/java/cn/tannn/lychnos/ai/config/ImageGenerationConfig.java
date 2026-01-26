@@ -15,10 +15,16 @@ import lombok.Getter;
 public class ImageGenerationConfig {
 
     /**
-     * 图片生成默认尺寸（格式: "宽x高"，如 "1024x1024"）
+     * 图片默认宽度（像素）
      */
     @Builder.Default
-    private String defaultSize = "1024x1024";
+    private Integer defaultWidth = 1024;
+
+    /**
+     * 图片默认高度（像素）
+     */
+    @Builder.Default
+    private Integer defaultHeight = 1024;
 
     /**
      * 图片生成推理步数（Z-Image-Turbo 推荐值为 9）
@@ -57,37 +63,12 @@ public class ImageGenerationConfig {
     private String style = "vivid";
 
     /**
-     * 获取默认宽度
+     * 获取默认尺寸字符串（格式: "宽x高"）
      *
-     * @return 宽度（像素）
+     * @return 尺寸字符串，如 "1024x1024"
      */
-    public Integer getDefaultWidth() {
-        String[] parts = defaultSize.split("x");
-        if (parts.length == 2) {
-            try {
-                return Integer.parseInt(parts[0]);
-            } catch (NumberFormatException e) {
-                return 1024;
-            }
-        }
-        return 1024;
-    }
-
-    /**
-     * 获取默认高度
-     *
-     * @return 高度（像素）
-     */
-    public Integer getDefaultHeight() {
-        String[] parts = defaultSize.split("x");
-        if (parts.length == 2) {
-            try {
-                return Integer.parseInt(parts[1]);
-            } catch (NumberFormatException e) {
-                return 1024;
-            }
-        }
-        return 1024;
+    public String buildSizeString() {
+        return defaultWidth + "x" + defaultHeight;
     }
 
     /**
@@ -97,7 +78,7 @@ public class ImageGenerationConfig {
      * @param height 高度
      * @return 尺寸字符串
      */
-    public static String buildSizeString(Integer width, Integer height) {
+    public static String buildSizeString2(Integer width, Integer height) {
         return width + "x" + height;
     }
 
