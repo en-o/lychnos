@@ -13,6 +13,49 @@ import lombok.extern.slf4j.Slf4j;
 public class ZipUtil {
 
     /**
+     * ModelScope 提示词最大长度限制
+     */
+    private static final int MAX_PROMPT_LENGTH = 2000;
+
+
+    /**
+     * 智能压缩提示词（仅在超过指定长度时才压缩） - def 2000
+     *
+     * @param prompt 原始提示词
+     * @return 压缩后的提示词
+     */
+    public static String smartCompressPromptLimit2K(String prompt){
+
+        String finalPrompt = prompt;
+
+        if (prompt.length() > MAX_PROMPT_LENGTH) {
+            log.info("提示词长度 {} 超过限制 {}，尝试智能压缩", prompt.length(), MAX_PROMPT_LENGTH);
+
+            // 第一步：尝试普通压缩
+            finalPrompt = ZipUtil.smartCompressPrompt(prompt, MAX_PROMPT_LENGTH);
+
+            // 第二步：如果还是超长，使用激进压缩
+            if (finalPrompt.length() > MAX_PROMPT_LENGTH) {
+                log.warn("普通压缩后长度 {} 仍超限，使用激进压缩", finalPrompt.length());
+                finalPrompt = ZipUtil.compressPromptAggressive(prompt);
+
+                // 第三步：最后的保险，如果还是超长才截断
+                if (finalPrompt.length() > MAX_PROMPT_LENGTH) {
+                    log.error("激进压缩后长度 {} 仍超限，被迫截断到 {}",
+                            finalPrompt.length(), MAX_PROMPT_LENGTH);
+                    finalPrompt = finalPrompt.substring(0, MAX_PROMPT_LENGTH);
+                }
+            }
+
+            log.info("提示词压缩完成：{} -> {} 字符（节省 {}%）",
+                    prompt.length(),
+                    finalPrompt.length(),
+                    String.format("%.1f", (1.0 - (double)finalPrompt.length() / prompt.length()) * 100));
+        }
+        return finalPrompt;
+    }
+
+    /**
      * 智能压缩提示词（仅在超过指定长度时才压缩）
      *
      * @param prompt 原始提示词
