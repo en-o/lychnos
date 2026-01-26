@@ -91,7 +91,7 @@ public class BookAnalyseService extends J2ServiceImpl<BookAnalyseDao, BookAnalys
 
                 // 尝试调用AI获取相似推荐
                 try {
-                    String userMessage = buildExtractUserMessageWithFound(found.getTitle(), found.getAuthor());
+                    String userMessage = BookPrompt.buildExtractUserMessageWithFound(found.getTitle(), found.getAuthor());
                     String aiResponse = aiService.generateTextWithSystem(userId, BookPrompt.EXTRACT_EXPERT, userMessage);
 
                     // 记录AI提取日志（成功）
@@ -120,7 +120,7 @@ public class BookAnalyseService extends J2ServiceImpl<BookAnalyseDao, BookAnalys
                 log.info("书籍已分析但用户未反馈，尝试AI提取: {}", found.getTitle());
 
                 try {
-                    String userMessage = buildExtractUserMessage(userInput);
+                    String userMessage = BookPrompt.buildExtractUserMessage(userInput);
                     String aiResponse = aiService.generateTextWithSystem(userId, BookPrompt.EXTRACT_EXPERT, userMessage);
 
                     // 记录AI提取日志（成功）
@@ -148,7 +148,7 @@ public class BookAnalyseService extends J2ServiceImpl<BookAnalyseDao, BookAnalys
 
         // 3. 数据库中未找到，使用正常的AI提取流程（这里失败就真的失败了，因为没有备选数据）
         try {
-            String userMessage = buildExtractUserMessage(userInput);
+            String userMessage = BookPrompt.buildExtractUserMessage(userInput);
             String aiResponse = aiService.generateTextWithSystem(userId, BookPrompt.EXTRACT_EXPERT, userMessage);
 
             // 记录AI提取日志（成功）
@@ -202,7 +202,7 @@ public class BookAnalyseService extends J2ServiceImpl<BookAnalyseDao, BookAnalys
         log.info("开始AI分析书籍，书名: {}, 作者: {}, 用户ID: {}", bookTitle, author, userId);
 
         try {
-            String userMessage = buildAnalysisUserMessage(bookTitle, author);
+            String userMessage = BookPrompt.buildAnalysisUserMessage(bookTitle, author);
             String aiResponse = aiService.generateTextWithSystem(userId, BookPrompt.ANALYSIS_EXPERT, userMessage);
 
             // 记录AI解析日志（成功）
@@ -263,34 +263,7 @@ public class BookAnalyseService extends J2ServiceImpl<BookAnalyseDao, BookAnalys
         }
     }
 
-    /**
-     * 构建书籍提取用户消息
-     */
-    private String buildExtractUserMessage(String userInput) {
-        return String.format("用户输入：%s\n\n请根据系统提示词的要求，从用户输入中提取书籍信息并推荐相似书籍。", userInput);
-    }
 
-    /**
-     * 构建书籍提取用户消息（已找到书籍的情况）
-     */
-    private String buildExtractUserMessageWithFound(String foundTitle, String foundAuthor) {
-        return String.format("""
-                已找到书籍：《%s》（作者：%s）
-
-                请推荐4-5本与这本书相似的真实存在的书籍。
-                """, foundTitle, foundAuthor);
-    }
-
-    /**
-     * 构建书籍分析用户消息
-     */
-    private String buildAnalysisUserMessage(String bookTitle, String author) {
-        String bookInfo = author != null && !author.trim().isEmpty()
-            ? String.format("《%s》（作者：%s）", bookTitle, author)
-            : String.format("《%s》", bookTitle);
-
-        return String.format("请对书籍%s进行分析，返回JSON格式的分析结果。", bookInfo);
-    }
 
     /**
      * 解析书籍提取响应（增强版：包含来源标注）

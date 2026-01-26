@@ -137,6 +137,37 @@ public class BookPrompt {
             - 确保内容准确、精炼、有价值
             """;
 
+
+    /**
+     * 构建书籍提取用户消息
+     */
+    public static String buildExtractUserMessage(String userInput) {
+        return String.format("用户输入：%s\n\n请根据系统提示词的要求，从用户输入中提取书籍信息并推荐相似书籍。", userInput);
+    }
+
+    /**
+     * 构建书籍提取用户消息（已找到书籍的情况）
+     */
+    public static String buildExtractUserMessageWithFound(String foundTitle, String foundAuthor) {
+        return String.format("""
+                已找到书籍：《%s》（作者：%s）
+
+                请推荐4-5本与这本书相似的真实存在的书籍。
+                """, foundTitle, foundAuthor);
+    }
+
+    /**
+     * 构建书籍分析用户消息
+     */
+    public static String buildAnalysisUserMessage(String bookTitle, String author) {
+        String bookInfo = author != null && !author.trim().isEmpty()
+                ? String.format("《%s》（作者：%s）", bookTitle, author)
+                : String.format("《%s》", bookTitle);
+
+        return String.format("请对书籍%s进行分析，返回JSON格式的分析结果。", bookInfo);
+    }
+
+
     private BookPrompt() {
         // 私有构造函数，防止实例化
     }
