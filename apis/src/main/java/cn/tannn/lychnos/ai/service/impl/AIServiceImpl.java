@@ -1,13 +1,11 @@
 package cn.tannn.lychnos.ai.service.impl;
 
 import cn.tannn.jdevelops.exception.built.BusinessException;
-import cn.tannn.lychnos.ai.config.DynamicAIModelConfig;
 import cn.tannn.lychnos.ai.exception.AIException;
 import cn.tannn.lychnos.ai.factory.DynamicAIClientFactory;
 import cn.tannn.lychnos.ai.service.AIService;
 import cn.tannn.lychnos.common.constant.BusinessErrorCode;
 import cn.tannn.lychnos.common.constant.ModelType;
-import cn.tannn.lychnos.common.util.AESUtil;
 import cn.tannn.lychnos.common.util.ZipUtil;
 import cn.tannn.lychnos.entity.AIModel;
 import cn.tannn.lychnos.service.AIModelService;
@@ -216,8 +214,7 @@ public class AIServiceImpl implements AIService {
             log.info("调用AI文本生成，modelId: {}, userId: {}, model: {}",
                     aiModel.getId(), aiModel.getUserId(), aiModel.getModel());
 
-            DynamicAIModelConfig config = buildConfig(aiModel);
-            ChatModel chatModel = clientFactory.createChatModel(config);
+            ChatModel chatModel = clientFactory.createChatModel(aiModel);
             ChatResponse response = chatModel.call(new Prompt(prompt));
 
             return extractTextFromResponse(response, aiModel.getId());
@@ -244,8 +241,7 @@ public class AIServiceImpl implements AIService {
                         prompt.length() - compressedPrompt.length());
             }
 
-            DynamicAIModelConfig config = buildConfig(aiModel);
-            ImageModel imageModel = clientFactory.createImageModel(config, aiModel.getFactory());
+            ImageModel imageModel = clientFactory.createImageModel(aiModel);
             ImageResponse response = imageModel.call(new ImagePrompt(compressedPrompt));
 
             log.info("AI图片生成成功，modelId: {}", aiModel.getId());
@@ -392,32 +388,7 @@ public class AIServiceImpl implements AIService {
         return result;
     }
 
-    /**
-     * 构建动态配置（解密 API Key 用于实际调用）
-     */
-    private DynamicAIModelConfig buildConfig(AIModel aiModel) {
-        // 解密 API Key
-        String decryptedApiKey = null;
-        if (aiModel.getApiKey() != null && !aiModel.getApiKey().isEmpty()) {
-            try {
-                decryptedApiKey = AESUtil.decrypt(aiModel.getApiKey());
-            } catch (Exception e) {
-                log.error("解密 API Key 失败，模型ID: {}, type: {}, error: {}",
-                        aiModel.getId(), aiModel.getType(), e.getMessage(), e);
-                // API Key 格式错误也视为配置无效
-                throw new BusinessException(
-                        BusinessErrorCode.MODEL_NOT_CONFIGURED.getCode(),
-                        String.format("API Key 格式错误，请重新配置 %s 类型模型", aiModel.getType().name())
-                );
-            }
-        }
 
-        return DynamicAIModelConfig.builder()
-                .apiKey(decryptedApiKey)
-                .baseUrl(aiModel.getApiUrl())
-                .model(aiModel.getModel())
-                .build();
-    }
 
     /**
      * 构建完整的图片提示词（默认风格 + 内容描述）

@@ -3,6 +3,7 @@ package cn.tannn.lychnos.ai.factory;
 import cn.tannn.lychnos.ai.config.CustomRetryConfig;
 import cn.tannn.lychnos.ai.config.DynamicAIModelConfig;
 import cn.tannn.lychnos.ai.modelscope.ModelScopeImageModel;
+import cn.tannn.lychnos.entity.AIModel;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.image.ImageModel;
@@ -42,6 +43,17 @@ public class DynamicAIClientFactory {
         this.restTemplate = restTemplate;
     }
 
+
+    /**
+     * 创建文本聊天模型
+     *
+     * @param aiModel {@link AIModel}
+     * @return ChatModel
+     */
+    public ChatModel createChatModel(AIModel aiModel) {
+        return createChatModel(DynamicAIModelConfig.buildAiClientConfig(aiModel));
+    }
+
     /**
      * 创建文本聊天模型
      *
@@ -67,6 +79,16 @@ public class DynamicAIClientFactory {
                         .build())
                 .retryTemplate(retryTemplate)
                 .build();
+    }
+
+    /**
+     * 创建图片生成模型
+     *
+     * @param aiModel {@link AIModel}
+     * @return ImageModel
+     */
+    public ImageModel createImageModel(AIModel aiModel) {
+        return createImageModel(DynamicAIModelConfig.buildAiClientConfig(aiModel), aiModel.getFactory());
     }
 
     /**
