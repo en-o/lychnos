@@ -1,7 +1,7 @@
 import {useEffect, useState} from 'react';
 import {useNavigate} from 'react-router-dom';
-import {ArrowLeft, RefreshCw, Trash2, AlertTriangle} from 'lucide-react';
-import {adminApi, type AttackStats, type AttackRecord} from '../api/admin';
+import {AlertTriangle, ArrowLeft, RefreshCw, Trash2} from 'lucide-react';
+import {adminApi, type AttackRecord, type AttackStats} from '../api/admin';
 import {toast} from '../components/ToastContainer';
 
 function AdminAttackStatsPage() {

@@ -1,13 +1,13 @@
 import {request} from '../utils/request';
 import {
-  type AnalysisHistory,
-  type BookAnalysis,
-  type BookExtract,
-  type BookRecommendItem,
-  type PageResult,
-  type Result,
-  type UserInterest,
-  type UserPreference,
+    type AnalysisHistory,
+    type BookAnalysis,
+    type BookExtract,
+    type BookRecommendItem,
+    type PageResult,
+    type Result,
+    type UserInterest,
+    type UserPreference,
 } from '../models';
 import type {InterestFeedback} from "../models/interest.model.ts";
 

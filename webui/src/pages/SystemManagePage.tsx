@@ -1,5 +1,5 @@
 import {useNavigate} from 'react-router-dom';
-import {Settings, Users, ArrowLeft, Brain, FileText, Shield} from 'lucide-react';
+import {ArrowLeft, Brain, FileText, Settings, Shield, Users} from 'lucide-react';
 
 function SystemManagePage() {
     const navigate = useNavigate();

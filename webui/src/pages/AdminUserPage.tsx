@@ -1,6 +1,6 @@
 import {useEffect, useState} from 'react';
 import {useNavigate} from 'react-router-dom';
-import {adminApi, type UserDetail, type ThirdPartyBind, type UserPageRequest} from '../api/admin';
+import {adminApi, type ThirdPartyBind, type UserDetail, type UserPageRequest} from '../api/admin';
 import ConfirmDialog from '../components/ConfirmDialog';
 import CopyableText from '../components/CopyableText';
 

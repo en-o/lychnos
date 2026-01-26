@@ -1,6 +1,6 @@
-import React, {useState, useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 import {useNavigate} from 'react-router-dom';
-import {ArrowLeft, Search, FileText} from 'lucide-react';
+import {ArrowLeft, FileText, Search} from 'lucide-react';
 import {adminApi, type UserAnalysisLog} from '../api/admin';
 import {toast} from '../components/ToastContainer';
 

@@ -1,5 +1,5 @@
 import React from 'react';
-import {AlertTriangle, Info, CheckCircle, XCircle} from 'lucide-react';
+import {AlertTriangle, CheckCircle, Info, XCircle} from 'lucide-react';
 
 export type ConfirmDialogType = 'warning' | 'danger' | 'info' | 'success';
 

@@ -1,7 +1,6 @@
 package cn.tannn.lychnos.ai.service.impl;
 
 import cn.tannn.jdevelops.exception.built.BusinessException;
-import cn.tannn.lychnos.ai.client.DynamicAIClient;
 import cn.tannn.lychnos.ai.exception.AIException;
 import cn.tannn.lychnos.ai.factory.DynamicAIClientFactory;
 import cn.tannn.lychnos.ai.service.AIService;
@@ -11,11 +10,6 @@ import cn.tannn.lychnos.entity.AIModel;
 import cn.tannn.lychnos.service.AIModelService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.ai.chat.model.ChatModel;
-import org.springframework.ai.chat.model.ChatResponse;
-import org.springframework.ai.chat.prompt.Prompt;
-import org.springframework.ai.image.ImageModel;
-import org.springframework.ai.image.ImagePrompt;
 import org.springframework.ai.image.ImageResponse;
 import org.springframework.stereotype.Service;
 
